@@ -6,7 +6,7 @@ Authors@R: c(
   person("Hyeyeon", "Hwang", email = "hyeyeon_hwang@brown.edu", role = "ctb", comment = c(ORCID = "0000-0002-7918-728X")),
   person("Charles", "Mordaunt", email = "mordauntcharles@gmail.com", role = "ctb", comment = c(ORCID = "0000-0002-3820-3298"))
   )
-Description: An executable and package for the statistical analysis and visualization of differentially methylated regions (DMRs) from CpG count matrices (Bismark cytosine reports).
+Description: A R package and executable for the preprocessing, statistical analysis, and downstream testing and visualization of differentially methylated regions (DMRs) and global methylation levels from CpG count matrices (Bismark cytosine reports).
 Depends: 
   R (>= 3.5.0),
   dmrseq,
@@ -91,7 +91,7 @@ Suggests:
   optparse,
   simpleCache,
   qvalue
-License: GPL-3 | file LICENSE
+License: MIT | file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
