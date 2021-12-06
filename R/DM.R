@@ -282,7 +282,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
   },
   error = function(error_condition) {
-    print(glue::glue("Block analysis has produced an error"))
+    print(glue::glue("Warning: Block analysis has produced an error"))
   })
   
   # DMRs --------------------------------------------------------------------
@@ -361,7 +361,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                        horizLegend = FALSE)
   },
   error = function(error_condition) {
-    print(glue::glue("ERROR: One (or more) of your DMRs can't be plotted, \\
+    print(glue::glue("Warning: One (or more) of your DMRs can't be plotted, \\
                       try again later by manually loading R Data and subsetting sigRegions"))
   })
   dev.off()
@@ -511,7 +511,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                 
                 plotMatrix %>%
                   get() %>% 
-                  DMRichR::PCA(group = group) %>%
+                  DMRichR::PCA(testCovariate = testCovariate,
+                               bs.filtered.bsseq = bs.filtered.bsseq) %>%
                   ggplot2::ggsave(glue::glue("Global/{title} PCA.pdf"),
                                   plot = .,
                                   device = NULL,
@@ -752,39 +753,44 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
     },
     error = function(error_condition) {
-      print(glue::glue("ERROR: enrichR did not finish. \\
+      print(glue::glue("Warning: enrichR did not finish. \\
                       The website may be down or there are internet connection issues."))
     })
   }
   
   # Machine learning --------------------------------------------------------
-  
-  methylLearnOutput <- DMRichR::methylLearn(bs.filtered.bsseq = bs.filtered.bsseq,
-                                            sigRegions = sigRegions,
-                                            testCovariate = testCovariate,
-                                            TxDb = TxDb,
-                                            annoDb = annoDb,
-                                            topPercent = 1,
-                                            output = "all",
-                                            saveHtmlReport = TRUE)
-  
-  if(!dir.exists("./Machine_learning")) {
-    dir.create("./Machine_learning")
-  } 
-  
-  if(length(methylLearnOutput) == 1) {
-    openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput), 
-                         file = "./Machine_learning/Machine_learning_output_one.xlsx") 
-  } else {
-    openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput$`Annotated common DMRs`,
-                              RF_Ranking_All_DMRs = methylLearnOutput$`RF ranking`,
-                              SVM_Ranking_All_DMRs = methylLearnOutput$`SVM ranking`),
-                         file = "./Machine_learning/Machine_learning_output_all.xlsx") 
-  }
-  
-  print(glue::glue("Saving RData..."))
-  save(methylLearnOutput, file = "RData/machineLearning.RData")
-  #load("RData/machineLearing.RData")
+  tryCatch({
+    methylLearnOutput <- DMRichR::methylLearn(bs.filtered.bsseq = bs.filtered.bsseq,
+                                              sigRegions = sigRegions,
+                                              testCovariate = testCovariate,
+                                              TxDb = TxDb,
+                                              annoDb = annoDb,
+                                              topPercent = 1,
+                                              output = "all",
+                                              saveHtmlReport = TRUE)
+    
+    if(!dir.exists("./Machine_learning")) {
+      dir.create("./Machine_learning")
+    } 
+    
+    if(length(methylLearnOutput) == 1) {
+      openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput), 
+                           file = "./Machine_learning/Machine_learning_output_one.xlsx") 
+    } else {
+      openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput$`Annotated common DMRs`,
+                                RF_Ranking_All_DMRs = methylLearnOutput$`RF ranking`,
+                                SVM_Ranking_All_DMRs = methylLearnOutput$`SVM ranking`),
+                           file = "./Machine_learning/Machine_learning_output_all.xlsx") 
+    }
+    
+    print(glue::glue("Saving RData..."))
+    save(methylLearnOutput, file = "RData/machineLearning.RData")
+    #load("RData/machineLearing.RData")
+  },
+  error = function(error_condition) {
+    print(glue::glue("Warning: methylLearn did not finish. \\
+                      You may have not had enough top DMRs across algrothims."))
+  })
   
   # Cell composition --------------------------------------------------------
   
@@ -849,17 +855,41 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   cat("\n[DMRichR] Summary \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   
-  print(glue::glue("Summary: There are {tidySigRegions} \\
-             ({tidyHyper}% hypermethylated, {tidyHypo}% hypomethylated) \\
-             from {tidyRegions} background regions consisting of {tidyCpGs} CpGs \\
-             assayed at {coverage}x coverage", 
-                   tidySigRegions = length(sigRegions),
-                   tidyHyper = round(sum(sigRegions$stat > 0) / length(sigRegions),
-                                     digits = 2)*100,
-                   tidyHypo = round(sum(sigRegions$stat < 0) / length(sigRegions),
-                                    digits = 2)*100,
-                   tidyRegions = length(regions),
-                   tidyCpGs = nrow(bs.filtered)))
+  print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
+                   The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
+                   {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. \\
+                   The methylomes consisted of {tidyCpGs} CpGs.", 
+                   dmrLength = sigRegions %>%
+                     length() %>%
+                     formatC(format = "d", big.mark = ","),
+                   backgroundLength = regions %>%
+                     length() %>%
+                     formatC(format = "d", big.mark = ","),
+                   tidyHyper = (sum(sigRegions$stat > 0) / length(sigRegions)) %>%
+                     scales::percent(),
+                   tidyHypo = (sum(sigRegions$stat < 0) / length(sigRegions)) %>%
+                     scales::percent(),
+                   tidyCpGs = nrow(bs.filtered) %>%
+                     formatC(format = "d", big.mark = ","),
+                   genomeSize = goi %>%
+                     seqinfo() %>%
+                     GenomeInfoDb::keepStandardChromosomes() %>%
+                     as.data.frame() %>%
+                     purrr::pluck("seqlengths") %>%
+                     sum(),
+                   dmrSize = sigRegions %>%
+                     dplyr::as_tibble() %>%
+                     purrr::pluck("width") %>%
+                     sum(),
+                   backgroundSize = regions  %>%
+                     dplyr::as_tibble() %>%
+                     purrr::pluck("width") %>%
+                     sum(),
+                   sigRegionPercent = (dmrSize/genomeSize) %>%
+                     scales::percent(accuracy = 0.01),
+                   regionPercent = (backgroundSize/genomeSize) %>%
+                     scales::percent(accuracy = 0.01)
+                   ))
   
   try(if(sum(blocks$pval < 0.05) > 0 & length(blocks) != 0){
     print(glue::glue("{length(sigBlocks)} significant blocks of differential methylation \\

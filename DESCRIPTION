@@ -1,6 +1,6 @@
 Package: DMRichR
 Title: Enrich your DMR Analysis with the Tidyverse
-Version: 1.7.2
+Version: 1.7.3
 Authors@R: c(
   person("Ben", "Laufer", email = "blaufer@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-7558-1335")),
   person("Hyeyeon", "Hwang", email = "hyeyeon_hwang@brown.edu", role = "ctb", comment = c(ORCID = "0000-0002-7918-728X")),
@@ -22,7 +22,6 @@ Imports:
     GenomicRanges,
     broom,
     enrichR,
-    ggbiplot,
     ggplot2,
     gplots,
     gt,
@@ -74,7 +73,9 @@ Imports:
     S4Vectors,
     bumphunter,
     genefilter,
-    methylCC
+    methylCC,
+    PCAtools,
+    scales
 Suggests:
   IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
   FlowSorted.Blood.EPIC,
@@ -94,8 +95,7 @@ Suggests:
 License: MIT | file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
-Remotes: vqv/ggbiplot
 URL: https://github.com/ben-laufer/DMRichR, https://ben-laufer.github.io/DMRichR
 BugReports: https://github.com/ben-laufer/DMRichR/issues

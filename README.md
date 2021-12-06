@@ -31,11 +31,9 @@ if(!requireNamespace("remotes", quietly = TRUE))
   install.packages("remotes")
 Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = TRUE)
 BiocManager::install("ben-laufer/DMRichR")
-if(R.Version()$major < 4)
-  install.packages("dmrseq", repos = "https://bioconductor.org/packages/3.12/bioc")
 ```
 
-macOS users will have to install XQuartz [manually](https://www.xquartz.org) or through [Homebrew](https://brew.sh) using `brew install xquartz --cask`.
+If you are running into installation errors with the package dependencies, make sure that you have the [latest version of bioconductor](https://www.bioconductor.org/install/) and R v4.1 installed. macOS users will have to install XQuartz [manually](https://www.xquartz.org) or through [Homebrew](https://brew.sh) using `brew install xquartz --cask`.
 
 ## Website Table of Contents
 1. [DMR Approach and Interpretation](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#dmr-approach-and-interpretation)

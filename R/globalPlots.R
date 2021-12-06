@@ -85,54 +85,43 @@ CpGs <- function(bs.filtered.bsseq = bs.filtered.bsseq){
 #' @title PCA plot of extracted methylation values
 #' @description Performs and plots a PCA from individual smoothed methylation values
 #' @param matrix A matrix of smoothed individual methylation values
-#' @param group Ordered factor vector of sample groupings
+#' @param testCovariate Factor of interest
+#' @param bs.filtered.bsseq Smoothed \code{bsseq} object with a testCovariate in \code{pData}
 #' @return A \code{ggplot} object that can be viewed by calling it,
 #'  saved with \code{ggplot2::ggsave()}, or further modified by adding \code{ggplot2} syntax
-#' @importFrom ggbiplot ggbiplot
-#' @importFrom stats prcomp
-#' @importFrom dplyr case_when
-#' @importFrom forcats fct_rev
+#' @importFrom PCAtools pca biplot
 #' @importFrom glue glue
 #' @importFrom Glimma glMDSPlot
+#' @importFrom purrr pluck
+#' @importClassesFrom bsseq BSseq 
+#' @importMethodsFrom bsseq pData
 #' @references \url{https://stackoverflow.com/questions/40315227/how-to-solve-prcomp-default-cannot-rescale-a-constant-zero-column-to-unit-var/40317343}
 #' @export PCA
 #' 
 PCA <- function(matrix = matrix,
-                group = NA){
+                testCovariate = testCovariate,
+                bs.filtered.bsseq = bs.filtered.bsseq){
   
   print(glue::glue("PCA of {length(matrix)} sites"))
   
   matrix %>%
-    t() %>%
-    .[ , which(apply(., 2, var) != 0)] %>% 
-    prcomp(.,
-           center = TRUE,
-           scale. = TRUE) %>%
-    ggbiplot::ggbiplot(.,
-                       obs.scale = 1,
-                       var.scale = 1,
-                       groups = group,
-                       ellipse = dplyr::case_when(length(group) < 6 ~ FALSE,
-                                                  length(group) >= 6 ~ TRUE),
-                       circle = FALSE,
-                       var.axes = FALSE,
-                       choices = 1:2) +
-    scale_color_discrete(name = '') +
-    theme_bw(base_size = 20) +
-    geom_point(aes(colour = group), size = 8) +
-    theme(legend.direction = 'vertical',
-          #legend.position = c(0.125, 0.1), # Change legend position
-          legend.text = element_text(size = 12),
-          legend.title = element_text(size = 18),
-          panel.grid.major = element_blank(),
-          panel.border = element_rect(color = "black", size = 1.25),
-          axis.ticks = element_line(size = 1.25),
-          legend.key = element_blank(),
-          panel.grid.minor = element_blank(),
-          plot.title = element_text(hjust = 0.5)) +
-    guides(col = guide_legend(ncol = 1)) +
-    theme() %>%
-    return()
+    PCAtools::pca(scale = TRUE,
+                  metadata = pData(bs.filtered.bsseq),
+                  removeVar = 0.1) %>% 
+    PCAtools::biplot(colby = testCovariate,
+                     colkey = DMRichR::gg_color_hue(2) %>%
+                       setNames(bs.filtered.bsseq %>%
+                                  pData() %>%
+                                  as.data.frame() %>%
+                                  purrr::pluck(testCovariate) %>%
+                                  unique() %>%
+                                  sort() %>%
+                                  rev()),
+                     pointSize = 6,
+                     labSize = 4,
+                     legendPosition = 'top',
+                     legendLabSize = 16,
+                     legendIconSize = 8.0)
 }
 
 #' densityPlot

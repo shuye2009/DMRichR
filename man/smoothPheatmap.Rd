@@ -18,7 +18,7 @@ smoothPheatmap(
 
 \item{testCovariate}{The factor tested for differences between groups}
 
-\item{...}{Additional arguments passed onto \code{pheatmap()}}
+\item{...}{Additional arguments passed onto \link[pheatmap]{pheatmap}}
 }
 \value{
 Saves a pdf image of the heatmap in the DMR folder

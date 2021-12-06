@@ -6,30 +6,76 @@
 #' @param annoDb Character specifying \code{OrgDb} annotation package for species of interest
 #' @return A \code{tibble} of annotated regions
 #' @rawNamespace import(ensembldb, except = c(select, filter))
-#' @importFrom dplyr rename_with as_tibble case_when mutate select
+#' @importFrom dplyr rename_with as_tibble case_when mutate select recode_factor distinct
 #' @importFrom tidyselect any_of
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom ChIPseeker annotatePeak
 #' @importFrom magrittr %>%
 #' @importFrom glue glue glue_collapse
 #' @importFrom GenomeInfoDb genome seqlevelsStyle
+#' @importFrom plyranges join_overlap_left select mutate
 #' @export annotateRegions
 #' 
 annotateRegions <- function(regions = sigRegions,
                             TxDb = TxDb,
                             annoDb = annoDb){
   
-  print(glue::glue("Annotating {tidyRegions} regions from {tidyGenome} with gene symbols",
-                   tidyRegions = length(regions),
-                   tidyGenome = TxDb %>%
-                     GenomeInfoDb::genome() %>%
-                     unique()))
+  genome <- TxDb %>%
+    GenomeInfoDb::genome() %>%
+    unique()
+  
+  print(glue::glue("Annotating {tidyRegions} regions from {genome} with gene symbols",
+                   tidyRegions = length(regions)))
   
   if(is(TxDb, "EnsDb")){
-    GenomeInfoDb::seqlevelsStyle(regions) <- "Ensembl" # Work around for organism not supported
+    
+    genome <- dplyr::case_when(GenomeInfoDb::genome(TxDb) == "GRCh38" ~ "hg38",
+                               GenomeInfoDb::genome(TxDb) == "GRCm38" ~ "mm10",
+                               GenomeInfoDb::genome(TxDb) == "Mmul_10" ~ "rheMac10",
+                               GenomeInfoDb::genome(TxDb) == "Mmul_8.0.1" ~ "rheMac8",
+                               GenomeInfoDb::genome(TxDb) == "Rnor_6.0" ~ "rn6",
+                               GenomeInfoDb::genome(TxDb) == "GRCz11" ~ "danRer11",
+                               GenomeInfoDb::genome(TxDb) == "GRCg6a" ~ "galGal6",
+                               GenomeInfoDb::genome(TxDb) == "ARS-UCD1.2" ~ "bosTau9",
+                               GenomeInfoDb::genome(TxDb) == "BDGP6.28" ~ "dm6",
+                               GenomeInfoDb::genome(TxDb) == "Sscrofa11.1" ~ "susScr11",
+                               GenomeInfoDb::genome(TxDb) == "CanFam3.1" ~ "canFam3") %>%
+      unique()
+                               }
+  
+  CpGs <- DMRichR::getCpGs(genome)
+  
+  regionsCpG <- regions %>% 
+    plyranges::join_overlap_left(CpGs %>%
+                                   plyranges::filter(type == "islands") %>% 
+                                   plyranges::select(CpG.Island = type)) %>%
+    unique() %>% 
+    plyranges::join_overlap_left(CpGs %>%
+                                   plyranges::filter(type == "shores") %>% 
+                                   plyranges::select(CpG.Shore = type)) %>%
+    unique() %>% 
+    plyranges::join_overlap_left(CpGs %>%
+                                   plyranges::filter(type == "shelves") %>% 
+                                   plyranges::select(CpG.Shelf = type)) %>%
+    unique() %>% 
+    plyranges::join_overlap_left(CpGs %>%
+                                   plyranges::filter(type == "inter") %>% 
+                                   plyranges::select(Open.Sea = type)) %>%
+    unique() %>% 
+    plyranges::mutate(CpG.Island = dplyr::case_when(CpG.Island == "islands" ~ "Yes",
+                                                    TRUE ~ "No"),
+                      CpG.Shore = dplyr::case_when(CpG.Shore == "shores" ~ "Yes",
+                                                   TRUE ~ "No"),
+                      CpG.Shelf = dplyr::case_when(CpG.Shelf == "shelves" ~ "Yes",
+                                                   TRUE ~ "No"),
+                      Open.Sea = dplyr::case_when(Open.Sea == "inter" ~ "Yes",
+                                                  TRUE ~ "No"))
+  
+  if(is(TxDb, "EnsDb")){
+    GenomeInfoDb::seqlevelsStyle(regionsCpG) <- "Ensembl" # Work around for organism not supported
   }
   
-  regions %>% 
+  regionsCpG %>% 
     ChIPseeker::annotatePeak(TxDb = TxDb,
                              annoDb = annoDb,
                              overlap = "all",
@@ -100,6 +146,10 @@ DMReport <- function(sigRegions = sigRegions,
                   p.value,
                   q.value ,
                   difference,
+                  CpG.Island,
+                  CpG.Shore,
+                  CpG.Shelf,
+                  Open.Sea,
                   annotation,
                   distanceToTSS,
                   geneSymbol,

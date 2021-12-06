@@ -29,7 +29,7 @@ echo "Allocated memory: " $MEM
 # Load Modules #
 ################
 
-module load R/3.6.3
+module load R
 module load homer
 
 ########

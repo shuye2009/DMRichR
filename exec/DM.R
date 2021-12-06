@@ -9,9 +9,9 @@
 cat("\n[DMRichR] Initializing \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
 
 if(length(grep("genomecenter.ucdavis.edu", .libPaths())) > 0){
-  .libPaths("/share/lasallelab/programs/DMRichR/R_3.6")
-  AnnotationHub::setAnnotationHubOption("CACHE", "/share/lasallelab/programs/DMRichR/R_3.6")
-  ExperimentHub::setExperimentHubOption("CACHE", "/share/lasallelab/programs/DMRichR/R_3.6")
+  .libPaths("/share/lasallelab/programs/DMRichR/R_4.1")
+  AnnotationHub::setAnnotationHubOption("CACHE", "/share/lasallelab/programs/DMRichR/R_4.1")
+  ExperimentHub::setExperimentHubOption("CACHE", "/share/lasallelab/programs/DMRichR/R_4.1")
 }
 
 if(!requireNamespace("BiocManager", quietly = TRUE))

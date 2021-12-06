@@ -6,6 +6,9 @@ url: https://ben-laufer.github.io/DMRichR
 
 development:
   mode: "release"
+  
+template:
+  bootstrap: 5
 
 reference:
   - title: Main function

@@ -33,7 +33,7 @@ getBackground <- function(bs = bs.filtered,
 #' @importFrom dplyr as_tibble select mutate 
 #' @export Manhattan
 #' 
-Manhattan<- function(backgroundAnno = backgroundAnno,
+Manhattan <- function(backgroundAnno = backgroundAnno,
                      ...){
   cat("\n[DMRichR] Manhattan plot \t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   setwd("DMRs")
@@ -219,7 +219,9 @@ smooth2txt <- function(bsseq = bs.filtered.bsseq,
                    type = "smooth",
                    what = "perRegion"),
     check.names = FALSE) %>% 
-    cbind(regions, .) %>% 
+    cbind(regions %>%
+            tibble::as_tibble(),
+          .) %>% 
     write.table(.,
                 txt,
                 sep = "\t",
@@ -263,4 +265,3 @@ gg_color_hue <- function(n = n){
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
-

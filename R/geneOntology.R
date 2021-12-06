@@ -13,12 +13,13 @@
 #' @import GenomicRanges
 #' @rawNamespace import(ensembldb, except = c(select, filter))
 #' @importFrom GenomicFeatures genes
-#' @importFrom GenomeInfoDb keepStandardChromosomes as.data.frame seqlevelsStyle
+#' @importFrom GenomeInfoDb keepStandardChromosomes as.data.frame seqlevelsStyle genome
 #' @importFrom glue glue
 #' @importFrom magrittr %>%
-#' @importFrom dplyr as_tibble mutate distinct select
+#' @importFrom dplyr as_tibble mutate distinct select filter
 #' @importFrom tidyr unite
 #' @importFrom plyranges count_overlaps
+#' @importFrom purrr pluck
 #' @export GOfuncR
 #' 
 GOfuncR <- function(sigRegions = sigRegions,
@@ -43,7 +44,7 @@ GOfuncR <- function(sigRegions = sigRegions,
       dplyr::as_tibble() %>% 
       dplyr::mutate(gene_id = as.integer(.$gene_id)) %>% 
       dplyr::mutate(gene_id = GOfuncR:::entrez_to_symbol(.$gene_id, get(annoDb))[,2]) %>% 
-      dplyr::distinct(gene_id, .keep_all = T) %>% 
+      dplyr::distinct(gene_id, .keep_all = TRUE) %>% 
       dplyr::select(symbol = gene_id, seqnames, start, end) %>% 
       as.data.frame() 
     
@@ -62,12 +63,10 @@ GOfuncR <- function(sigRegions = sigRegions,
     gene_coords <- genes %>% 
       DMRichR::extend(upstream = upstream, downstream = downstream) %>% 
       dplyr::as_tibble() %>% 
-      dplyr::distinct(gene_name, .keep_all = T) %>% 
+      dplyr::distinct(gene_name, .keep_all = TRUE) %>% 
       dplyr::select(symbol = gene_name, seqnames, start, end) %>% 
       dplyr::filter(symbol != "") %>% 
       as.data.frame()
-    
-    print(glue::glue("{nrow(gene_coords)} unique genes will be utilized for GOfuncR..."))
   }
   
   coord <- regions %>%
@@ -89,12 +88,33 @@ GOfuncR <- function(sigRegions = sigRegions,
                                       n_randsets = n_randsets,
                                       regions = TRUE,
                                       gene_coords = gene_coords,
-                                      circ_chrom = TRUE, # Otherwise get the error: "Background regions too small."
+                                      circ_chrom = TRUE, # Sample from the same chromosome
                                       gene_len = TRUE,
-                                      orgDb = annoDb, # Blocking this makes it use human mappings, which are better in most cases for non-model organism since their org.dbs contain old GO mappings
+                                      orgDb = annoDb, # Blocking this makes it use human mappings, which can be better for non-model organisms if their org.dbs warn of old GO mappings
                                       #txDb = TxDb, # Not used for custom gene coords
                                       silent = TRUE,
                                       ...)
+  
+  print(glue::glue("GOfuncR mapped {sigRegions} DMRs to within \\
+                   {upstream} Kb upstream and {downstream} Kb downstream of {foregroundGenes} genes \\
+                   and tested them against a universe of {regions} background regions mapping to within \\
+                   {upstream} Kb upstream and {downstream} Kb downstream of {backgroundGenes} genes \\
+                   from a total of {geneAnnotations} possible gene annotations in {genome}",
+                   sigRegions = length(sigRegions),
+                   regions = length(regions),
+                   foregroundGenes = GOfuncResults %>%
+                     purrr::pluck("genes") %>%
+                     dplyr::filter(score == 1) %>%
+                     nrow(),
+                   backgroundGenes = GOfuncResults %>%
+                     purrr::pluck("genes") %>%
+                     nrow(),
+                   geneAnnotations = nrow(gene_coords),
+                   genome = TxDb %>%
+                     GenomeInfoDb::genome() %>%
+                     unique()
+                   )
+        )
   
   return(GOfuncResults)
 }

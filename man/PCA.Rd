@@ -4,12 +4,18 @@
 \alias{PCA}
 \title{PCA plot of extracted methylation values}
 \usage{
-PCA(matrix = matrix, group = NA)
+PCA(
+  matrix = matrix,
+  testCovariate = testCovariate,
+  bs.filtered.bsseq = bs.filtered.bsseq
+)
 }
 \arguments{
 \item{matrix}{A matrix of smoothed individual methylation values}
 
-\item{group}{Ordered factor vector of sample groupings}
+\item{testCovariate}{Factor of interest}
+
+\item{bs.filtered.bsseq}{Smoothed \code{bsseq} object with a testCovariate in \code{pData}}
 }
 \value{
 A \code{ggplot} object that can be viewed by calling it,
