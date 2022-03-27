@@ -28,7 +28,7 @@
 #' @importMethodsFrom bsseq pData seqnames sampleNames
 #' @export processBismark
 #' 
-processBismark <- function(files = list.files(path = getwd(), pattern = "*.txt.gz"),
+processBismark <- function(files = list.files(path = getwd(), pattern = "*.CpG_report.txt.gz"),
                            meta = openxlsx::read.xlsx("sample_info.xlsx", colNames = TRUE) %>% dplyr::mutate_if(is.character, as.factor),
                            testCovariate = testCovariate,
                            adjustCovariate = NULL,

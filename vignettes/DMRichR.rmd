@@ -281,9 +281,15 @@ The output from the main steps is saved in the RData folder so that it can be lo
 
 The following publications utilize **DMRichR**:
 
-Laufer BI\*, Neier KE\*, Valenzuela AE, Yasui DH, Lein PJ, LaSalle JM. Genome-Wide DNA Methylation Profiles of Neurodevelopmental Disorder Genes in Mouse Placenta and Fetal Brain Following Prenatal Exposure to Polychlorinated Biphenyls. *bioRxiv* preprint, 2021. **doi**: [10.1101/2021.05.27.446011](https://doi.org/10.1101/2021.05.27.446011) 
+Laufer BI\*, Neier KE\*, Valenzuela AE, Yasui DH, Lein PJ, LaSalle JM. Placenta and Fetal Brain Share a Neurodevelopmental Disorder DNA Methylation Profile in a Mouse Model of Prenatal PCB Exposure. *Cell Reports*, 2022. **doi**: [10.1016/j.celrep.2022.110442](https://doi.org/10.1016/j.celrep.2022.110442)
 
-Laufer BI\*, Gomez JA\*, Jianu JM, LaSalle, JM.  Stable DNMT3L Overexpression in SH-SY5Y Neurons Recreates a Facet of the Genome-Wide Down Syndrome DNA Methylation Signature. *Epigenetics & Chromatin*, 2021. **doi**: [10.1186/s13072-021-00387-7](https://doi.org/10.1186/s13072-021-00387-7)
+Zhu Y, Gomez JA, Laufer BI, Mordaunt CE, Mouat JS, Soto DC, Dennis MY, Benke KS, Bakulski KM, Dou J, Marathe R, Jianu JM, Williams LA, Gutierrez Fugon OJ, Walker CK, Ozonoff S, Daniels J, Grosvenor LP, Volk HE, Feinberg JI, Fallin MD, Hertz-Picciotto I, Schmidt RJ, Yasui DH, LaSalle JM. Placental Methylome Reveals a 22q13.33 Brain Regulatory Gene Locus Associated with Autism. *Genome Biology*, 2022. **doi**: [10.1186/s13059-022-02613-1](https://doi.org/10.1186/s13059-022-02613-1)
+
+Laufer BI, Hasegawa Y, Zhang Z, Hogrefe CE, Del Rosso LA, Haapanan L, Hwang H, Bauman MD, Van de Water JA, Taha AY, Slupsky CM, Golub MS, Capitanio JP, VandeVoort CA, Walker CK, LaSalle JM. Multi-omic brain and behavioral correlates of cell-free fetal DNA methylation in macaque maternal obesity models. *bioRxiv* preprint. **doi**: [10.1101/2021.08.27.457952](https://doi.org/10.1101/2021.08.27.457952) 
+
+Brown AP, Cai L, Laufer BI, Miller LA, LaSalle JM, Ji, H. Long-term effects of wildfire smoke exposure during early life on the nasal epigenome in rhesus macaques. *Environment International*, 2022. **doi**: [10.1016/j.envint.2021.106993](https://doi.org/10.1016/j.envint.2021.106993)
+
+Laufer BI\*, Gomez JA\*, Jianu JM, LaSalle, JM. Stable DNMT3L Overexpression in SH-SY5Y Neurons Recreates a Facet of the Genome-Wide Down Syndrome DNA Methylation Signature. *Epigenetics & Chromatin*, 2021. **doi**: [10.1186/s13072-021-00387-7](https://doi.org/10.1186/s13072-021-00387-7)
 
 Maggio AG, Shu HT, Laufer BI, Hwang H, Bi C, Lai Y, LaSalle JM, Hu VW. Impact of exposures to persistent endocrine disrupting compounds on the sperm methylome in regions associated with neurodevelopmental disorders. *medRxiv* preprint, 2021. **doi**: [10.1101/2021.02.21.21252162](https://doi.org/10.1101/2021.02.21.21252162)
 
