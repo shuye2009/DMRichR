@@ -69,7 +69,7 @@ annotationDatabases <- function(genome = genome,
   new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)>0){
     glue::glue("Installing {new.packages}")
-    suppressMessages(BiocManager::install(new.packages, ask = FALSE, quiet = TRUE))
+    suppressMessages(BiocManager::install(new.packages, update = FALSE, ask = FALSE, quiet = TRUE))
     cat("Done", "\n")
   }
   print(glue::glue("Loading {packages}"))

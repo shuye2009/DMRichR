@@ -60,7 +60,6 @@ Manhattan <- function(backgroundAnno = backgroundAnno,
                  signal.cex = c(1,1),
                  signal.pch = c(19,19),
                  file = "pdf",
-                 memo = "",
                  ...)
   setwd('..')
 }
