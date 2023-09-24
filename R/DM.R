@@ -631,10 +631,15 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   # Manhattan plot ----------------------------------------------------------
   
-  regions %>%
-    DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb) %>% 
-    DMRichR::Manhattan()
+  tryCatch({
+    regions %>%
+      DMRichR::annotateRegions(TxDb = TxDb,
+                               annoDb = annoDb) %>% 
+      DMRichR::Manhattan()
+  }, 
+  error = function(error_condition) {
+    print(glue::glue("Manhattan plot error"))
+  })
   
   # Gene Ontology analyses --------------------------------------------------
   
