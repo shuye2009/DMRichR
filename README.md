@@ -33,7 +33,7 @@ Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = TRUE)
 BiocManager::install("ben-laufer/DMRichR")
 ```
 
-If you are running into installation errors with the package dependencies, make sure that you have the [latest version of bioconductor](https://www.bioconductor.org/install/) and R v4.1 installed. macOS users will have to install XQuartz [manually](https://www.xquartz.org) or through [Homebrew](https://brew.sh) using `brew install xquartz --cask`.
+If you are running into installation errors with the package dependencies, make sure that you have [bioconductor v3.16](https://www.bioconductor.org/install/) and R v4.2 installed. macOS users will have to install XQuartz [manually](https://www.xquartz.org) or through [Homebrew](https://brew.sh) using `brew install xquartz --cask`.
 
 ## Website Table of Contents
 1. [DMR Approach and Interpretation](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#dmr-approach-and-interpretation)
@@ -57,7 +57,6 @@ If you are running into installation errors with the package dependencies, make 
       10. [Manhattan plot](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#10-manhattan-plot)
       11. [Gene Ontology Enrichments](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#11-gene-ontology-enrichments)
       12. [Machine Learning](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#12-machine-learning)
-      13. [Cell Composition Estimation](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#13-cell-composition-estimation)
-      14. [RData](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#14-RData)
+      13. [RData](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#14-RData)
 5. [Publications](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#publications)
 6. [Acknowledgements](https://ben-laufer.github.io/DMRichR/articles/DMRichR.html#acknowledgements)

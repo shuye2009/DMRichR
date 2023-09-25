@@ -27,8 +27,6 @@
 #' adjustCovariate. 
 #' @param EnsDb Logical indicating whether to to select Ensembl transcript annotation database.
 #' This is recommended for non-model organisms. 
-#' @param cellComposition Logical indicating whether to estimate whole-blood cell composition.
-#' This is an experimental feature. 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
 #' @importFrom magrittr %>% %T>%
@@ -46,7 +44,6 @@
 #' @importFrom Glimma glMDSPlot
 #' @importFrom rGREAT submitGreatJob getEnrichmentTables plotRegionGeneAssociationGraphs
 #' @importFrom enrichR listEnrichrDbs setEnrichrSite enrichr 
-#' @importFrom methylCC estimatecc cell_counts
 #' @importFrom utils write.table sessionInfo
 #' @importFrom grDevices pdf dev.off
 #' @importClassesFrom bsseq BSseq 
@@ -69,8 +66,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  cores = 20,
                  GOfuncR = TRUE,
                  sexCheck = FALSE,
-                 EnsDb = FALSE,
-                 cellComposition = FALSE){
+                 EnsDb = FALSE){
   
   
   # Check dmrseq version 
@@ -796,65 +792,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     print(glue::glue("Warning: methylLearn did not finish. \\
                       You may have not had enough top DMRs across algrothims."))
   })
-  
-  # Cell composition --------------------------------------------------------
-  
-  if(cellComposition == TRUE & genome %in% c("hg38", "hg19")){
-    
-    bs.filtered.bsseq.cc <- bs.filtered.bsseq %>%
-      DMRichR::prepareCC(genome = genome)
-    
-    rm(bs.filtered.bsseq)
-
-    # Houseman method
-    
-    HousemanCC <- bs.filtered.bsseq.cc %>%
-      DMRichR::Houseman()
-    
-    # methylCC method
-    
-    ccDMRs <- DMRichR::find_dmrs2(mset_train_flow_sort = "FlowSorted.Blood.EPIC",
-                                  include_cpgs = FALSE,
-                                  include_dmrs = TRUE)
-    
-    methylCC <- bs.filtered.bsseq.cc %>%
-      methylCC::estimatecc(include_cpgs = FALSE,
-                           include_dmrs = TRUE,
-                           find_dmrs_object = ccDMRs)
-    
-    dir.create("Cell Composition")
-    save(HousemanCC, methylCC, ccDMRs, file = "RData/cellComposition.RData")
-    
-    purrr::walk(c("Houseman", "methylCC"),
-                function(method = method){
-                  if(method == "Houseman"){
-                    CC <- HousemanCC
-                  }else if(method == "methylCC"){
-                    CC <- methylCC %>%
-                      methylCC::cell_counts()
-                  }
-                  
-                  CC %>% 
-                    "*"(100) %>%
-                    "/"(rowSums(.)) %>% 
-                    as.data.frame() %>% 
-                    DMRichR::CCstats(bs.filtered.bsseq.cc = bs.filtered.bsseq.cc,
-                                     testCovariate = testCovariate,
-                                     adjustCovariate = adjustCovariate,
-                                     matchCovariate = matchCovariate
-                    ) %T>%
-                    openxlsx::write.xlsx(glue::glue("Cell Composition/{method}_stats.xlsx")) %>%
-                    DMRichR::CCplot(testCovariate = testCovariate,
-                                    adjustCovariate = adjustCovariate,
-                                    matchCovariate = matchCovariate
-                    ) %>% 
-                    ggplot2::ggsave(glue::glue("Cell Composition/{method}_plot.pdf"),
-                                    plot = .,
-                                    device = NULL,
-                                    height = 6,
-                                    width = 6)
-                })
-  }
   
   # End ---------------------------------------------------------------------
   

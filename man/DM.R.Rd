@@ -19,8 +19,7 @@ DM.R(
   cores = 20,
   GOfuncR = TRUE,
   sexCheck = FALSE,
-  EnsDb = FALSE,
-  cellComposition = FALSE
+  EnsDb = FALSE
 )
 }
 \arguments{
@@ -62,9 +61,6 @@ adjustCovariate.}
 
 \item{EnsDb}{Logical indicating whether to to select Ensembl transcript annotation database.
 This is recommended for non-model organisms.}
-
-\item{cellComposition}{Logical indicating whether to estimate whole-blood cell composition.
-This is an experimental feature.}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 

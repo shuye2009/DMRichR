@@ -110,8 +110,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  cores = 20,
                  GOfuncR = TRUE,
                  sexCheck = FALSE,
-                 EnsDb = FALSE,
-                 cellComposition = FALSE)
+                 EnsDb = FALSE)
 ```
 
 If your analysis contains both male and female samples, you should adjust for sex via `adjustCovariate = "Sex"` and it's highly recommended to set `sexCheck = TRUE`. If you find that you're getting too many DMRs, you can reduce the total number by setting `cutoff = 0.1`. 
@@ -247,19 +246,7 @@ Finally, `DMRichR::slimGO()` will take the significant results from of all tools
 
 `DMRichR::methylLearn()` utilizes random forest and support vector machine algorithms from [Boruta](https://cran.r-project.org/web/packages/Boruta/index.html) and [sigFeature](https://bioconductor.org/packages/release/bioc/html/sigFeature.html) in a feature selection approach to identify the most informative DMRs based on individual smoothed methylation values. It creates an excel spreadsheet and an html report of the results along with a heatmap. 
 
-### 13) Cell Composition Estimation
-
-The epigenome is defined by its ability to create cell type specific differences. Therefore, when assaying heterogenous sample sources, it is standard for array-based methylation studies to estimate cell type composition and adjust for it in their model. While this is a standard for array-based studies, it is a significant challenge for WGBS studies due to differences in the nature of the data and the lack of appropriate reference sets and methods. In order to address this, we offer two approaches, both of which provide statistics and plots through `DMRichR::CCstats()` and `DMRichR::CCplot()`. However, it must be said that, unlike the rest of DMRichR, this is an **experimental feature** that you need to further investigate by comparing to array studies that are similar to yours.
-
-#### A) The Houseman Method
-
-The Houseman method is a standard for arrays and we have adapted it to work with WGBS data. The workflow will convert the smoothed `bsseq` object to a matrix of beta values for all EPIC array probes. It will then estimate cell composition using the IDOL reference CpGs in a modified Houseman method via `DMRichR::Houseman()`. If you use the results from this method you should also cite: [1](https://dx.doi.org/10.1186/s13059-018-1448-7), [2](https://dx.doi.org/10.1186/s12859-016-0943-7), [3](https://dx.doi.org/10.1093/bioinformatics/btu049), and [4](https://dx.doi.org/10.1186/1471-2105-13-86).
-
-#### B) The methylCC Method
-
-`methylCC` is designed to be technology independent by identifying DMRs that define cell types. The workflow uses `bumphunter()` to find cell type specific DMRs in an array reference database and then examines those regions within your dataset. In this case, it has been modified to utilize the `FlowSorted.Blood.EPIC` reference dataset and quantile normalization. If you use the results from this method you should also cite: [1](https://dx.doi.org/10.1186/s13059-019-1827-8) and [2](https://dx.doi.org/10.1186/s13059-018-1448-7).
-
-### 14) RData
+### 13) RData
 
 The output from the main steps is saved in the RData folder so that it can be loaded for custom analyses or to resume an interrupted run:
 
@@ -274,8 +261,6 @@ The output from the main steps is saved in the RData folder so that it can be lo
 `bsseq.RData` contains `bs.filtered.bsseq`, which is a bsseq object that has been smoothed by `bsseq::BSmooth()` and is used for the individual methylation values (but not the DMR or block calling by `dmrseq`, which uses a different smoothing approach).
 
 `machineLearning.RData` contains `methylLearnOutput`, which is the output from the machine learning feature selection.
-
-`cellComposition.RData` contains the output from the cell composition estimation analyses. `HousemanCC` is from the Houseman method, while `methylCC` and `ccDMRs` are from the methylCC method.
 
 ## Publications
 
