@@ -123,7 +123,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("adjustCovariate = {adjustCovariate}"))
   print(glue::glue("matchCovariate = {matchCovariate}"))
   print(glue::glue("cores = {cores}"))
-  print(glue::glue("cellComposition = {cellComposition}"))
   print(glue::glue("sexCheck = {sexCheck}"))
   print(glue::glue("EnsDb = {EnsDb}"))
   print(glue::glue("GOfuncR = {GOfuncR}"))

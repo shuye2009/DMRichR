@@ -51,8 +51,6 @@ option_list <- list(
                         help = "Choose covariate to balance permutations [default = NULL]"),
   optparse::make_option(c("-c", "--cores"), type = "integer", default = 20,
                         help = "Choose number of cores [default = %default]"),
-  optparse::make_option(c("-e", "--cellComposition"), type = "logical", default = FALSE,
-                        help = "Logical to estimate blood cell composition [default = %default]"),
   optparse::make_option(c("-k", "--sexCheck"), type = "logical", default = FALSE,
                         help = "Logical to confirm sex of each sample [default = %default]"),
   optparse::make_option(c("-d", "--EnsDb"), type = "logical", default = FALSE,
@@ -84,6 +82,5 @@ DMRichR::DM.R(genome = opt$genome,
               cores = opt$cores,
               GOfuncR = opt$GOfuncR,
               sexCheck = opt$sexCheck,
-              EnsDb = opt$EnsDb,
-              cellComposition = opt$cellComposition)
+              EnsDb = opt$EnsDb)
     

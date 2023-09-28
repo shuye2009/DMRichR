@@ -70,15 +70,6 @@ reference:
   - title: Machine learning
     contents:
       - methylLearn
-  - title: Cell composition estimation
-    contents:
-      - bsseqLift
-      - prepareCC
-      - arrayRanges
-      - Houseman
-      - find_dmrs2
-      - CCstats
-      - CCplot
   - title: Helper functions
     contents:
       - arrayLift
