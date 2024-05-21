@@ -27,6 +27,7 @@
 #' adjustCovariate. 
 #' @param EnsDb Logical indicating whether to to select Ensembl transcript annotation database.
 #' This is recommended for non-model organisms. 
+#' @param filePattern character indicating cytosine report file name pattern
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
 #' @importFrom magrittr %>% %T>%
@@ -66,7 +67,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  cores = 20,
                  GOfuncR = TRUE,
                  sexCheck = FALSE,
-                 EnsDb = FALSE){
+                 EnsDb = FALSE,
+                 filePattern = "*.CpG_report.txt.gz"){
   
   
   # Check dmrseq version 
@@ -143,7 +145,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   # Load and process samples ------------------------------------------------
   
   bs.filtered <- DMRichR::processBismark(files = list.files(path = getwd(),
-                                                            pattern = "*.CpG_report.txt.gz"),
+                                                            pattern = filePattern),
                                          meta = openxlsx::read.xlsx("sample_info.xlsx",
                                                                     colNames = TRUE) %>%
                                            dplyr::mutate_if(is.character, as.factor),
