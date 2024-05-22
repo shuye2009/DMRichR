@@ -28,6 +28,7 @@
 #' @param EnsDb Logical indicating whether to to select Ensembl transcript annotation database.
 #' This is recommended for non-model organisms. 
 #' @param filePattern character indicating cytosine report file name pattern
+#' @param internet Logical indicating if internet connection is available
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
 #' @importFrom magrittr %>% %T>%
@@ -68,7 +69,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  GOfuncR = TRUE,
                  sexCheck = FALSE,
                  EnsDb = FALSE,
-                 filePattern = "*.CpG_report.txt.gz"){
+                 filePattern = "*.CpG_report.txt.gz",
+                 internet = TRUE){
   
   
   # Check dmrseq version 
@@ -163,7 +165,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   print(glue::glue("Building annotations for plotting..."))
   if(is(TxDb, "TxDb")){
-    annoTrack <- dmrseq::getAnnot(genome)
+    if(internet){
+      annoTrack <- dmrseq::getAnnot(genome)
+      saveRDS(annoTrack, file.path(getwd(), "annoTrack.rds"))
+    }else{
+      readRDS(file.path(getwd(), "annoTrack.rds"))
+    }
+    
   }else if(is(TxDb, "EnsDb")){
     annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome),
                                             Exons = DMRichR::getExons(TxDb),
@@ -589,7 +597,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                 unique(),
               function(type){
                 
-                print(glue::glue("Creating DMRichMultiPlots for {type} annotations"))
+                print(glue::glue("Creating DMRich MultiPlots for {type} annotations"))
                 
                 DMRichR::DMparseR(direction =  c("All DMRs",
                                                  "Hypermethylated DMRs",
