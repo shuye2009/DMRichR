@@ -167,9 +167,9 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   if(is(TxDb, "TxDb")){
     if(internet){
       annoTrack <- dmrseq::getAnnot(genome)
-      saveRDS(annoTrack, file.path(getwd(), "annoTrack.rds"))
+      saveRDS(annoTrack, file.path(getwd(), "RData/annoTrack.rds"))
     }else{
-      readRDS(file.path(getwd(), "annoTrack.rds"))
+      annoTrack <- readRDS(file.path(getwd(), "RData/annoTrack.rds"))
     }
     
   }else if(is(TxDb, "EnsDb")){
