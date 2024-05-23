@@ -2,8 +2,29 @@
 % Please edit documentation in R/DMRichR-package.R
 \docType{package}
 \name{DMRichR}
+\alias{DMRichR-package}
 \alias{DMRichR}
 \title{DMRichR}
 \description{
 Enrich your DMR analysis
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/ben-laufer/DMRichR}
+  \item \url{https://ben-laufer.github.io/DMRichR}
+  \item \url{https://www.benlaufer.com/DMRichR/}
+  \item Report bugs at \url{https://github.com/ben-laufer/DMRichR/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Ben Laufer \email{blaufer@gmail.com} (\href{https://orcid.org/0000-0002-7558-1335}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Hyeyeon Hwang \email{hyeyeon_hwang@brown.edu} (\href{https://orcid.org/0000-0002-7918-728X}{ORCID}) [contributor]
+  \item Charles Mordaunt \email{mordauntcharles@gmail.com} (\href{https://orcid.org/0000-0002-3820-3298}{ORCID}) [contributor]
+}
+
 }

@@ -19,7 +19,9 @@ DM.R(
   cores = 20,
   GOfuncR = TRUE,
   sexCheck = FALSE,
-  EnsDb = FALSE
+  EnsDb = FALSE,
+  filePattern = "*.CpG_report.txt.gz",
+  internet = TRUE
 )
 }
 \arguments{
@@ -61,6 +63,10 @@ adjustCovariate.}
 
 \item{EnsDb}{Logical indicating whether to to select Ensembl transcript annotation database.
 This is recommended for non-model organisms.}
+
+\item{filePattern}{character indicating cytosine report file name pattern}
+
+\item{internet}{Logical indicating if internet connection is available}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 
