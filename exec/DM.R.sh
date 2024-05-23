@@ -51,7 +51,9 @@ call="Rscript \
 --sexCheck TRUE \
 --GOfuncR TRUE \
 --EnsDb FALSE \
---cores 20"
+--cores 20 \
+--filePattern '*.CG_report.txt.gz' \
+--internet FALSE"
 
 echo $call
 eval $call

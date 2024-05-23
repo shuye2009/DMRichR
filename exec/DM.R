@@ -20,7 +20,7 @@ if(!requireNamespace("remotes", quietly = TRUE))
   install.packages("remotes")
 if(suppressPackageStartupMessages(!requireNamespace("DMRichR", quietly = TRUE))){
   Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = TRUE)
-  BiocManager::install("ben-laufer/DMRichR")
+  remotes::install_github("shuye2009/DMRichR")
 }
 suppressPackageStartupMessages(library(DMRichR))
 
@@ -56,7 +56,11 @@ option_list <- list(
   optparse::make_option(c("-d", "--EnsDb"), type = "logical", default = FALSE,
                         help = "Logical to select Ensembl transcript annotation database [default = %default]"),
   optparse::make_option(c("-f", "--GOfuncR"), type = "logical", default = TRUE,
-                        help = "Logical to run GOfuncR GO analysis [default = %default]")
+                        help = "Logical to run GOfuncR GO analysis [default = %default]"),
+  optparse::make_option(c("--filePattern"), type = "character", default = NULL,
+                        help = "To allow flexible input file names [default = %default]"),
+  optparse::make_option(c("--internet"), type = "logical", default = TRUE,
+                        help = "Logical to run offline [default = %default]")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
@@ -82,5 +86,7 @@ DMRichR::DM.R(genome = opt$genome,
               cores = opt$cores,
               GOfuncR = opt$GOfuncR,
               sexCheck = opt$sexCheck,
-              EnsDb = opt$EnsDb)
+              EnsDb = opt$EnsDb,
+              filePattern = opt$filePattern,
+              internet = opt$internet)
     
