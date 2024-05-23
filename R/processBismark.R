@@ -69,7 +69,7 @@ processBismark <- function(files = list.files(path = getwd(), pattern = "*.CpG_r
                             nThread = 1) # 1L # nThread
   
   print(glue::glue("Assigning sample metadata with {testCovariate} as factor of interest..."))
-  sampleNames(bs) <- gsub( "_.*$","", sampleNames(bs))
+  sampleNames(bs) <- gsub( "_report.*$","", sampleNames(bs))
   meta <- meta[order(match(meta[,1],sampleNames(bs))),]
   stopifnot(sampleNames(bs) == as.character(meta$Name))
   pData(bs) <- cbind(pData(bs), meta[2:length(meta)])
