@@ -652,7 +652,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   dir.create("Ontologies")
   
-  if(genome %in% c("hg38", "hg19", "mm10", "mm9")){
+  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & internet){
     
     print(glue::glue("Running GREAT"))
     GREATjob <- sigRegions %>%
@@ -689,6 +689,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     # write.csv(as.data.frame(res),
     #           file = glue::glue("Ontologies/GREATannotations.csv"),
     #           row.names = FALSE)
+   
   }
   
   if(GOfuncR == TRUE){
@@ -713,7 +714,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                       width = 10)
   }
   
-  if(genome != "TAIR10" & genome != "TAIR9"){
+
+  if(genome != "TAIR10" & genome != "TAIR9" & internet){
     tryCatch({
       print(glue::glue("Running enrichR"))
       
