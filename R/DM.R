@@ -644,6 +644,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }, 
   error = function(error_condition) {
     print(glue::glue("Manhattan plot error"))
+    setwd("..")
   })
   
   # Gene Ontology analyses --------------------------------------------------
