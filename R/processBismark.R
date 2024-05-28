@@ -40,10 +40,12 @@ processBismark <- function(files = list.files(path = getwd(), pattern = "*.CpG_r
   
   cat("\n[DMRichR] Processing Bismark cytosine reports \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
-  
+  print(glue::glue("{meta}"))
+  print(glue::glue("{files}"))
   files.idx <- pmatch(meta$Name, files)
   files <- files[files.idx]
-  print(glue::glue("Selecting files...\n {files}"))
+  print(glue::glue("Selecting files..."))
+  print(glue::glue("{files}"))
   #names <- as.data.frame(gsub( "_.*$","", files[files.idx])) # For colData, but jumbles file order with parallel processing
   #colnames(names) <- "Name"
   #rownames(names) <- names[,1]
