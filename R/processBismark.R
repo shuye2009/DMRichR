@@ -14,7 +14,6 @@
 #'  This function requires a column called "Sex" (case sensitive) in sample_info.xlsx. 
 #'  Males should be coded as either "Male", "male", "M", or "m".
 #'  Females coded as "Female", "female", "F", or "f".
-#' @importFrom openxlsx read.xlsx
 #' @importFrom magrittr %>%
 #' @importFrom parallel mclapply
 #' @importFrom glue glue
@@ -29,7 +28,7 @@
 #' @export processBismark
 #' 
 processBismark <- function(files = list.files(path = getwd(), pattern = "*.CpG_report.txt.gz"),
-                           meta = openxlsx::read.xlsx("sample_info.xlsx", colNames = TRUE) %>% dplyr::mutate_if(is.character, as.factor),
+                           meta = read.delim("sample_info.txt") %>% dplyr::mutate_if(is.character, as.factor),
                            testCovariate = testCovariate,
                            adjustCovariate = NULL,
                            matchCovariate = NULL,

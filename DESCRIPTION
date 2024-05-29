@@ -55,7 +55,6 @@ Imports:
     tidyr,
     purrr,
     tibble,
-    readxl,
     readr,
     ensembldb,
     rrvgo,
