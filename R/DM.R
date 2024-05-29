@@ -148,8 +148,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   bs.filtered <- DMRichR::processBismark(files = list.files(path = getwd(),
                                                             pattern = filePattern),
-                                         meta = openxlsx::read.xlsx("sample_info.xlsx",
-                                                                    colNames = TRUE) %>%
+                                         meta = read.delim("sample_info.txt") %>%
                                            dplyr::mutate_if(is.character, as.factor),
                                          testCovariate = testCovariate,
                                          adjustCovariate = adjustCovariate,
