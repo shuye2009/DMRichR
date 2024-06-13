@@ -4,9 +4,11 @@
 \alias{Manhattan}
 \title{Manhattan plot}
 \usage{
-Manhattan(backgroundAnno = backgroundAnno, ...)
+Manhattan(subfolder = ".", backgroundAnno = backgroundAnno, ...)
 }
 \arguments{
+\item{subfolder}{Characters for folder names that organize output.}
+
 \item{backgroundAnno}{A \code{tibble} of annotated background regions from \code{dmrseq::dmrseq()}}
 
 \item{...}{Additional arguments passed onto \code{\link[CMplot]{CMplot}}}

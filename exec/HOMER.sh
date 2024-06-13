@@ -59,6 +59,41 @@ homerDMR(){
 
 	echo $call
 	eval $call
+	
+## annotate DMRs, Added by Shuye Pu
+
+  echo 
+      echo "Annotating DMRs"
+  call="annotatePeaks.pl \
+	DMRs.bed \
+	${genome} \
+	-annStats both/DMRs_annot_stat.tab \
+	-p ${cores} \
+	> both/DMRs_annot.tab"
+
+	echo $call
+	eval $call
+    
+  call="annotatePeaks.pl \
+	DMRs_hyper.bed \
+	${genome} \
+	-annStats hyper/DMRs_hyper_annot_stat.tab \
+	-p ${cores} \
+	> hyper/DMRs_hyper_annot.tab"
+
+	echo $call
+	eval $call
+
+ call="annotatePeaks.pl \
+	DMRs_hypo.bed \
+	${genome} \
+	-annStats hypo/DMRs_hypo_annot_stat.tab \
+	-p ${cores} \
+	> hypo/DMRs_hypo_annot.tab"
+
+	echo $call
+	eval $call
+
 }
 export -f homerDMR
 

@@ -5,11 +5,14 @@
 \title{Combined plot of stratified gene region and CpG annotation enrichment testing}
 \usage{
 DMparseR(
+  subfolder = ".",
   direction = c("All DMRs", "Hypermethylated DMRs", "Hypomethylated DMRs"),
   type = c("CpG", "genic")
 )
 }
 \arguments{
+\item{subfolder}{Characters for folder names that organize output.}
+
 \item{direction}{A character vector of the DMR profiles to analyze
 c("All DMRs", "Hypermethylated DMRs", "Hypomethylated DMRs").}
 

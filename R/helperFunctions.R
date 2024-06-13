@@ -23,6 +23,7 @@ getBackground <- function(bs = bs.filtered,
 #' @title Manhattan plot
 #' @description Create a Manhattan plot of \code{ChIPseeker csAnno} peak object with genic annotations using \code{CMplot}
 #' @param backgroundAnno A \code{tibble} of annotated background regions from \code{dmrseq::dmrseq()}
+#' @param subfolder Characters for folder names that organize output.
 #' @param ... Additional arguments passed onto \code{\link[CMplot]{CMplot}}
 #' @return Saves a pdf of manhattan and qq plots
 #' @importFrom CMplot CMplot
@@ -33,10 +34,11 @@ getBackground <- function(bs = bs.filtered,
 #' @importFrom dplyr as_tibble select mutate 
 #' @export Manhattan
 #' 
-Manhattan <- function(backgroundAnno = backgroundAnno,
+Manhattan <- function(subfolder = ".", backgroundAnno = backgroundAnno,
                      ...){
   cat("\n[DMRichR] Manhattan plot \t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-  setwd("DMRs")
+  wd <- getwd()
+  setwd(file.path(subfolder, "DMRs"))
   CMplot::CMplot(backgroundAnno %>%
                    GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
                    sort() %>%
@@ -61,7 +63,7 @@ Manhattan <- function(backgroundAnno = backgroundAnno,
                  signal.pch = c(19,19),
                  file = "pdf",
                  ...)
-  setwd('..')
+  setwd(wd)
 }
 
 #' arrayLift

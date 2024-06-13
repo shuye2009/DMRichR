@@ -247,6 +247,7 @@ DMRichPlot <- function(data = data,
 #' @param direction A character vector of the DMR profiles to analyze
 #'  c("All DMRs", "Hypermethylated DMRs", "Hypomethylated DMRs").
 #' @param type A character vector of the type of results to parse i.e. c("CpG", "genic").
+#' @param subfolder Characters for folder names that organize output.
 #' @return A \code{tibble} of enrichment results
 #' @importFrom dplyr filter mutate case_when select as_tibble
 #' @importFrom tidyr separate
@@ -257,7 +258,7 @@ DMRichPlot <- function(data = data,
 #' @importFrom forcats as_factor
 #' @export DMparseR
 #' 
-DMparseR <- function(direction = c("All DMRs", "Hypermethylated DMRs", "Hypomethylated DMRs"),
+DMparseR <- function(subfolder=".", direction = c("All DMRs", "Hypermethylated DMRs", "Hypomethylated DMRs"),
                      type = c("CpG", "genic")
                      ){
   
@@ -269,7 +270,7 @@ DMparseR <- function(direction = c("All DMRs", "Hypermethylated DMRs", "Hypometh
   
   purrr::map(direction,
              function(direction){
-               glue::glue("DMRichments/{direction}_{type}_enrichments.xlsx") 
+               glue::glue("{subfolder}/DMRichments/{direction}_{type}_enrichments.xlsx") 
              }) %>%
     as.vector() %>%
     lapply(function(file){
