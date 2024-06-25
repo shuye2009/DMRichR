@@ -50,7 +50,7 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
 # DM.R --------------------------------------------------------------------
 
-DMRichR::DM.R(genome = opt$genome,
+DMRichR::DM_cgmaptools.R(genome = opt$genome,
               minSites =  opt$minSites,
               cutoff = opt$cutoff,
               cores = opt$cores,
