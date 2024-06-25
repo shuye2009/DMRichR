@@ -250,7 +250,7 @@ getCpGs <- function(genome = genome){
   message('Building CpG islands...')
   
   #islands <- readr::read_tsv(glue::glue("http://hgdownload.cse.ucsc.edu/goldenpath/{genome}/database/cpgIslandExt.txt.gz"),
-  islands <- readr::read_tsv("~/resource/cpgIslandExt.txt.gz",
+  islands <- readr::read_tsv("extdata/cpgIslandExt.txt.gz",
                              col_names = c('chr','start','end'),
                              col_types = '-cii-------') %>%
     GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%

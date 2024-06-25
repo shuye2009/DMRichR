@@ -86,7 +86,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
       annoTrack <- dmrseq::getAnnot(genome)
       saveRDS(annoTrack, file.path(outfolder, "RData","annoTrack.rds"))
     }else{
-      annoTrack <- readRDS("~/resource/annoTrack.rds")
+      annoTrack <- readRDS("extdata/annoTrack.rds")
     }
     
   }else if(is(TxDb, "EnsDb")){
