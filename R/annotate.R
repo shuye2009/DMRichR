@@ -18,7 +18,7 @@
 #' 
 annotateRegions <- function(regions = sigRegions,
                             TxDb = TxDb,
-                            annoDb = annoDb){
+                            annoDb = annoDb, internet=TRUE){
   
   genome <- TxDb %>%
     GenomeInfoDb::genome() %>%
@@ -43,7 +43,7 @@ annotateRegions <- function(regions = sigRegions,
       unique()
                                }
   
-  CpGs <- DMRichR::getCpGs(genome)
+  CpGs <- DMRichR::getCpGs(genome, internet)
   
   regionsCpG <- regions %>% 
     plyranges::join_overlap_left(CpGs %>%
@@ -235,6 +235,7 @@ getExons <- function(TxDb = TxDb){
 #'  This function is based on \code{annotatr:::build_cpg_annots()}; however, 
 #'  it obtains annotations for all genomes in the UCSC genome browser.
 #' @param genome Character specifying the genome
+#' @param internet bool to indicate if internet is available
 #' @return A \code{GRanges} object of CpG island, CpG shore, CpG shelf, and open sea annotations
 #' @importFrom GenomicRanges makeGRangesFromDataFrame mcols trim setdiff sort gaps
 #' @importFrom GenomeInfoDb keepStandardChromosomes
@@ -245,18 +246,28 @@ getExons <- function(TxDb = TxDb){
 #'  see: \url{https://github.com/rcavalcante/annotatr/blob/master/R/build_annotations.R}
 #' @export getCpGs
 #' 
-getCpGs <- function(genome = genome){
+getCpGs <- function(genome = genome, internet=TRUE){
   
   message('Building CpG islands...')
   
-  #islands <- readr::read_tsv(glue::glue("http://hgdownload.cse.ucsc.edu/goldenpath/{genome}/database/cpgIslandExt.txt.gz"),
-  islands <- readr::read_tsv("~/resource/cpgIslandExt.txt.gz",
-                             col_names = c('chr','start','end'),
-                             col_types = '-cii-------') %>%
-    GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
-    GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
-    plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
-                      type = "islands")
+  if(internet){
+    islands <- readr::read_tsv(glue::glue("http://hgdownload.cse.ucsc.edu/goldenpath/{genome}/database/cpgIslandExt.txt.gz"),
+                               col_names = c('chr','start','end'),
+                               col_types = '-cii-------') %>%
+      GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
+      GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
+      plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
+                        type = "islands")
+  }else{
+    islands <- readr::read_tsv("~/resource/cpgIslandExt.txt.gz",
+                               col_names = c('chr','start','end'),
+                               col_types = '-cii-------') %>%
+      GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
+      GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
+      plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
+                        type = "islands")
+  }
+  
   
   message('Building CpG shores...')
   

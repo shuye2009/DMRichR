@@ -4,7 +4,12 @@
 \alias{DMRichCpG}
 \title{CpG annotation enrichment testing}
 \usage{
-DMRichCpG(sigRegions = sigRegions, regions = regions, genome = genome)
+DMRichCpG(
+  sigRegions = sigRegions,
+  regions = regions,
+  genome = genome,
+  internet = TRUE
+)
 }
 \arguments{
 \item{sigRegions}{\code{GRanges} object of DMRs}
@@ -14,6 +19,8 @@ DMRichCpG(sigRegions = sigRegions, regions = regions, genome = genome)
 \item{genome}{A character vector specifying the genome of interest
 c("hg38", "hg19", "mm10", "mm9", "rheMac10", "rheMac8", "rn6", "danRer11",
  "galGal6", "bosTau9", "panTro6", "dm6", "susScr11", "canFam3")}
+
+\item{internet}{bool to indicate if internet is available}
 }
 \value{
 A tibble with the enrichment results

@@ -32,7 +32,9 @@
 #' @importClassesFrom bsseq BSseq 
 #' @importMethodsFrom bsseq pData seqnames sampleNames
 #' @export DM_cgmaptools.R
-#' 
+#' setwd("C:/PROJECTS/Shane/Harding_240124/local")
+#' genome = "hg38"; minSites = 5; cutoff = 0.05; cores = 20; GOfuncR = TRUE; fileName = "WT_IR_vs_R172K_IR_dmr.CG.txt.gz"; EnsDb = FALSE; internet = TRUE
+
 DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "rheMac8", "rn6", "danRer11", "galGal6",
                             "bosTau9", "panTro6", "dm6", "susScr11",
@@ -103,6 +105,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   regions <- read.delim(fileName, header = FALSE) %>%
     `colnames<-`(c("chr", "start", "end", "stat", "pval", "beta", "pi", "nsites")) %>%
+    dplyr::filter(!is.na(pval)) %>%
     dplyr::mutate(qval = p.adjust(pval)) %>%
     GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns=TRUE, ignore.strand=TRUE)
   
@@ -113,13 +116,13 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
                                                    stat < 0 ~ "Hypomethylated"),
                       difference = round((beta-pi)*100))
   
-  if(sum(regions$qval < cutoff) < 100 & sum(regions$pval < 0.05) != 0){
+  if(sum(regions$qval < cutoff, na.rm=TRUE) < 100 & sum(regions$pval < cutoff, na.rm=TRUE) != 0){
     sigRegions <- regions %>%
-      plyranges::filter(pval < 0.05)
-  }else if(sum(regions$qval < cutoff) >= 100){
+      plyranges::filter(pval < cutoff)
+  }else if(sum(regions$qval < cutoff, na.rm=TRUE) >= 100){
     sigRegions <- regions %>%
       plyranges::filter(qval < cutoff)
-  }else if(sum(regions$pval < 0.05) == 0){
+  }else if(sum(regions$pval < cutoff, na.rm=TRUE) == 0){
     stop(glue::glue("No significant DMRs detected in {length(regions)} background regions"))
   }
 
@@ -153,13 +156,13 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   sigRegions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb) %T>%
+                             annoDb = annoDb, internet=internet) %T>%
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/DMRs_annotated.xlsx"))
   
   print(glue::glue("Annotating background regions with gene symbols..."))
   regions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb) %>% 
+                             annoDb = annoDb, internet=internet) %>% 
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/background_annotated.xlsx"))
   
 
@@ -217,7 +220,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
       print(glue::glue("Running CpG annotation enrichments for {names(dmrList)[x]}"))
       dmrList[x] %>% 
         DMRichR::DMRichCpG(regions = regions,
-                           genome = genome) %T>%
+                           genome = genome, internet = internet) %T>%
         openxlsx::write.xlsx(file = glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.xlsx")) %>% 
         DMRichR::DMRichPlot(type = "CpG") %>% 
         ggplot2::ggsave(glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.pdf"),
@@ -295,7 +298,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   tryCatch({
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
-                               annoDb = annoDb) %>% 
+                               annoDb = annoDb, internet = internet) %>% 
       DMRichR::Manhattan(subfoler = outfolder)
   }, 
   error = function(error_condition) {

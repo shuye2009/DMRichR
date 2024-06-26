@@ -81,6 +81,7 @@ DMRichGenic <- function(sigRegions = sigRegions,
 #' @param genome A character vector specifying the genome of interest
 #'  c("hg38", "hg19", "mm10", "mm9", "rheMac10", "rheMac8", "rn6", "danRer11",
 #'   "galGal6", "bosTau9", "panTro6", "dm6", "susScr11", "canFam3")
+#' @param internet bool to indicate if internet is available
 #' @return A tibble with the enrichment results
 #' @importFrom dplyr filter mutate case_when select recode_factor as_tibble
 #' @importFrom magrittr %>%
@@ -94,13 +95,13 @@ DMRichGenic <- function(sigRegions = sigRegions,
 #' 
 DMRichCpG <- function(sigRegions = sigRegions,
                       regions = regions,
-                      genome = genome){
+                      genome = genome, internet=TRUE){
     
   stopifnot(genome %in% c("hg38", "hg19", "mm10", "mm9", "rheMac10", "rheMac8", "rn6", "danRer11", "galGal6", "bosTau9", "panTro6", "dm6", "susScr11", "canFam3"))
   print(glue::glue("Performing CpG annotation enrichment testing for {genome}"))
   
   CGannotations <- genome %>%
-    DMRichR::getCpGs()
+    DMRichR::getCpGs(internet=internet)
   
   sigRegions <- sigRegions %>%
     plyranges::as_granges()

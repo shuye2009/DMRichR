@@ -265,7 +265,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         print(glue::glue("Annotating blocks with gene symbols..."))
         sigBlocks %>%
           DMRichR::annotateRegions(TxDb = TxDb,
-                                   annoDb = annoDb) %T>%
+                                   annoDb = annoDb, internet=internet) %T>%
           DMRichR::DMReport(regions = blocks,
                             bs.filtered = bs.filtered,
                             coverage = coverage,
@@ -276,7 +276,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Annotating background blocks with gene symbols..."))
       blocks %>%
         DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb) %>% 
+                                 annoDb = annoDb, internet=internet) %>% 
         openxlsx::write.xlsx(file = "Blocks/background_blocks_annotated.xlsx")
     }
     

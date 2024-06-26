@@ -4,7 +4,12 @@
 \alias{annotateRegions}
 \title{Annotate DMRs and blocks}
 \usage{
-annotateRegions(regions = sigRegions, TxDb = TxDb, annoDb = annoDb)
+annotateRegions(
+  regions = sigRegions,
+  TxDb = TxDb,
+  annoDb = annoDb,
+  internet = TRUE
+)
 }
 \arguments{
 \item{regions}{A \code{GRanges} object of DMRs, blocks, or background regions from \code{dmrseq::dmrseq()}}
