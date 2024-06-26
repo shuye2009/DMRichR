@@ -205,11 +205,9 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   # HOMER -------------------------------------------------------------------
   
   sigRegions %>% 
-    DMRichR::prepareHOMER(regions = regions)
+    DMRichR::prepareHOMER(regions = regions, subfolder = outfolder)
   
-  DMRichR::HOMER(genome = genome,
-                 cores = cores,
-                 subfolder = outfolder)
+  DMRichR::HOMER(genome = genome, cores = cores,  subfolder = outfolder)
   
   # CpG and genic enrichment testing ----------------------------------------
   
