@@ -4,7 +4,7 @@
 \alias{getCpGs}
 \title{Obtain CpG island, CpG shore, CpG shelf, and open sea annotations}
 \usage{
-getCpGs(genome = genome, resPath)
+getCpGs(genome = genome, resPath = NULL)
 }
 \arguments{
 \item{genome}{Character specifying the genome}

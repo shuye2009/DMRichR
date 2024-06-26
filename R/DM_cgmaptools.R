@@ -105,6 +105,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   regions <- read.delim(fileName, header = FALSE) %>%
     `colnames<-`(c("chr", "start", "end", "stat", "pval", "beta", "pi", "nsites")) %>%
     dplyr::filter(!is.na(pval)) %>%
+    dplyr::filter(abs(beta-pi) > 0.05) %>%  # to reduce the size of background set
     dplyr::mutate(qval = p.adjust(pval)) %>%
     GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns=TRUE, ignore.strand=TRUE)
   
@@ -207,8 +208,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
     DMRichR::prepareHOMER(regions = regions)
   
   DMRichR::HOMER(genome = genome,
-                 cores = cores)
-  system(paste0("mv HOMER ", outfolder))
+                 cores = cores,
+                 subfolder = outfolder)
   
   # CpG and genic enrichment testing ----------------------------------------
   

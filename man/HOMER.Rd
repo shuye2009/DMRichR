@@ -4,12 +4,14 @@
 \alias{HOMER}
 \title{Transcription factor motif analysis}
 \usage{
-HOMER(genome = genome, cores = cores)
+HOMER(genome = genome, cores = cores, subfolder = ".")
 }
 \arguments{
 \item{genome}{Character specifying the genome}
 
 \item{cores}{Integer specifying the number of cores to use}
+
+\item{subfolder}{Character specifying saving directory to allow multiple instance of HOMER}
 }
 \value{
 A folder with HOMER results

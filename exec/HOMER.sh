@@ -6,8 +6,9 @@
 homerDMR(){
 	genome=${1}
 	cores=${2}
+	subfolder=${3}
 	
-	cd HOMER
+	cd ${subfolder}/HOMER
 	
     echo 
     echo "Testing both hypermethylated and hypomethylated DMRs"
@@ -97,4 +98,4 @@ homerDMR(){
 }
 export -f homerDMR
 
-homerDMR ${1} ${2}
+homerDMR ${1} ${2} ${3}

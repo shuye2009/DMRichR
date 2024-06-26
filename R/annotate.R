@@ -4,6 +4,7 @@
 #' @param regions A \code{GRanges} object of DMRs, blocks, or background regions from \code{dmrseq::dmrseq()}
 #' @param TxDb \code{TxDb} or \code{EnsDb} annotation package for genome of interest
 #' @param annoDb Character specifying \code{OrgDb} annotation package for species of interest
+#' @param resPath character specifying path to local resources in internet is not available
 #' @return A \code{tibble} of annotated regions
 #' @rawNamespace import(ensembldb, except = c(select, filter))
 #' @importFrom dplyr rename_with as_tibble case_when mutate select recode_factor distinct
@@ -246,7 +247,7 @@ getExons <- function(TxDb = TxDb){
 #'  see: \url{https://github.com/rcavalcante/annotatr/blob/master/R/build_annotations.R}
 #' @export getCpGs
 #' 
-getCpGs <- function(genome = genome, resPath){
+getCpGs <- function(genome = genome, resPath = NULL){
   
   message('Building CpG islands...')
   

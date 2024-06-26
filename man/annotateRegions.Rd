@@ -17,6 +17,8 @@ annotateRegions(
 \item{TxDb}{\code{TxDb} or \code{EnsDb} annotation package for genome of interest}
 
 \item{annoDb}{Character specifying \code{OrgDb} annotation package for species of interest}
+
+\item{resPath}{character specifying path to local resources in internet is not available}
 }
 \value{
 A \code{tibble} of annotated regions

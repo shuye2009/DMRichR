@@ -5,6 +5,7 @@
 #' @param regions \code{GRanges} object of background regions
 #' @param annoDb Character specifying OrgDb annotation package for species of interest
 #' @param TxDb TxDb annotation package for genome of interest
+#' @param resPath character specifying path to local resources in internet is not available
 #' @return A tibble with the enrichment results
 #' @importFrom dplyr filter mutate case_when select as_tibble
 #' @importFrom magrittr %>%
@@ -20,7 +21,7 @@
 DMRichGenic <- function(sigRegions = sigRegions,
                         regions = regions,
                         TxDb = TxDb,
-                        annoDb = annoDb){
+                        annoDb = annoDb, resPath = NULL){
   
   genome <- TxDb %>%
     GenomeInfoDb::genome() %>%
@@ -34,12 +35,10 @@ DMRichGenic <- function(sigRegions = sigRegions,
   
   print(glue::glue("{genome} annotations will be used for sigRegions and regions"))
   sigRegionsAnnotated <- sigRegions %>%
-    DMRichR::annotateRegions(TxDb,
-                             annoDb)
+    DMRichR::annotateRegions(TxDb, annoDb, resPath)
   
   regionsAnnotated <- regions %>%
-    DMRichR::annotateRegions(TxDb,
-                             annoDb)
+    DMRichR::annotateRegions(TxDb, annoDb, resPath)
   
   annotations <- c("Promoter", "5' UTR", "Exon", "Intron", "3' UTR", "Downstream", "Intergenic")
   print(glue::glue("Performing gene region enrichment testing for {genome} with the following annotations: {tidyAnnotations}",

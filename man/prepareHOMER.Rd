@@ -4,12 +4,14 @@
 \alias{prepareHOMER}
 \title{Save regions for HOMER}
 \usage{
-prepareHOMER(sigRegions = sigRegions, regions = regions)
+prepareHOMER(sigRegions = sigRegions, regions = regions, subfolder = ".")
 }
 \arguments{
 \item{sigRegions}{A \code{GRanges} object of significant DMRs returned by \code{dmrseq::dmrseq()}}
 
 \item{regions}{A \code{GRanges} object of background regions returned by \code{dmrseq::dmrseq()}}
+
+\item{subfolder}{Character specifying saving directory to allow multiple instance of HOMER}
 }
 \value{
 Creates a folder for HOMER with bed files

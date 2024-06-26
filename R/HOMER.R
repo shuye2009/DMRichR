@@ -3,29 +3,30 @@
 #' @description Save DMRs and background regions from \code{dmrseq::dmrseq()}for HOMER
 #' @param sigRegions A \code{GRanges} object of significant DMRs returned by \code{dmrseq::dmrseq()}
 #' @param regions A \code{GRanges} object of background regions returned by \code{dmrseq::dmrseq()}
+#' @param subfolder Character specifying saving directory to allow multiple instance of HOMER
 #' @return Creates a folder for HOMER with bed files
 #' @importFrom magrittr %>%
 #' @importFrom plyranges filter
 #' @export prepareHOMER
 #' 
 prepareHOMER <- function(sigRegions = sigRegions,
-                         regions = regions){
+                         regions = regions, subfolder = "."){
   
-  dir.create("HOMER")
+  dir.create(file.path(subfolder, "HOMER"))
   
   sigRegions %>%
-    DMRichR::gr2bed("HOMER/DMRs.bed")
+    DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs.bed"))
   
   sigRegions %>%
     plyranges::filter(stat > 0) %>% 
-    DMRichR::gr2bed("HOMER/DMRs_hyper.bed")
+    DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs_hyper.bed"))
   
   sigRegions %>%
     plyranges::filter(stat < 0) %>% 
-    DMRichR::gr2bed("HOMER/DMRs_hypo.bed")
+    DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs_hypo.bed"))
   
   regions %>%
-    DMRichR::gr2bed("HOMER/background.bed")
+    DMRichR::gr2bed(file.path(subfolder, "HOMER/background.bed"))
   
 }
 
@@ -38,6 +39,7 @@ prepareHOMER <- function(sigRegions = sigRegions,
 #' to be installed through \code{perl /path-to-homer/configureHomer.pl -install human}.
 #' @param genome Character specifying the genome
 #' @param cores Integer specifying the number of cores to use
+#' @param subfolder Character specifying saving directory to allow multiple instance of HOMER
 #' @return A folder with HOMER results
 #' @importFrom glue glue
 #' @references \url{http://homer.ucsd.edu/homer/introduction/configure.html}
@@ -45,14 +47,14 @@ prepareHOMER <- function(sigRegions = sigRegions,
 #' @export HOMER
 #' 
 HOMER <- function(genome = genome,
-                  cores = cores){
+                  cores = cores, subfolder = "."){
   cat("\n[DMRichR] HOMER known transcription factor motif analysis \t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   tryCatch({
     if(Sys.which("findMotifsGenome.pl") == ""){
       print(glue::glue("HOMER was not detected in PATH, skipping motif analysis. Did you load the module?"))
     }else{
       print(glue::glue("HOMER was detected in PATH, now performing motif enrichment for {genome} using {cores} cores"))
-      system(paste(shQuote(system.file("exec/HOMER.sh", package = "DMRichR")),genome,cores))
+      system(paste(shQuote(system.file("exec/HOMER.sh", package = "DMRichR")),genome,cores,subfolder))
     }
   },
   error = function(error_condition) {
