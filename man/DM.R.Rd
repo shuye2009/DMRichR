@@ -21,7 +21,7 @@ DM.R(
   sexCheck = FALSE,
   EnsDb = FALSE,
   filePattern = "*.CpG_report.txt.gz",
-  internet = TRUE
+  resPath = NULL
 )
 }
 \arguments{
@@ -66,7 +66,7 @@ This is recommended for non-model organisms.}
 
 \item{filePattern}{character indicating cytosine report file name pattern}
 
-\item{internet}{Logical indicating if internet connection is available}
+\item{resPath}{character specifying path to local resources if internet is not available}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 

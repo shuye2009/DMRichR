@@ -8,7 +8,7 @@ DMRichCpG(
   sigRegions = sigRegions,
   regions = regions,
   genome = genome,
-  internet = TRUE
+  resPath = NULL
 )
 }
 \arguments{
@@ -20,7 +20,7 @@ DMRichCpG(
 c("hg38", "hg19", "mm10", "mm9", "rheMac10", "rheMac8", "rn6", "danRer11",
  "galGal6", "bosTau9", "panTro6", "dm6", "susScr11", "canFam3")}
 
-\item{internet}{bool to indicate if internet is available}
+\item{resPath}{character specifying path to local resources in internet is not available}
 }
 \value{
 A tibble with the enrichment results

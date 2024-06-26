@@ -13,7 +13,7 @@ DM_cgmaptools.R(
   GOfuncR = TRUE,
   fileName = "*_dmr.CG.txt.gz",
   EnsDb = FALSE,
-  internet = TRUE
+  resPath = NULL
 )
 }
 \arguments{
@@ -21,17 +21,17 @@ DM_cgmaptools.R(
 
 \item{minSites}{Numeric for minimum number of cytosine sites for a DMR.}
 
-\item{cutoff}{Numeric cutoff for qvalues}
+\item{cutoff}{Numeric cutoff for qvalues.}
 
 \item{cores}{Numeric specifying the number of cores to use. 20 is recommended.}
 
 \item{GOfuncR}{Logical indicating whether to run a GOfuncR GO analysis.}
 
-\item{fileName}{Character indicating dmr file name pattern}
+\item{fileName}{Character indicating dmr file name.}
 
-\item{EnsDb}{Whether to use Ensemble database}
+\item{EnsDb}{Whether to use Ensemble database.}
 
-\item{internet}{Logical indicating if internet connection is available}
+\item{resPath}{character specifying path to local resources if internet is not available.}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 

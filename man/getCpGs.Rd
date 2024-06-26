@@ -4,12 +4,12 @@
 \alias{getCpGs}
 \title{Obtain CpG island, CpG shore, CpG shelf, and open sea annotations}
 \usage{
-getCpGs(genome = genome, internet = TRUE)
+getCpGs(genome = genome, resPath)
 }
 \arguments{
 \item{genome}{Character specifying the genome}
 
-\item{internet}{bool to indicate if internet is available}
+\item{resPath}{character specifying path to local resources in internet is not available}
 }
 \value{
 A \code{GRanges} object of CpG island, CpG shore, CpG shelf, and open sea annotations

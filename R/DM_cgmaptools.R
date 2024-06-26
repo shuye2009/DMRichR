@@ -4,12 +4,12 @@
 #' using a limited number of tools.
 #' @param genome Character specifying the genome.
 #' @param minSites Numeric for minimum number of cytosine sites for a DMR.
-#' @param cutoff Numeric cutoff for qvalues 
+#' @param cutoff Numeric cutoff for qvalues.
 #' @param cores Numeric specifying the number of cores to use. 20 is recommended. 
 #' @param GOfuncR Logical indicating whether to run a GOfuncR GO analysis.
-#' @param fileName Character indicating dmr file name pattern
-#' @param EnsDb Whether to use Ensemble database
-#' @param internet Logical indicating if internet connection is available
+#' @param fileName Character indicating dmr file name.
+#' @param EnsDb Whether to use Ensemble database.
+#' @param resPath character specifying path to local resources if internet is not available.
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
 #' @importFrom magrittr %>% %T>%
@@ -33,7 +33,8 @@
 #' @importMethodsFrom bsseq pData seqnames sampleNames
 #' @export DM_cgmaptools.R
 #' setwd("C:/PROJECTS/Shane/Harding_240124/local")
-#' genome = "hg38"; minSites = 5; cutoff = 0.05; cores = 20; GOfuncR = TRUE; fileName = "WT_IR_vs_R172K_IR_dmr.CG.txt.gz"; EnsDb = FALSE; internet = TRUE
+#' genome = "hg38"; minSites = 5; cutoff = 0.05; cores = 20; GOfuncR = TRUE; fileName = "WT_IR_vs_R172K_IR_dmr.CG.txt.gz"; 
+#' EnsDb = FALSE; resPath = "C:/PROJECTS/Shane/Harding_240124/resource"
 
 DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "rheMac8", "rn6", "danRer11", "galGal6",
@@ -45,7 +46,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
                  GOfuncR = TRUE,
                  fileName = "*_dmr.CG.txt.gz",
                  EnsDb = FALSE,
-                 internet = TRUE){
+                 resPath = NULL){
   
 
   # Set options
@@ -84,11 +85,11 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   print(glue::glue("Building annotations for plotting..."))
   if(is(TxDb, "TxDb")){
-    if(internet){
+    if(is.null(resPath)){
       annoTrack <- dmrseq::getAnnot(genome)
       saveRDS(annoTrack, file.path(outfolder, "RData","annoTrack.rds"))
     }else{
-      annoTrack <- readRDS("~/resource/annoTrack.rds")
+      annoTrack <- readRDS(file.path(resPath, "annoTrack.rds"))
     }
     
   }else if(is(TxDb, "EnsDb")){
@@ -156,13 +157,13 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   sigRegions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb, internet=internet) %T>%
+                             annoDb = annoDb, resPath = resPath) %T>%
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/DMRs_annotated.xlsx"))
   
   print(glue::glue("Annotating background regions with gene symbols..."))
   regions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb, internet=internet) %>% 
+                             annoDb = annoDb, resPath=resPath) %>% 
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/background_annotated.xlsx"))
   
 
@@ -220,7 +221,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
       print(glue::glue("Running CpG annotation enrichments for {names(dmrList)[x]}"))
       dmrList[x] %>% 
         DMRichR::DMRichCpG(regions = regions,
-                           genome = genome, internet = internet) %T>%
+                           genome = genome, resPath = resPath) %T>%
         openxlsx::write.xlsx(file = glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.xlsx")) %>% 
         DMRichR::DMRichPlot(type = "CpG") %>% 
         ggplot2::ggsave(glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.pdf"),
@@ -298,7 +299,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   tryCatch({
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
-                               annoDb = annoDb, internet = internet) %>% 
+                               annoDb = annoDb, resPath = resPath) %>% 
       DMRichR::Manhattan(subfoler = outfolder)
   }, 
   error = function(error_condition) {
@@ -312,7 +313,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   dir.create(file.path(outfolder, "Ontologies"))
   
-  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & internet){
+  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & in.null(resPath)){
     
     print(glue::glue("Running GREAT"))
     GREATjob <- sigRegions %>%
@@ -375,7 +376,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   }
   
 
-  if(genome != "TAIR10" & genome != "TAIR9" & internet){
+  if(genome != "TAIR10" & genome != "TAIR9" & is.null(resPath)){
     tryCatch({
       print(glue::glue("Running enrichR"))
       

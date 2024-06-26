@@ -28,7 +28,8 @@
 #' @param EnsDb Logical indicating whether to to select Ensembl transcript annotation database.
 #' This is recommended for non-model organisms. 
 #' @param filePattern character indicating cytosine report file name pattern
-#' @param internet Logical indicating if internet connection is available
+#' @param resPath character specifying path to local resources if internet is not available
+#' 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
 #' @importFrom magrittr %>% %T>%
@@ -70,7 +71,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  sexCheck = FALSE,
                  EnsDb = FALSE,
                  filePattern = "*.CpG_report.txt.gz",
-                 internet = TRUE){
+                 resPath = NULL){
   
   
   # Check dmrseq version 
@@ -164,7 +165,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   print(glue::glue("Building annotations for plotting..."))
   if(is(TxDb, "TxDb")){
-    if(internet){
+    if(is.null(resPath)){
       annoTrack <- dmrseq::getAnnot(genome)
       saveRDS(annoTrack, file.path(getwd(), "RData/annoTrack.rds"))
     }else{
@@ -265,7 +266,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         print(glue::glue("Annotating blocks with gene symbols..."))
         sigBlocks %>%
           DMRichR::annotateRegions(TxDb = TxDb,
-                                   annoDb = annoDb, internet=internet) %T>%
+                                   annoDb = annoDb, resPath=resPath) %T>%
           DMRichR::DMReport(regions = blocks,
                             bs.filtered = bs.filtered,
                             coverage = coverage,
@@ -276,7 +277,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Annotating background blocks with gene symbols..."))
       blocks %>%
         DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb, internet=internet) %>% 
+                                 annoDb = annoDb, resPath=resPath) %>% 
         openxlsx::write.xlsx(file = "Blocks/background_blocks_annotated.xlsx")
     }
     
@@ -652,7 +653,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   dir.create("Ontologies")
   
-  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & internet){
+  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & is.null(resPath)){
     
     print(glue::glue("Running GREAT"))
     GREATjob <- sigRegions %>%
@@ -715,7 +716,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }
   
 
-  if(genome != "TAIR10" & genome != "TAIR9" & internet){
+  if(genome != "TAIR10" & genome != "TAIR9" & is.null(resPath)){
     tryCatch({
       print(glue::glue("Running enrichR"))
       

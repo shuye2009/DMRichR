@@ -59,8 +59,8 @@ option_list <- list(
                         help = "Logical to run GOfuncR GO analysis [default = %default]"),
   optparse::make_option(c("--filePattern"), type = "character", default = NULL,
                         help = "To allow flexible input file names [default = %default]"),
-  optparse::make_option(c("--internet"), type = "logical", default = TRUE,
-                        help = "Logical to run offline [default = %default]")
+  optparse::make_option(c("--resPath"), type = "charactr", default = NULL,
+                        help = "Path to local resources [default = %default]")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
@@ -88,5 +88,5 @@ DMRichR::DM.R(genome = opt$genome,
               sexCheck = opt$sexCheck,
               EnsDb = opt$EnsDb,
               filePattern = opt$filePattern,
-              internet = opt$internet)
+              resPath = opt$resPath)
     

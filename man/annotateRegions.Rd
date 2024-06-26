@@ -8,7 +8,7 @@ annotateRegions(
   regions = sigRegions,
   TxDb = TxDb,
   annoDb = annoDb,
-  internet = TRUE
+  resPath = NULL
 )
 }
 \arguments{
