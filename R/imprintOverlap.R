@@ -6,7 +6,10 @@
 #' @param regions \code{GRanges} object of background regions. 
 #' @param annoDb Character specifying OrgDb annotation package for species of interest.
 #' @param TxDb TxDb annotation package for genome of interest.
+#' @param resPath character specifying path to local resources if internet is not available.
+#' 
 #' @return A printed statement with the enrichment results.
+#' 
 #' @importFrom dplyr filter mutate case_when select distinct pull
 #' @importFrom magrittr %>%
 #' @importFrom glue glue glue_collapse
@@ -18,7 +21,8 @@
 imprintOverlap <- function(sigRegions = sigRegions,
                            regions = regions,
                            TxDb = TxDb,
-                           annoDb = annoDb){
+                           annoDb = annoDb,
+                           resPath = NULL){
   
   imprint <- c("(?i)^DIRAS3$",
                "(?i)^RNU5D-1$",
@@ -129,12 +133,10 @@ imprintOverlap <- function(sigRegions = sigRegions,
   
   sigRegions <- sigRegions %>%
     plyranges::as_granges() %>% 
-    DMRichR::annotateRegions(TxDb,
-                             annoDb)
+    DMRichR::annotateRegions(TxDb, annoDb, resPath)
   
   regions <- regions %>%
-    DMRichR::annotateRegions(TxDb,
-                             annoDb)
+    DMRichR::annotateRegions(TxDb, annoDb, resPath)
   
   # Overlap pipe
   imprintOverlaps <- . %>%

@@ -173,7 +173,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }
     
   }else if(is(TxDb, "EnsDb")){
-    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome),
+    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome, resPath),
                                             Exons = DMRichR::getExons(TxDb),
                                             compress = FALSE)
   }
@@ -266,7 +266,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         print(glue::glue("Annotating blocks with gene symbols..."))
         sigBlocks %>%
           DMRichR::annotateRegions(TxDb = TxDb,
-                                   annoDb = annoDb, resPath=resPath) %T>%
+                                   annoDb = annoDb, 
+                                   resPath=resPath) %T>%
           DMRichR::DMReport(regions = blocks,
                             bs.filtered = bs.filtered,
                             coverage = coverage,
@@ -277,7 +278,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Annotating background blocks with gene symbols..."))
       blocks %>%
         DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb, resPath=resPath) %>% 
+                                 annoDb = annoDb, 
+                                 resPath=resPath) %>% 
         openxlsx::write.xlsx(file = "Blocks/background_blocks_annotated.xlsx")
     }
     
@@ -377,7 +379,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   sigRegions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb) %T>%
+                             annoDb = annoDb,
+                             resPath = resPath) %T>%
     DMRichR::DMReport(regions = regions,
                       bs.filtered = bs.filtered,
                       coverage = coverage,
@@ -387,7 +390,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("Annotating background regions with gene symbols..."))
   regions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb) %>% 
+                             annoDb = annoDb,
+                             resPath = resPath) %>% 
     openxlsx::write.xlsx(file = "DMRs/background_annotated.xlsx")
   
   # Individual smoothed values ----------------------------------------------
@@ -562,7 +566,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Running CpG annotation enrichments for {names(dmrList)[x]}"))
       dmrList[x] %>% 
         DMRichR::DMRichCpG(regions = regions,
-                           genome = genome) %T>%
+                           genome = genome,
+                           resPath = resPath) %T>%
         openxlsx::write.xlsx(file = glue::glue("DMRichments/{names(dmrList)[x]}_CpG_enrichments.xlsx")) %>% 
         DMRichR::DMRichPlot(type = "CpG") %>% 
         ggplot2::ggsave(glue::glue("DMRichments/{names(dmrList)[x]}_CpG_enrichments.pdf"),
@@ -575,7 +580,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     dmrList[x] %>% 
       DMRichR::DMRichGenic(regions = regions,
                            TxDb = TxDb,
-                           annoDb = annoDb) %T>%
+                           annoDb = annoDb,
+                           resPath = resPath) %T>%
       openxlsx::write.xlsx(file = glue::glue("DMRichments/{names(dmrList)[x]}_genic_enrichments.xlsx")) %>% 
       DMRichR::DMRichPlot(type = "genic") %>% 
       ggplot2::ggsave(glue::glue("DMRichments/{names(dmrList)[x]}_genic_enrichments.pdf"),
@@ -629,7 +635,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                 dmrList[x] %>%
                   DMRichR::imprintOverlap(regions = regions,
                                           TxDb = TxDb,
-                                          annoDb = annoDb)
+                                          annoDb = annoDb,
+                                          resPath = rePath)
               })
   
   sink()
@@ -639,7 +646,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   tryCatch({
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
-                               annoDb = annoDb) %>% 
+                               annoDb = annoDb,
+                               resPath = resPath) %>% 
       DMRichR::Manhattan()
   }, 
   error = function(error_condition) {
@@ -746,7 +754,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
       sigRegions %>%
         DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb) %>%  
+                                 annoDb = annoDb,
+                                 resPath = resPath) %>%  
         dplyr::select(geneSymbol) %>%
         purrr::flatten() %>%
         enrichR::enrichr(dbs) %>% 

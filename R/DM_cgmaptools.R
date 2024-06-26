@@ -91,7 +91,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
     }
     
   }else if(is(TxDb, "EnsDb")){
-    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome),
+    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome, resPath),
                                             Exons = DMRichR::getExons(TxDb),
                                             compress = FALSE)
   }
@@ -156,13 +156,15 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   sigRegions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb, resPath = resPath) %T>%
+                             annoDb = annoDb, 
+                             resPath = resPath) %T>%
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/DMRs_annotated.xlsx"))
   
   print(glue::glue("Annotating background regions with gene symbols..."))
   regions %>%
     DMRichR::annotateRegions(TxDb = TxDb,
-                             annoDb = annoDb, resPath=resPath) %>% 
+                             annoDb = annoDb, 
+                             resPath=resPath) %>% 
     openxlsx::write.xlsx(file = file.path(outfolder, "DMRs/background_annotated.xlsx"))
   
 
@@ -218,7 +220,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
       print(glue::glue("Running CpG annotation enrichments for {names(dmrList)[x]}"))
       dmrList[x] %>% 
         DMRichR::DMRichCpG(regions = regions,
-                           genome = genome, resPath = resPath) %T>%
+                           genome = genome, 
+                           resPath = resPath) %T>%
         openxlsx::write.xlsx(file = glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.xlsx")) %>% 
         DMRichR::DMRichPlot(type = "CpG") %>% 
         ggplot2::ggsave(glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_CpG_enrichments.pdf"),
@@ -231,7 +234,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
     dmrList[x] %>% 
       DMRichR::DMRichGenic(regions = regions,
                            TxDb = TxDb,
-                           annoDb = annoDb, resPath = resPath) %T>%
+                           annoDb = annoDb, 
+                           resPath = resPath) %T>%
       openxlsx::write.xlsx(file = glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_genic_enrichments.xlsx")) %>% 
       DMRichR::DMRichPlot(type = "genic") %>% 
       ggplot2::ggsave(glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_genic_enrichments.pdf"),
@@ -286,7 +290,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
                 dmrList[x] %>%
                   DMRichR::imprintOverlap(regions = regions,
                                           TxDb = TxDb,
-                                          annoDb = annoDb)
+                                          annoDb = annoDb,
+                                          resPath = resPath)
               })
   
   sink()
@@ -296,7 +301,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   tryCatch({
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
-                               annoDb = annoDb, resPath = resPath) %>% 
+                               annoDb = annoDb, 
+                               resPath = resPath) %>% 
       DMRichR::Manhattan(subfoler = outfolder)
   }, 
   error = function(error_condition) {
@@ -403,7 +409,8 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
       
       sigRegions %>%
         DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb) %>%  
+                                 annoDb = annoDb,
+                                 resPath = resPath) %>%  
         dplyr::select(geneSymbol) %>%
         purrr::flatten() %>%
         enrichR::enrichr(dbs) %>% 

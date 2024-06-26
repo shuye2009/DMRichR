@@ -8,7 +8,8 @@ imprintOverlap(
   sigRegions = sigRegions,
   regions = regions,
   TxDb = TxDb,
-  annoDb = annoDb
+  annoDb = annoDb,
+  resPath = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ imprintOverlap(
 \item{TxDb}{TxDb annotation package for genome of interest.}
 
 \item{annoDb}{Character specifying OrgDb annotation package for species of interest.}
+
+\item{resPath}{character specifying path to local resources if internet is not available.}
 }
 \value{
 A printed statement with the enrichment results.
