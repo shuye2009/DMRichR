@@ -35,6 +35,7 @@
 #' setwd("C:/PROJECTS/Shane/Harding_240124/local")
 #' genome = "hg38"; minSites = 5; cutoff = 0.05; cores = 20; GOfuncR = TRUE; fileName = "WT_IR_vs_R172K_IR_dmr.CG.txt.gz"; 
 #' EnsDb = FALSE; resPath = "C:/PROJECTS/Shane/Harding_240124/resource"
+#' 
 
 DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "rheMac8", "rn6", "danRer11", "galGal6",

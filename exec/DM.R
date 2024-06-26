@@ -59,7 +59,7 @@ option_list <- list(
                         help = "Logical to run GOfuncR GO analysis [default = %default]"),
   optparse::make_option(c("--filePattern"), type = "character", default = NULL,
                         help = "To allow flexible input file names [default = %default]"),
-  optparse::make_option(c("--resPath"), type = "charactr", default = NULL,
+  optparse::make_option(c("--resPath"), type = "character", default = NULL,
                         help = "Path to local resources [default = %default]")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
