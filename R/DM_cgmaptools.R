@@ -231,7 +231,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
     dmrList[x] %>% 
       DMRichR::DMRichGenic(regions = regions,
                            TxDb = TxDb,
-                           annoDb = annoDb) %T>%
+                           annoDb = annoDb, resPath = resPath) %T>%
       openxlsx::write.xlsx(file = glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_genic_enrichments.xlsx")) %>% 
       DMRichR::DMRichPlot(type = "genic") %>% 
       ggplot2::ggsave(glue::glue("{outfolder}/DMRichments/{names(dmrList)[x]}_genic_enrichments.pdf"),
