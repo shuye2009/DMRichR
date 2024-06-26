@@ -69,7 +69,7 @@ homerDMR(){
 	DMRs.bed \
 	${genome} \
 	-annStats both/DMRs_annot_stat.tab \
-	-p ${cores} \
+	-cpu ${cores} \
 	> both/DMRs_annot.tab"
 
 	echo $call
@@ -79,7 +79,7 @@ homerDMR(){
 	DMRs_hyper.bed \
 	${genome} \
 	-annStats hyper/DMRs_hyper_annot_stat.tab \
-	-p ${cores} \
+	-cpu ${cores} \
 	> hyper/DMRs_hyper_annot.tab"
 
 	echo $call
@@ -89,7 +89,7 @@ homerDMR(){
 	DMRs_hypo.bed \
 	${genome} \
 	-annStats hypo/DMRs_hypo_annot_stat.tab \
-	-p ${cores} \
+	-cpu ${cores} \
 	> hypo/DMRs_hypo_annot.tab"
 
 	echo $call
