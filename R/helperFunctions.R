@@ -34,7 +34,7 @@ getBackground <- function(bs = bs.filtered,
 #' @importFrom dplyr as_tibble select mutate 
 #' @export Manhattan
 #' 
-Manhattan <- function(subfolder = ".", backgroundAnno = backgroundAnno,
+Manhattan <- function(backgroundAnno = backgroundAnno, subfolder = ".",
                      ...){
   cat("\n[DMRichR] Manhattan plot \t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   wd <- getwd()

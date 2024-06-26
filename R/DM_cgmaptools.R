@@ -316,7 +316,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   dir.create(file.path(outfolder, "Ontologies"))
   
-  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & in.null(resPath)){
+  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & is.null(resPath)){
     
     print(glue::glue("Running GREAT"))
     GREATjob <- sigRegions %>%
@@ -442,7 +442,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
                    The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
-                   {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated.", 
+                   {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. Genome size is {genomeSize}", 
                    dmrLength = sigRegions %>%
                      length() %>%
                      formatC(format = "d", big.mark = ","),
