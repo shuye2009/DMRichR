@@ -316,123 +316,133 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   
   dir.create(file.path(outfolder, "Ontologies"))
   
-  if(genome %in% c("hg38", "hg19", "mm10", "mm9") & is.null(resPath)){
-    
-    print(glue::glue("Running GREAT"))
-    GREATjob <- sigRegions %>%
-      dplyr::as_tibble() %>%
-      GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
-      rGREAT::submitGreatJob(bg = regions,
-                             species = genome,
-                             rule = "oneClosest",
-                             request_interval = 1,
-                             version = "4.0.4")
-    
-    print(glue::glue("Saving and plotting GREAT results"))
-    GREATjob %>%
-      rGREAT::getEnrichmentTables(category = "GO") %T>% #%>%
-      #purrr::map(~ dplyr::filter(., Hyper_Adjp_BH < 0.05)) %T>%
-      openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_results.xlsx")) %>%
-      DMRichR::slimGO(tool = "rGREAT",
-                      annoDb = annoDb,
-                      plots = FALSE) %T>%
-      openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_slimmed_results.xlsx")) %>%
-      DMRichR::GOplot() %>%
-      ggplot2::ggsave(glue::glue("Ontologies/GREAT_plot.pdf"),
-                      plot = .,
-                      device = NULL,
-                      height = 8.5,
-                      width = 10)
-    
-    # pdf(glue::glue("Ontologies/GREAT_gene_associations_graph.pdf"),
-    #     height = 8.5,
-    #     width = 11)
-    # par(mfrow = c(1, 3))
-    # res <- rGREAT::plotRegionGeneAssociationGraphs(GREATjob)
-    # dev.off()
-    # write.csv(as.data.frame(res),
-    #           file = glue::glue("Ontologies/GREATannotations.csv"),
-    #           row.names = FALSE)
-   
-  }
+  hyper <- sigRegions %>%
+    plyranges::filter(stat > 0)
+  hypo <- sigRegions %>%
+    plyranges::filter(stat < 0)
+  all_sigRegions <- list("hyper"=hyper, "hypo"=hypo)
   
-  if(GOfuncR == TRUE){
-    print(glue::glue("Running GOfuncR"))
-    sigRegions %>% 
-      DMRichR::GOfuncR(regions = regions,
-                       n_randsets = 1000,
-                       upstream = 5000,
-                       downstream = 1000,
-                       annoDb = annoDb,
-                       TxDb = TxDb) %T>%
-      openxlsx::write.xlsx(glue::glue("{outfolder}/Ontologies/GOfuncR.xlsx")) %>% 
-      DMRichR::slimGO(tool = "GOfuncR",
-                      annoDb = annoDb,
-                      plots = FALSE) %T>%
-      openxlsx::write.xlsx(file = glue::glue("{outfolder}/Ontologies/GOfuncR_slimmed_results.xlsx")) %>% 
-      DMRichR::GOplot() %>% 
-      ggplot2::ggsave(glue::glue("{outfolder}/Ontologies/GOfuncR_plot.pdf"),
-                      plot = .,
-                      device = NULL,
-                      height = 8.5,
-                      width = 10)
-  }
+  for(direction in c("hyper", "hypo")){
+    asigRegions <- all_sigRegions[[direction]]
   
-
-  if(genome != "TAIR10" & genome != "TAIR9" & is.null(resPath)){
-    tryCatch({
-      print(glue::glue("Running enrichR"))
+    if(genome %in% c("hg38", "hg19", "mm10", "mm9") & is.null(resPath)){
       
-      enrichR:::.onAttach() # Needed or else "EnrichR website not responding"
-      #dbs <- enrichR::listEnrichrDbs()
-      dbs <- c("GO_Biological_Process_2018",
-               "GO_Cellular_Component_2018",
-               "GO_Molecular_Function_2018",
-               "KEGG_2019_Human",
-               "Panther_2016",
-               "Reactome_2016",
-               "RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO")
+      print(glue::glue("Running GREAT"))
+      GREATjob <- asigRegions %>%
+        dplyr::as_tibble() %>%
+        GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
+        rGREAT::submitGreatJob(bg = regions,
+                               species = genome,
+                               rule = "oneClosest",
+                               request_interval = 1,
+                               version = "4.0.4")
       
-      if(genome %in% c("mm10", "mm9", "rn6")){
-        dbs %>%
-          gsub(pattern = "Human", replacement = "Mouse")
-      }else if(genome %in% c("danRer11", "dm6")){
-        if(genome == "danRer11"){
-          enrichR::setEnrichrSite("FishEnrichr")
-        }else if(genome == "dm6"){
-          enrichR::setEnrichrSite("FlyEnrichr")}
-        dbs <- c("GO_Biological_Process_2018",
-                 "GO_Cellular_Component_2018",
-                 "GO_Molecular_Function_2018",
-                 "KEGG_2019")
-      }
-      
-      sigRegions %>%
-        DMRichR::annotateRegions(TxDb = TxDb,
-                                 annoDb = annoDb,
-                                 resPath = resPath) %>%  
-        dplyr::select(geneSymbol) %>%
-        purrr::flatten() %>%
-        enrichR::enrichr(dbs) %>% 
-        purrr::set_names(names(.) %>% stringr::str_trunc(31, ellipsis = "")) %T>% # %>% 
-        #purrr::map(~ dplyr::filter(., Adjusted.P.value < 0.05)) %T>%
-        openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr.xlsx")) %>%
-        DMRichR::slimGO(tool = "enrichR",
+      print(glue::glue("Saving and plotting GREAT results"))
+      GREATjob %>%
+        rGREAT::getEnrichmentTables(category = "GO") %T>% #%>%
+        #purrr::map(~ dplyr::filter(., Hyper_Adjp_BH < 0.05)) %T>%
+        openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_results_{direction}.xlsx")) %>%
+        DMRichR::slimGO(tool = "rGREAT",
                         annoDb = annoDb,
                         plots = FALSE) %T>%
-        openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr_slimmed_results.xlsx")) %>% 
-        DMRichR::GOplot() %>% 
-        ggplot2::ggsave(glue::glue("Ontologies/enrichr_plot.pdf"),
+        openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_slimmed_results_{direction}.xlsx")) %>%
+        DMRichR::GOplot() %>%
+        ggplot2::ggsave(glue::glue("Ontologies/GREAT_plot_{direction}.pdf"),
                         plot = .,
                         device = NULL,
                         height = 8.5,
                         width = 10)
       
-    },
-    error = function(error_condition) {
-      print(glue::glue("Warning: enrichR did not finish. \\
-                      The website may be down or there are internet connection issues."))
-    })
+      # pdf(glue::glue("Ontologies/GREAT_gene_associations_graph.pdf"),
+      #     height = 8.5,
+      #     width = 11)
+      # par(mfrow = c(1, 3))
+      # res <- rGREAT::plotRegionGeneAssociationGraphs(GREATjob)
+      # dev.off()
+      # write.csv(as.data.frame(res),
+      #           file = glue::glue("Ontologies/GREATannotations.csv"),
+      #           row.names = FALSE)
+     
+    }
+    
+    if(GOfuncR == TRUE){
+      print(glue::glue("Running GOfuncR"))
+      asigRegions %>% 
+        DMRichR::GOfuncR(regions = regions,
+                         n_randsets = 1000,
+                         upstream = 5000,
+                         downstream = 1000,
+                         annoDb = annoDb,
+                         TxDb = TxDb) %T>%
+        openxlsx::write.xlsx(glue::glue("{outfolder}/Ontologies/GOfuncR_{direction}.xlsx")) %>% 
+        DMRichR::slimGO(tool = "GOfuncR",
+                        annoDb = annoDb,
+                        plots = FALSE) %T>%
+        openxlsx::write.xlsx(file = glue::glue("{outfolder}/Ontologies/GOfuncR_slimmed_results_{direction}.xlsx")) %>% 
+        DMRichR::GOplot() %>% 
+        ggplot2::ggsave(glue::glue("{outfolder}/Ontologies/GOfuncR_plot_{direction}.pdf"),
+                        plot = .,
+                        device = NULL,
+                        height = 8.5,
+                        width = 10)
+    }
+    
+  
+    if(genome != "TAIR10" & genome != "TAIR9" & is.null(resPath)){
+      tryCatch({
+        print(glue::glue("Running enrichR"))
+        
+        enrichR:::.onAttach() # Needed or else "EnrichR website not responding"
+        #dbs <- enrichR::listEnrichrDbs()
+        dbs <- c("GO_Biological_Process_2018",
+                 "GO_Cellular_Component_2018",
+                 "GO_Molecular_Function_2018",
+                 "KEGG_2019_Human",
+                 "Panther_2016",
+                 "Reactome_2016",
+                 "RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO")
+        
+        if(genome %in% c("mm10", "mm9", "rn6")){
+          dbs %>%
+            gsub(pattern = "Human", replacement = "Mouse")
+        }else if(genome %in% c("danRer11", "dm6")){
+          if(genome == "danRer11"){
+            enrichR::setEnrichrSite("FishEnrichr")
+          }else if(genome == "dm6"){
+            enrichR::setEnrichrSite("FlyEnrichr")}
+          dbs <- c("GO_Biological_Process_2018",
+                   "GO_Cellular_Component_2018",
+                   "GO_Molecular_Function_2018",
+                   "KEGG_2019")
+        }
+        
+        asigRegions %>%
+          DMRichR::annotateRegions(TxDb = TxDb,
+                                   annoDb = annoDb,
+                                   resPath = resPath) %>%  
+          dplyr::select(geneSymbol) %>%
+          purrr::flatten() %>%
+          enrichR::enrichr(dbs) %>% 
+          purrr::set_names(names(.) %>% stringr::str_trunc(31, ellipsis = "")) %T>% # %>% 
+          #purrr::map(~ dplyr::filter(., Adjusted.P.value < 0.05)) %T>%
+          openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr_{direction}.xlsx")) %>%
+          DMRichR::slimGO(tool = "enrichR",
+                          annoDb = annoDb,
+                          plots = FALSE) %T>%
+          openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr_slimmed_results_{direction}.xlsx")) %>% 
+          DMRichR::GOplot() %>% 
+          ggplot2::ggsave(glue::glue("Ontologies/enrichr_plot_{direction}.pdf"),
+                          plot = .,
+                          device = NULL,
+                          height = 8.5,
+                          width = 10)
+        
+      },
+      error = function(error_condition) {
+        print(glue::glue("Warning: enrichR did not finish. \\
+                        The website may be down or there are internet connection issues."))
+      })
+    }
   }
   
  
