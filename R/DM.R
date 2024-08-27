@@ -97,7 +97,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   stopifnot(coverage >= 1)
   
   # Check for more permutations than samples
-  nSamples <- openxlsx::read.xlsx("sample_info.xlsx", colNames = TRUE) %>%
+  nSamples <- read.delim("sample_info.txt", header = TRUE) %>%
     nrow()
   
   if(nSamples < maxPerms){
