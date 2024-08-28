@@ -637,7 +637,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                   DMRichR::imprintOverlap(regions = regions,
                                           TxDb = TxDb,
                                           annoDb = annoDb,
-                                          resPath = rePath)
+                                          resPath = resPath)
               })
   
   sink()
