@@ -32,7 +32,8 @@ globalStats <- function(bs.filtered.bsseq = bs.filtered.bsseq,
                         genome = genome,
                         testCovariate = testCovariate,
                         adjustCovariate = NULL,
-                        matchCovariate = NULL){
+                        matchCovariate = NULL,
+                        resPath = NULL){
   
   cat("\n[DMRichR] Global and CpG island methylation statistics \t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   
@@ -87,7 +88,7 @@ globalStats <- function(bs.filtered.bsseq = bs.filtered.bsseq,
     print(glue::glue("Performing CpG island methylation level testing for {genome}"))
     
     CGi <- genome %>%
-      DMRichR::getCpGs() %>% 
+      DMRichR::getCpGs(resPath = resPath) %>% 
       plyranges::filter(type == "islands") %>% 
       bsseq::getMeth(BSseq = bs.filtered.bsseq,
                      regions = .,

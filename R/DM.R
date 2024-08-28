@@ -484,7 +484,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     DMRichR::globalStats(genome = genome,
                          testCovariate = testCovariate,
                          adjustCovariate = adjustCovariate,
-                         matchCovariate = matchCovariate) %>%
+                         matchCovariate = matchCovariate,
+                         resPath = resPath) %>%
     openxlsx::write.xlsx("Global/smoothed_globalStats.xlsx") 
   
   # Global plots ------------------------------------------------------------
