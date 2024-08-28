@@ -4,7 +4,7 @@
 #' using a limited number of tools.
 #' @param genome Character specifying the genome.
 #' @param minSites Numeric for minimum number of cytosine sites for a DMR.
-#' @param cutoff Numeric cutoff for qvalues.
+#' @param cutoff Numeric cutoff for difference in methylation coverage.
 #' @param cores Numeric specifying the number of cores to use. 20 is recommended. 
 #' @param GOfuncR Logical indicating whether to run a GOfuncR GO analysis.
 #' @param fileName Character indicating dmr file name.
@@ -105,7 +105,7 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   regions <- read.delim(fileName, header = FALSE) %>%
     `colnames<-`(c("chr", "start", "end", "stat", "pval", "beta", "pi", "nsites")) %>%
     dplyr::filter(!is.na(pval)) %>%
-    dplyr::filter(abs(beta-pi) > 0.05) %>%  # to reduce the size of background set
+    dplyr::filter(abs(beta-pi) > cutoff) %>%  # to reduce the size of background set
     dplyr::mutate(qval = p.adjust(pval)) %>%
     GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns=TRUE, ignore.strand=TRUE)
   
@@ -116,13 +116,13 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
                                                    stat < 0 ~ "Hypomethylated"),
                       difference = round((beta-pi)*100))
   
-  if(sum(regions$qval < cutoff, na.rm=TRUE) < 100 & sum(regions$pval < cutoff, na.rm=TRUE) != 0){
+  if(sum(regions$qval < 0.05, na.rm=TRUE) < 100 & sum(regions$pval < 0.05, na.rm=TRUE) != 0){
     sigRegions <- regions %>%
-      plyranges::filter(pval < cutoff)
-  }else if(sum(regions$qval < cutoff, na.rm=TRUE) >= 100){
+      plyranges::filter(pval < 0.05)
+  }else if(sum(regions$qval < 0.05, na.rm=TRUE) >= 100){
     sigRegions <- regions %>%
-      plyranges::filter(qval < cutoff)
-  }else if(sum(regions$pval < cutoff, na.rm=TRUE) == 0){
+      plyranges::filter(qval < 0.05)
+  }else if(sum(regions$pval < 0.05, na.rm=TRUE) == 0){
     stop(glue::glue("No significant DMRs detected in {length(regions)} background regions"))
   }
 
