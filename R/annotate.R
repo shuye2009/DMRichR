@@ -247,7 +247,7 @@ getExons <- function(TxDb = TxDb){
 #'  see: \url{https://github.com/rcavalcante/annotatr/blob/master/R/build_annotations.R}
 #' @export getCpGs
 #' 
-getCpGs <- function(genome = genome, resPath = NULL){
+getCpGs <- function(genome = genome, resPath = resPath){
   
   message('Building CpG islands...')
   

@@ -502,7 +502,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                    "bosTau9", "panTro6", "dm6", "susScr11", "canFam3")){
     
     CGi <- bs.filtered.bsseq %>% 
-      DMRichR::CGi(genome = genome)
+      DMRichR::CGi(genome = genome, resPath = resPath)
     
     plots <- c("windows", "CpGs", "CGi")
   }

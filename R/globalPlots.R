@@ -44,12 +44,12 @@ windows <- function(bs.filtered.bsseq = bs.filtered.bsseq,
 #' @export CGi
 #' 
 CGi <- function(bs.filtered.bsseq = bs.filtered.bsseq,
-                genome = genome){
+                genome = genome, resPath = resPath){
   
   print(glue::glue("Obtaining individual smoothed methylation values of CpG islands from {genome}"))
   
   genome %>%
-    DMRichR::getCpGs() %>% 
+    DMRichR::getCpGs(resPath = resPath) %>% 
     plyranges::filter(type == "islands") %>% 
     bsseq::getMeth(BSseq = bs.filtered.bsseq,
                    regions = .,
