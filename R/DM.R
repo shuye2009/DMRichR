@@ -660,7 +660,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   cat("\n[DMRichR] Performing gene ontology analyses \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   
-  dir.create(file.path(outfolder, "Ontologies"))
+  dir.create("Ontologies")
   
   hyper <- sigRegions %>%
     plyranges::filter(stat > 0)
@@ -720,13 +720,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                          downstream = 1000,
                          annoDb = annoDb,
                          TxDb = TxDb) %T>%
-        openxlsx::write.xlsx(glue::glue("{outfolder}/Ontologies/GOfuncR_{direction}.xlsx")) %>% 
+        openxlsx::write.xlsx(glue::glue("Ontologies/GOfuncR_{direction}.xlsx")) %>% 
         DMRichR::slimGO(tool = "GOfuncR",
                         annoDb = annoDb,
                         plots = FALSE) %T>%
-        openxlsx::write.xlsx(file = glue::glue("{outfolder}/Ontologies/GOfuncR_slimmed_results_{direction}.xlsx")) %>% 
+        openxlsx::write.xlsx(file = glue::glue("Ontologies/GOfuncR_slimmed_results_{direction}.xlsx")) %>% 
         DMRichR::GOplot() %>% 
-        ggplot2::ggsave(glue::glue("{outfolder}/Ontologies/GOfuncR_plot_{direction}.pdf"),
+        ggplot2::ggsave(glue::glue("Ontologies/GOfuncR_plot_{direction}.pdf"),
                         plot = .,
                         device = NULL,
                         height = 8.5,
