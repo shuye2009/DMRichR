@@ -76,8 +76,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                           "rheMac8", "rn6", "danRer11", "galGal6",
                           "bosTau9", "panTro6", "dm6", "susScr11",
                           "canFam3", "TAIR10", "TAIR9"))
-  stopifnot(!is.null(testCovariate))
-  stopifnot(coverage >= 1)
   
   # Check for more permutations than samples, 
   # factor1 and factor2 must be in the columns of design
@@ -269,7 +267,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                          group =  bs.filtered %>%
                            pData() %>%
                            dplyr::as_tibble() %>%
-                           dplyr::pull(!!testCovariate) %>%
+                           dplyr::pull(!!factor1) %>%
                            forcats::fct_rev()){
                   
                   title <- dplyr::case_when(plotMatrix == "windows" ~ "20Kb Windows",
@@ -278,7 +276,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                   
                   plotMatrix %>%
                     get() %>% 
-                    DMRichR::PCA(testCovariate = testCovariate,
+                    DMRichR::PCA(testCovariate = factor1,
                                  bs.filtered = bs.filtered) %>%
                     ggplot2::ggsave(glue::glue("{wd}/{aname}/Global/{title} PCA.pdf"),
                                     plot = .,
