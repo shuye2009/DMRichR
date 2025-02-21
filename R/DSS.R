@@ -6,7 +6,7 @@
 #' @param coverage Numeric specifying the CpG coverage cutoff (1x recommended).
 #' @param perGroup Numeric indicating percent of samples per 
 #' a group to apply the CpG coverage cutoff to (from 0 to 1).
-#' @param minCpGs Numeric for minimum number of CpGs for a DMR.
+#' @param minSites Numeric for minimum number of CpGs for a DMR.
 #' @param maxPerms Numeric indicating number of permutations for the DMR analysis.
 #' @param maxBlockPerms Numeric indicating number of permutations for the block analysis.
 #' @param cutoff Numeric indicating the cutoff value for the single CpG coefficient 
@@ -58,7 +58,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "bosTau9", "panTro6", "dm6", "susScr11",
                             "canFam3", "TAIR10", "TAIR9"),
                  pval_cutoff = 0.05,
-                 minCpGs = 3,
+                 minSites = 3,
                  ratio_cutoff = 2,
                  factor1 = "",
                  factor2 = "",
@@ -97,30 +97,13 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   # Check for more permutations than samples, 
   # factor1 and factor2 must be in the columns of design
   design <- read.delim("sample_info.txt", header = TRUE) 
-  nSamples <- design %>%
-    nrow()
-  
-  if(nSamples < maxPerms){
-    print(glue::glue("Warning: You have requested {maxPerms} permutations for the DMR analysis, \\
-                   which is more than the {nSamples} samples you have. \\
-                   maxPerms will now be changed to {nSamples}."))
-    maxPerms <- nSamples
-  }
-  
-  if(nSamples < maxBlockPerms){
-    print(glue::glue("Warning: You have requested {maxBlockPerms} permutations for the block analysis, \\
-                   which is more than the {nSamples} samples you have. \\
-                   maxBlockPerms will now be changed to {nSamples}."))
-    maxBlockPerms <- nSamples
-  }
-  
-  rm(nSamples)
+  print(design)
   
   # Print
   print(glue::glue("genome = {genome}"))
   print(glue::glue("ratio_cutoff = {ratio_cutoff}"))
   print(glue::glue("pval_cutoff = {pval_cutoff}"))
-  print(glue::glue("minCpGs = {minCpGs}"))
+  print(glue::glue("minSites = {minSites}"))
   print(glue::glue("factor1 = {factor1}"))
   print(glue::glue("factor2 = {factor2}"))
   print(glue::glue("cores = {cores}"))
@@ -134,7 +117,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Selecting annotation databases \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   
   DMRichR::annotationDatabases(genome = genome,
-                               EnsDb = EnsDb)
+                               EnsDb = FALSE)
   
   print(glue::glue("Saving Rdata..."))
   dir.create("RData")
@@ -168,7 +151,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   dir.create("Extra")
   
   DMRichR::getBackground(bs.filtered,
-                         minNumRegion = minCpGs,
+                         minNumRegion = minSites,
                          maxGap = 1000) %>% 
     write.table(file = "Extra/bsseq_background.csv",
                 sep = ",",
@@ -181,6 +164,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   start_time <- Sys.time()
   
   DMR_lists <- DSS_multi_factor(bs.filtered, desgin, factor1, factor2, pval_cutoff, ratio_cutoff)
+  DMR_lists <- purrr::compact(DMR_lists) # remove null elements
   
   for(aname in names(DMR_lists)){
     dir.create(aname)
@@ -191,6 +175,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     sigRegions <- as(DMR$sigRegions, "GRanges")
     
     print(glue::glue("Exporting DMR and background region information..."))
+    dir.create(file.path(wd, aname,"DMR"))
     output_DMR(DMR, file.path(wd, aname))
     
     if(sum(sigRegions$stat > 0) > 0 & sum(sigRegions$stat < 0) > 0){
@@ -252,48 +237,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                annoDb = annoDb,
                                resPath = resPath) %>% 
       openxlsx::write.xlsx(file = file.path(wd, aname, "DMRs/background_annotated.xlsx"))
-    
-    # Individual smoothed values ----------------------------------------------
-    
-    cat("\n[DMRichR] Smoothing individual methylation values \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-    start_time <- Sys.time()
-    
-  
-    # ChromHMM and Reference Epigenomes ---------------------------------------
-    
-    if(length(grep("genomecenter.ucdavis.edu", .libPaths())) > 0 & genome == "hg38"){
-      
-      dir.create("LOLA")
-      setwd("LOLA")
-      
-      dmrList <- sigRegions %>% 
-        DMRichR::dmrList()
-      
-      LOLA <- function(x){
-        
-        dir.create(names(dmrList)[x])
-        setwd(names(dmrList)[x])
-        
-        dmrList[x] %>%
-          DMRichR::chromHMM(regions = regions,
-                            cores = floor(cores/3)) %>% 
-          DMRichR::chromHMM_heatmap()
-        
-        dmrList[x] %>%
-          DMRichR::roadmap(regions = regions,
-                           cores = floor(cores/3)) %>% 
-          DMRichR::roadmap_heatmap()
-        
-        if(file.exists("Rplots.pdf")){file.remove("Rplots.pdf")}
-      }
-      
-      parallel::mclapply(seq_along(dmrList),
-                         LOLA,
-                         mc.cores = 3,
-                         mc.silent = TRUE)
-      
-      setwd("..")
-    }
+
     
     # HOMER -------------------------------------------------------------------
     
@@ -306,7 +250,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     # Smoothed global, chromosomal, and CGi methylation statistics ------------
     
-    dir.create("Global")
+    dir.create(file.path(wd, aname, "Global"))
     
     bs.filtered %>%
       DMRichR::globalStats(genome = genome,
@@ -484,223 +428,83 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       setwd("..")
     })
     
-    # Gene Ontology analyses --------------------------------------------------
+    # Gene Ontology, pathway analyses --------------------------------------------------
     
-    cat("\n[DMRichR] Performing gene ontology analyses \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    cat("\n[DMRichR] Performing GREAT analyses \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
     
-    dir.create("Ontologies")
+    dir <- file.path(wd, aname) 
+    dir.create(dir, "GREAT")
     
-    hyper <- sigRegions %>%
-      plyranges::filter(stat > 0)
-    hypo <- sigRegions %>%
-      plyranges::filter(stat < 0)
-    all_sigRegions <- list("hyper"=hyper, "hypo"=hypo)
+    dmr_list <- list()
+    dmr_list$sigDMR <- DMR$sigRegions
+    dmr_list$background <- dmrs$bgRegions
     
-    for(direction in c("hyper", "hypo")){
-      asigRegions <- all_sigRegions[[direction]]
+    for(dname in names(dmr_list)[1]){
+      dmr <- dmr_list[[dname]]
       
-      if(genome %in% c("hg38", "hg19", "mm10", "mm9") & is.null(resPath)){
-        
-        print(glue::glue("Running GREAT"))
-        GREATjob <- asigRegions %>%
-          dplyr::as_tibble() %>%
-          GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
-          rGREAT::submitGreatJob(bg = regions,
-                                 species = genome,
-                                 rule = "oneClosest",
-                                 request_interval = 1,
-                                 version = "4.0.4")
-        
-        print(glue::glue("Saving and plotting GREAT results"))
-        GREATjob %>%
-          rGREAT::getEnrichmentTables(category = "GO") %T>% #%>%
-          #purrr::map(~ dplyr::filter(., Hyper_Adjp_BH < 0.05)) %T>%
-          openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_results_{direction}.xlsx")) %>%
-          DMRichR::slimGO(tool = "rGREAT",
-                          annoDb = annoDb,
-                          plots = FALSE) %T>%
-          openxlsx::write.xlsx(file = glue::glue("Ontologies/GREAT_slimmed_results_{direction}.xlsx")) %>%
-          DMRichR::GOplot() %>%
-          ggplot2::ggsave(glue::glue("Ontologies/GREAT_plot_{direction}.pdf"),
-                          plot = .,
-                          device = NULL,
-                          height = 8.5,
-                          width = 10)
-        
-        # pdf(glue::glue("Ontologies/GREAT_gene_associations_graph.pdf"),
-        #     height = 8.5,
-        #     width = 11)
-        # par(mfrow = c(1, 3))
-        # res <- rGREAT::plotRegionGeneAssociationGraphs(GREATjob)
-        # dev.off()
-        # write.csv(as.data.frame(res),
-        #           file = glue::glue("Ontologies/GREATannotations.csv"),
-        #           row.names = FALSE)
-        
-      }
-      
-      if(GOfuncR == TRUE){
-        print(glue::glue("Running GOfuncR"))
-        asigRegions %>% 
-          DMRichR::GOfuncR(regions = regions,
-                           n_randsets = 1000,
-                           upstream = 5000,
-                           downstream = 1000,
-                           annoDb = annoDb,
-                           TxDb = TxDb) %T>%
-          openxlsx::write.xlsx(glue::glue("Ontologies/GOfuncR_{direction}.xlsx")) %>% 
-          DMRichR::slimGO(tool = "GOfuncR",
-                          annoDb = annoDb,
-                          plots = FALSE) %T>%
-          openxlsx::write.xlsx(file = glue::glue("Ontologies/GOfuncR_slimmed_results_{direction}.xlsx")) %>% 
-          DMRichR::GOplot() %>% 
-          ggplot2::ggsave(glue::glue("Ontologies/GOfuncR_plot_{direction}.pdf"),
-                          plot = .,
-                          device = NULL,
-                          height = 8.5,
-                          width = 10)
-      }
-      
-      
-      if(genome != "TAIR10" & genome != "TAIR9" & is.null(resPath)){
-        tryCatch({
-          print(glue::glue("Running enrichR"))
-          
-          enrichR:::.onAttach() # Needed or else "EnrichR website not responding"
-          #dbs <- enrichR::listEnrichrDbs()
-          dbs <- c("GO_Biological_Process_2018",
-                   "GO_Cellular_Component_2018",
-                   "GO_Molecular_Function_2018",
-                   "KEGG_2019_Human",
-                   "Panther_2016",
-                   "Reactome_2016",
-                   "RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO")
-          
-          if(genome %in% c("mm10", "mm9", "rn6")){
-            dbs %>%
-              gsub(pattern = "Human", replacement = "Mouse")
-          }else if(genome %in% c("danRer11", "dm6")){
-            if(genome == "danRer11"){
-              enrichR::setEnrichrSite("FishEnrichr")
-            }else if(genome == "dm6"){
-              enrichR::setEnrichrSite("FlyEnrichr")}
-            dbs <- c("GO_Biological_Process_2018",
-                     "GO_Cellular_Component_2018",
-                     "GO_Molecular_Function_2018",
-                     "KEGG_2019")
-          }
-          
-          asigRegions %>%
-            DMRichR::annotateRegions(TxDb = TxDb,
-                                     annoDb = annoDb,
-                                     resPath = resPath) %>%  
-            dplyr::select(geneSymbol) %>%
-            purrr::flatten() %>%
-            enrichR::enrichr(dbs) %>% 
-            purrr::set_names(names(.) %>% stringr::str_trunc(31, ellipsis = "")) %T>% # %>% 
-            #purrr::map(~ dplyr::filter(., Adjusted.P.value < 0.05)) %T>%
-            openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr_{direction}.xlsx")) %>%
-            DMRichR::slimGO(tool = "enrichR",
-                            annoDb = annoDb,
-                            plots = FALSE) %T>%
-            openxlsx::write.xlsx(file = glue::glue("Ontologies/enrichr_slimmed_results_{direction}.xlsx")) %>% 
-            DMRichR::GOplot() %>% 
-            ggplot2::ggsave(glue::glue("Ontologies/enrichr_plot_{direction}.pdf"),
-                            plot = .,
-                            device = NULL,
-                            height = 8.5,
-                            width = 10)
-          
-        },
-        error = function(error_condition) {
-          print(glue::glue("Warning: enrichR did not finish. \\
-                          The website may be down or there are internet connection issues."))
-        })
+      for(status in c("hyper", "hypo")){
+        gr <- as(dmr[dmr$status==status,], "GRanges")
+        for(geneset in c("GO:BP", "msigdb:C5:GO:BP", "msigdb:C2:CP:KEGG", 
+                         "msigdb:C2:CP:REACTOME")){
+          GREAT_analysis(gr, 
+                         genesetName=geneset, 
+                         padj_cutoff=0.2, 
+                         status=status, 
+                         dname = dname, 
+                         geneset_cutoff=200, 
+                         dir = dir, 
+                         genome=genome)
+        }
       }
     }
+  }
     
     
-    # Machine learning --------------------------------------------------------
-    tryCatch({
-      methylLearnOutput <- DMRichR::methylLearn(bs.filtered = bs.filtered,
-                                                sigRegions = sigRegions,
-                                                testCovariate = testCovariate,
-                                                TxDb = TxDb,
-                                                annoDb = annoDb,
-                                                topPercent = 1,
-                                                output = "all",
-                                                saveHtmlReport = TRUE)
-      
-      if(!dir.exists("./Machine_learning")) {
-        dir.create("./Machine_learning")
-      } 
-      
-      if(length(methylLearnOutput) == 1) {
-        openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput), 
-                             file = "./Machine_learning/Machine_learning_output_one.xlsx") 
-      } else {
-        openxlsx::write.xlsx(list(Annotations_Common_DMRs = methylLearnOutput$`Annotated common DMRs`,
-                                  RF_Ranking_All_DMRs = methylLearnOutput$`RF ranking`,
-                                  SVM_Ranking_All_DMRs = methylLearnOutput$`SVM ranking`),
-                             file = "./Machine_learning/Machine_learning_output_all.xlsx") 
-      }
-      
-      print(glue::glue("Saving RData..."))
-      save(methylLearnOutput, file = "RData/machineLearning.RData")
-      #load("RData/machineLearing.RData")
-    },
-    error = function(error_condition) {
-      print(glue::glue("Warning: methylLearn did not finish. \\
-                        You may have not had enough top DMRs across algrothims."))
-    })
     
-    # End ---------------------------------------------------------------------
     
-    cat("\n[DMRichR] Summary \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-    
-    print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
-                     The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
-                     {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. \\
-                     The methylomes consisted of {tidyCpGs} CpGs.", 
-                     dmrLength = sigRegions %>%
-                       length() %>%
-                       formatC(format = "d", big.mark = ","),
-                     backgroundLength = regions %>%
-                       length() %>%
-                       formatC(format = "d", big.mark = ","),
-                     tidyHyper = (sum(sigRegions$stat > 0) / length(sigRegions)) %>%
-                       scales::percent(),
-                     tidyHypo = (sum(sigRegions$stat < 0) / length(sigRegions)) %>%
-                       scales::percent(),
-                     tidyCpGs = nrow(bs.filtered) %>%
-                       formatC(format = "d", big.mark = ","),
-                     genomeSize = goi %>%
-                       seqinfo() %>%
-                       GenomeInfoDb::keepStandardChromosomes() %>%
-                       as.data.frame() %>%
-                       purrr::pluck("seqlengths") %>%
-                       sum(),
-                     dmrSize = sigRegions %>%
-                       dplyr::as_tibble() %>%
-                       purrr::pluck("width") %>%
-                       sum(),
-                     backgroundSize = regions  %>%
-                       dplyr::as_tibble() %>%
-                       purrr::pluck("width") %>%
-                       sum(),
-                     sigRegionPercent = (dmrSize/genomeSize) %>%
-                       scales::percent(accuracy = 0.01),
-                     regionPercent = (backgroundSize/genomeSize) %>%
-                       scales::percent(accuracy = 0.01)
-    ))
-    
-    try(if(sum(blocks$pval < 0.05) > 0 & length(blocks) != 0){
-      print(glue::glue("{length(sigBlocks)} significant blocks of differential methylation \\
-             in {length(blocks)} background blocks"))
-    }, silent = TRUE)
-    
-    writeLines(capture.output(sessionInfo()), "sessionInfo.txt")
-    if(file.exists("Rplots.pdf")){file.remove("Rplots.pdf")}
-  } 
+  # End ---------------------------------------------------------------------
+  
+  cat("\n[DMRichR] Summary \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+  
+  print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
+                   The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
+                   {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. \\
+                   The methylomes consisted of {tidyCpGs} CpGs.", 
+                   dmrLength = sigRegions %>%
+                     length() %>%
+                     formatC(format = "d", big.mark = ","),
+                   backgroundLength = regions %>%
+                     length() %>%
+                     formatC(format = "d", big.mark = ","),
+                   tidyHyper = (sum(sigRegions$stat > 0) / length(sigRegions)) %>%
+                     scales::percent(),
+                   tidyHypo = (sum(sigRegions$stat < 0) / length(sigRegions)) %>%
+                     scales::percent(),
+                   tidyCpGs = nrow(bs.filtered) %>%
+                     formatC(format = "d", big.mark = ","),
+                   genomeSize = goi %>%
+                     seqinfo() %>%
+                     GenomeInfoDb::keepStandardChromosomes() %>%
+                     as.data.frame() %>%
+                     purrr::pluck("seqlengths") %>%
+                     sum(),
+                   dmrSize = sigRegions %>%
+                     dplyr::as_tibble() %>%
+                     purrr::pluck("width") %>%
+                     sum(),
+                   backgroundSize = regions  %>%
+                     dplyr::as_tibble() %>%
+                     purrr::pluck("width") %>%
+                     sum(),
+                   sigRegionPercent = (dmrSize/genomeSize) %>%
+                     scales::percent(accuracy = 0.01),
+                   regionPercent = (backgroundSize/genomeSize) %>%
+                     scales::percent(accuracy = 0.01)
+  ))
+ 
+  
+  writeLines(capture.output(sessionInfo()), "sessionInfo.txt")
+  if(file.exists("Rplots.pdf")){file.remove("Rplots.pdf")}
+   
   print(glue::glue("Done..."))
 }
