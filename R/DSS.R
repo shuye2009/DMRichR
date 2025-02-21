@@ -10,7 +10,7 @@
 #' @param factor2 Character indicating co-factor of interest from the design matrix.
 #' @param wd Character indicating the location where the analysis results to be stored.
 #' @param context Character indicating the methylation context, one of c(CG, CGH, CHH).
-#' @param cores Numeric specifying the number of cores to use. 20 is recommended. 
+#' @param cores Numeric specifying the number of cores to use. 10 is recommended. 
 #' @param filePattern character indicating cytosine report file name pattern.
 #' @param reportPath character indicating the location of cytosine report file.
 #' @param resPath character specifying path to local resources if internet is not available.
