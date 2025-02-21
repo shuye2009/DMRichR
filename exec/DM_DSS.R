@@ -46,7 +46,7 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
 # DM.R --------------------------------------------------------------------
 
-DMRichR::DM_DSS.R(genome = opt$genome,
+DMRichR::DSS.R(genome = opt$genome,
                  minSites =  opt$minSites,
                  pval_cutoff = opt$pval_cutoff,
                  ratio_cutoff = opt$raio_cutoff,
