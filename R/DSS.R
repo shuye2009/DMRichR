@@ -1,34 +1,19 @@
-#' DM.R
-#' @title Run the pipeline
+#' DSS.R
+#' @title Run the pipeline with DSS as the DMR calling method
 #' @description Performs the entire DMRichR analysis pipeline, 
 #' which runs most functions in the package.
 #' @param genome Character specifying the genome.
-#' @param coverage Numeric specifying the CpG coverage cutoff (1x recommended).
-#' @param perGroup Numeric indicating percent of samples per 
-#' a group to apply the CpG coverage cutoff to (from 0 to 1).
-#' @param minSites Numeric for minimum number of CpGs for a DMR.
-#' @param maxPerms Numeric indicating number of permutations for the DMR analysis.
-#' @param maxBlockPerms Numeric indicating number of permutations for the block analysis.
-#' @param cutoff Numeric indicating the cutoff value for the single CpG coefficient 
-#' utilized to discover testable background regions. Values range from 0 to 1 and 
-#' 0.05 (5 percent) is the default. If you get too many DMRs you should try 0.1 (10 percent).
-#' @param testCovariate Character indicating factor of interest from the design matrix. 
-#' Only case vs control is supported. 
-#' @param adjustCovariate Character vector indicating discrete and continuous 
-#' variables to adjust for based on the design matrix. Multiple variables can be provided. 
-#' @param matchCovariate Character indicating the variable in the design matrix to block 
-#' for when constructing permutations. Only a single variable can be provided and it cannot 
-#' also be an adjustCovariate.
+#' @param pval_cutoff Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.
+#' @param ratio_cutoff cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection.
+#' @param minSites Numeric for the minimum number of Cytosines for a DMR.
+#' @param factor1 Character indicating factor of interest from the design matrix. 
+#' @param factor2 Character indicating co-factor of interest from the design matrix.
+#' @param wd Character indicating the location where the analysis results to be stored.
+#' @param context Character indicating the methylation context, one of c(CG, CGH, CHH).
 #' @param cores Numeric specifying the number of cores to use. 20 is recommended. 
-#' @param GOfuncR Logical indicating whether to run a GOfuncR GO analysis.
-#' @param sexCheck Logical indicating whether to confirm sex of each sample. 
-#' This is highly recommended if your analysis has males and females 
-#' and will also drop the sex chromosomes. You should also include the sex variable as an
-#' adjustCovariate. 
-#' @param EnsDb Logical indicating whether to to select Ensembl transcript annotation database.
-#' This is recommended for non-model organisms. 
-#' @param filePattern character indicating cytosine report file name pattern
-#' @param resPath character specifying path to local resources if internet is not available
+#' @param filePattern character indicating cytosine report file name pattern.
+#' @param reportPath character indicating the location of cytosine report file.
+#' @param resPath character specifying path to local resources if internet is not available.
 #' 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
@@ -51,7 +36,7 @@
 #' @importFrom grDevices pdf dev.off
 #' @importClassesFrom bsseq BSseq 
 #' @importMethodsFrom bsseq pData seqnames sampleNames
-#' @export DM.R
+#' @export DSS.R
 #' 
 DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "rheMac8", "rn6", "danRer11", "galGal6",
