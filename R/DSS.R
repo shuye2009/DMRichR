@@ -79,7 +79,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   # Check for more permutations than samples, 
   # factor1 and factor2 must be in the columns of design
-  design <- read.delim("sample_info.txt", header = TRUE) 
+  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) 
   print(design)
   
   # Print
@@ -103,9 +103,9 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                EnsDb = FALSE)
   
   print(glue::glue("Saving Rdata..."))
-  dir.create("RData")
+  dir.create(file.path(wd, "RData"))
   settings_env <- ls(all = TRUE)
-  save(list = settings_env, file = "RData/settings.RData")
+  save(list = settings_env, file = file.path(wd, "RData/settings.RData"))
   #load("RData/settings.RData")
   
   # Load and process samples ------------------------------------------------
@@ -117,7 +117,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   if(is(TxDb, "TxDb")){
     if(is.null(resPath)){
       annoTrack <- dmrseq::getAnnot(genome)
-      saveRDS(annoTrack, file.path(getwd(), "RData/annoTrack.rds"))
+      saveRDS(annoTrack, file.path(wd, "RData/annoTrack.rds"))
     }else{
       annoTrack <- readRDS("~/resource/annoTrack.rds")
     }
@@ -136,7 +136,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   DMRichR::getBackground(bs.filtered,
                          minNumRegion = minSites,
                          maxGap = 1000) %>% 
-    write.table(file = "Extra/bsseq_background.csv",
+    write.table(file = file.path(wd, "Extra/bsseq_background.csv"),
                 sep = ",",
                 quote = FALSE,
                 row.names = FALSE)
@@ -151,6 +151,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   for(aname in names(DMR_lists)){
     dir.create(aname)
+    dir <- file.path(wd, aname)
+    
     DMR <- DMR_lists[[aname]]
     print(glue::glue("Prossessing factor {aname}..."))
     
@@ -158,8 +160,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     sigRegions <- as(DMR$sigRegions, "GRanges")
     
     print(glue::glue("Exporting DMR and background region information..."))
-    dir.create(file.path(wd, aname,"DMR"))
-    output_DMR(DMR, file.path(wd, aname))
+    dir.create(file.path(dir, "DMR"))
+    output_DMR(DMR, dir)
     
     if(sum(sigRegions$stat > 0) > 0 & sum(sigRegions$stat < 0) > 0){
       
@@ -180,7 +182,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     print(glue::glue("Annotating DMRs and plotting..."))
     
-    pdf(file.path(wd, aname, "DMRs/DMRs.pdf"), height = 4, width = 8)
+    pdf(file.path(dir, "DMRs/DMRs.pdf"), height = 4, width = 8)
     tryCatch({
       DMRichR::plotDMRs2(bs.filtered,
                          regions = sigRegions,
@@ -212,28 +214,28 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                         bs.filtered = bs.filtered,
                         coverage = 1,
                         name = "DMReport") %>% 
-      openxlsx::write.xlsx(file = file.path(wd, aname, "DMRs/DMRs_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMRs/DMRs_annotated.xlsx"))
     
     print(glue::glue("Annotating background regions with gene symbols..."))
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
                                annoDb = annoDb,
                                resPath = resPath) %>% 
-      openxlsx::write.xlsx(file = file.path(wd, aname, "DMRs/background_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMRs/background_annotated.xlsx"))
 
     
     # HOMER -------------------------------------------------------------------
     
     sigRegions %>% 
-      DMRichR::prepareHOMER(regions = regions, subfolder = file.path(wd, aname))
+      DMRichR::prepareHOMER(regions = regions, subfolder = dir)
     
     DMRichR::HOMER(genome = genome,
                    cores = cores,
-                   subfolder = file.path(wd, aname))
+                   subfolder = dir)
     
     # Smoothed global, chromosomal, and CGi methylation statistics ------------
     
-    dir.create(file.path(wd, aname, "Global"))
+    dir.create(file.path(dir, "Global"))
     
     bs.filtered %>%
       DMRichR::globalStats(genome = genome,
@@ -241,7 +243,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                            adjustCovariate = factor2,
                            matchCovariate = NULL,
                            resPath = resPath) %>%
-      openxlsx::write.xlsx(file.path(wd, aname, "Global/smoothed_globalStats.xlsx")) 
+      openxlsx::write.xlsx(file.path(dir, "Global/smoothed_globalStats.xlsx")) 
     
     # Global plots ------------------------------------------------------------
     
@@ -278,7 +280,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                     get() %>% 
                     DMRichR::PCA(testCovariate = factor1,
                                  bs.filtered = bs.filtered) %>%
-                    ggplot2::ggsave(glue::glue("{wd}/{aname}/Global/{title} PCA.pdf"),
+                    ggplot2::ggsave(glue::glue("{dir}/Global/{title} PCA.pdf"),
                                     plot = .,
                                     device = NULL,
                                     width = 11,
@@ -287,7 +289,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                   plotMatrix %>%
                     get() %>% 
                     DMRichR::densityPlot(group = group) %>% 
-                    ggplot2::ggsave(glue::glue("{wd}/{aname}/Global/{title} Density Plot.pdf"),
+                    ggplot2::ggsave(glue::glue("{dir}/Global/{title} Density Plot.pdf"),
                                     plot = .,
                                     device = NULL,
                                     width = 11,
@@ -300,7 +302,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                       dplyr::as_tibble() %>% 
                                       dplyr::select(-col) %>%
                                       dplyr::rename(Name = bsseq..sampleNames.bs.filtered.),
-                                    path = file.path(wd, aname),
+                                    path = dir,
                                     folder = "interactiveMDS",
                                     html = glue::glue("{title} MDS plot"),
                                     launch = FALSE)
@@ -349,10 +351,10 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     dmrList <- sigRegions %>% 
       DMRichR::dmrList()
     
-    dir.create(file.path(wd, aname, "DMRichments"))
+    dir.create(file.path(dir, "DMRichments"))
     
     purrr::walk(seq_along(dmrList),
-                DMRich)
+                DMRich(dir=dir))
     
     purrr::walk(dplyr::case_when(genome %in% c("hg38", "hg19", "mm10", "mm9", "rn6") ~ c("CpG", "genic"),
                                  TRUE ~ "genic") %>%
@@ -414,8 +416,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     # Gene Ontology, pathway analyses --------------------------------------------------
     
     cat("\n[DMRichR] Performing GREAT analyses \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-    
-    dir <- file.path(wd, aname) 
+  
     dir.create(dir, "GREAT")
     
     dmr_list <- list()
