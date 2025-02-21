@@ -14,9 +14,6 @@ DSS.R(
   factor2 = "",
   cores = 10,
   wd = ".",
-  filePattern = ".CG_report.txt.gz",
-  context = "CG",
-  reportPath = ".",
   resPath = NULL
 )
 }
@@ -36,12 +33,6 @@ DSS.R(
 \item{cores}{Numeric specifying the number of cores to use. 10 is recommended.}
 
 \item{wd}{Character indicating the location where the analysis results to be stored.}
-
-\item{filePattern}{character indicating cytosine report file name pattern.}
-
-\item{context}{Character indicating the methylation context, one of c(CG, CGH, CHH).}
-
-\item{reportPath}{character indicating the location of cytosine report file.}
 
 \item{resPath}{character specifying path to local resources if internet is not available.}
 }

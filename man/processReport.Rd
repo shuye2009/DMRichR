@@ -4,13 +4,9 @@
 \alias{processReport}
 \title{Process methylation report files}
 \usage{
-processReport(report_path, file_pattern, design, cores)
+processReport(design, cores)
 }
 \arguments{
-\item{report_path}{character indicating the location of cytosine report file.}
-
-\item{file_pattern}{character indicating cytosine report file name pattern.}
-
 \item{design}{sample information dataframe.}
 
 \item{cores}{Numeric specifying the number of cores to use. 10 is recommended.}
