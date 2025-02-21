@@ -9,7 +9,8 @@ globalStats(
   genome = genome,
   testCovariate = testCovariate,
   adjustCovariate = NULL,
-  matchCovariate = NULL
+  matchCovariate = NULL,
+  resPath = NULL
 )
 }
 \arguments{

@@ -4,7 +4,7 @@
 \alias{CGi}
 \title{Extract methylation values from CpG islands}
 \usage{
-CGi(bs.filtered.bsseq = bs.filtered.bsseq, genome = genome)
+CGi(bs.filtered.bsseq = bs.filtered.bsseq, genome = genome, resPath = resPath)
 }
 \arguments{
 \item{bs.filtered.bsseq}{Smoothed \code{bsseq} object with a testCovariate in \code{pData}}

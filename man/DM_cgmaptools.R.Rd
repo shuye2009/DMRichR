@@ -21,7 +21,7 @@ DM_cgmaptools.R(
 
 \item{minSites}{Numeric for minimum number of cytosine sites for a DMR.}
 
-\item{cutoff}{Numeric cutoff for qvalues.}
+\item{cutoff}{Numeric cutoff for difference in methylation coverage.}
 
 \item{cores}{Numeric specifying the number of cores to use. 20 is recommended.}
 
