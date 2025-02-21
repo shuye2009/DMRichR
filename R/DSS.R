@@ -84,7 +84,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("factor2 = {factor2}"))
   print(glue::glue("cores = {cores}"))
   print(glue::glue("wd = {wd}"))
-  print(glue::glue("context = {context}"))
   print(glue::glue("resPath = {resPath}"))
 
   # Setup annotation databases ----------------------------------------------
