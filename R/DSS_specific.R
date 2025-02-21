@@ -2,16 +2,14 @@
 #' processReport
 #' @title Process methylation report files
 #' @description Build bsseq object from report files and perform smoothing
-#' @param file_pattern character indicating cytosine report file name pattern.
-#' @param report_path character indicating the location of cytosine report file.
 #' @param design sample information dataframe.
 #' @param cores Numeric specifying the number of cores to use. 10 is recommended.
 #' 
 #' @return a bsseq object
 #' @export processReport
 
-processReport <- function(report_path, file_pattern, design, cores){
-  files <- list.files(report_path, file_pattern)
+processReport <- function(design, cores){
+  files <- design$path
   if(Sys.info()['sysname'] == "Windows"){
     bpparams <- BiocParallel::SnowParam(workers = detectCores()-2, progressbar = TRUE)
     smooth_params <- BiocParallel::SnowParam(workers = 1, progressbar = TRUE)
@@ -21,7 +19,7 @@ processReport <- function(report_path, file_pattern, design, cores){
   
   print(glue::glue("Reading cytosine reports..."))
   if(!file.exists("bs.RDS")){
-    bs <- bsseq::read.bismark(files = file.path(report_path, files),
+    bs <- bsseq::read.bismark(files,
                               colData = design,
                               rmZeroCov = FALSE,
                               strandCollapse = TRUE,

@@ -9,10 +9,7 @@
 #' @param factor1 Character indicating factor of interest from the design matrix. 
 #' @param factor2 Character indicating co-factor of interest from the design matrix.
 #' @param wd Character indicating the location where the analysis results to be stored.
-#' @param context Character indicating the methylation context, one of c(CG, CGH, CHH).
 #' @param cores Numeric specifying the number of cores to use. 10 is recommended. 
-#' @param filePattern character indicating cytosine report file name pattern.
-#' @param reportPath character indicating the location of cytosine report file.
 #' @param resPath character specifying path to local resources if internet is not available.
 #' 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
@@ -49,13 +46,9 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  factor2 = "",
                  cores = 10,
                  wd = ".",
-                 filePattern = ".CG_report.txt.gz",
-                 context = "CG",
-                 reportPath = ".",
                  resPath = NULL){
   
-  wd <- file.path(wd, context)
-  dir.create(wd)
+  if(!dir.exists(wd)) dir.create(wd)
   setwd(wd)
   # Check dmrseq version 
   if(Biobase::package.version("dmrseq") %>%
@@ -91,8 +84,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("factor2 = {factor2}"))
   print(glue::glue("cores = {cores}"))
   print(glue::glue("wd = {wd}"))
-  print(glue::glue("reportPath = {reportPath}"))
-  print(glue::glue("filePattern = {filePattern}"))
+  print(glue::glue("context = {context}"))
   print(glue::glue("resPath = {resPath}"))
 
   # Setup annotation databases ----------------------------------------------
