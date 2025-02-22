@@ -101,8 +101,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   # Load and process samples ------------------------------------------------
   
-  bs.filtered <- DMRichR::processReport(report_path=reportPath, 
-                                        file_pattern=filePattern, design, cores)
+  bs.filtered <- DMRichR::processReport(design, cores)
   
 
   print(glue::glue("Building annotations for plotting..."))

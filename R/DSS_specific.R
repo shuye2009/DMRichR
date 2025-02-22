@@ -62,7 +62,7 @@ processReport <- function(design, cores){
 #' @return a list of DMRs for all factors and interaction. See \code{findDMR} for details
 #' @export DSS_multi_factor
 
-DSS_multi_factor <- function(bss, desgin, factor1, factor2, pval_cutoff, ratio_cutoff, minSites=3){
+DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cutoff, minSites=3){
   if(!file.exists("DMLfit.RDS")){
     if(is.null(factor2)){
       fomu <- as.formula(paste("~", factor1))
