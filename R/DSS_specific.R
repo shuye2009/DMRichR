@@ -139,20 +139,23 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                   minCG=minSites, 
                   dis.merge=100, 
                   pct.sig=0.5) |>
-    dplyr::filter(!is.na(chr))
+    dplyr::filter(!is.na(chr)) |>
+    dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
+    dplyr::mutate(stat = areaStat) |>
+    dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                     stat < 0 ~ "hypo",
+                                     .default = "none"))
   
-  message("[findDMR] sample of significant DMR at ", pval_cutoff, "...")
+  message("[findDMR] sample of significant DMR at pval_cutoff ", pval_cutoff, 
+          " before filtering for ratio_cutoff ", ratio_cutoff)
   print(head(dmrs))
   
   if(nrow(dmrs) > 0){
+    message("select significant DMR")
     dmrs <- dmrs |>
-      dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
-      dplyr::filter(ratio > ratio_cutoff) |>
-      dplyr::mutate(stat = areaStat) |>
-      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
-                                       stat < 0 ~ "hypo",
-                                       .default = "none"))
+      dplyr::filter(ratio > ratio_cutoff)
   
+    message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
                                delta=0, 
                                p.threshold=1.0,
@@ -162,12 +165,12 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                pct.sig=0.5) |>
       dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
-      dplyr::filter(ratio < ratio_cutoff) |>
       dplyr::filter(length <= max(dmrs$length)) |>
       dplyr::mutate(stat = areaStat) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
                                        .default = "none")) |>
+      dplyr::filter(ratio < ratio_cutoff) |>
       rbind(dmrs)
     
     return(list(sigRegions=dmrs, bgRegions=dmrs_background))

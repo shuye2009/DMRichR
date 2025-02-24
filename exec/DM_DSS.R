@@ -25,7 +25,7 @@ option_list <- list(
                         help = "Choose the cutoff value [from 0 to 1] for the pval of DML used for DMR detection [default = %default]"),
   optparse::make_option(c("-c", "--cores"), type = "integer", default = 10,
                         help = "Choose number of cores [default = %default]"),
-  optparse::make_option(c("-r", "--ratio_cutoff"), type = "double", default = 2,
+  optparse::make_option(c("-r", "--ratio_cutoff"), type = "double", default = 2.0,
                         help = "Choose the cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection [default = %default]"),
   optparse::make_option(c("-s", "--resPath"), type = "character", default = NULL,
                         help = "path to local resources [default = %default]"),
