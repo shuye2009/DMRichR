@@ -75,20 +75,22 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
     DMLfit <- readRDS("DMLfit.RDS")
   }
   
-  print("desing matrix:")
+  message("desing matrix:")
   print(DMLfit$X)                
   
-  print("[DSS_multi_factor] finding DML...")
+  message("[DSS_multi_factor] finding DML for factor ", factor1)
   DMLfactor1 <- DSS::DMLtest.multiFactor(DMLfit, term = factor1)
   if(!is.null(factor2)){
+    message("[DSS_multi_factor] finding DML for factor ", factor2)
     DMLfactor2 <- DSS::DMLtest.multiFactor(DMLfit, term = factor2)
+    message("[DSS_multi_factor] finding DML for interaction of ", factor1, "and", factor2)
     DMLInter <- DSS::DMLtest.multiFactor(DMLfit, term = factor(paste0(factor1, ":", factor2)))
   }
 
   rm(DMLfit)
   gc()
   
-  print("[DSS_multi_factor] finding DMR...")
+  message("[DSS_multi_factor] finding DMR...")
   
   dmrsfactor1 <- findDMR(DMLfactor1, 
                         pval_cutoff = pval_cutoff, 
@@ -121,7 +123,7 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
 #' @export findDMR
 #' 
 findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
-  print(paste0("[findDMR] sample of significant DML at ", pval_cutoff, "..."))
+  message("[findDMR] sample of significant DML at ", pval_cutoff, "...")
   print(head(DML[DML$pvals<pval_cutoff,]))
   DML <- DML |>
     dplyr::filter(!is.na(chr))
@@ -132,14 +134,14 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                   minlen=50, 
                   minCG=minSites, 
                   dis.merge=100, 
-                  pct.sig=0.5)
+                  pct.sig=0.5) |>
+    dplyr::filter(!is.na(chr))
   
-  print(paste0("[findDMR] sample of significant DMR at ", pval_cutoff, "..."))
+  message("[findDMR] sample of significant DMR at ", pval_cutoff, "...")
   print(head(dmrs))
   
   if(nrow(dmrs) > 0){
     dmrs <- dmrs |>
-      dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(stat = areaStat) |>
       dplyr::filter(abs(stat/nCG) > ratio_cutoff) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
