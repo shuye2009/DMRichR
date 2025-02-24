@@ -84,9 +84,7 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
     DMLfactor2 <- DSS::DMLtest.multiFactor(DMLfit, term = factor2)
     DMLInter <- DSS::DMLtest.multiFactor(DMLfit, term = factor(paste0(factor1, ":", factor2)))
   }
-  
-  print("[DSS_multi_factor] sample DML...")
-  print(head(DMLfactor1))
+
   
   rm(DMLfit)
   gc()
@@ -124,37 +122,44 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
 #' @export findDMR
 #' 
 findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
+  print(paste0("[findDMR] sample of significant DML at", pval_cutoff, "..."))
+  print(head(DML[DML$pvals<pval_cutoff,]))
+  
   dmrs <- DSS::callDMR(DML, 
                   delta=0, 
                   p.threshold=pval_cutoff,
                   minlen=50, 
                   minCG=minSites, 
                   dis.merge=100, 
-                  pct.sig=0.5) |>
-    dplyr::mutate(stat = areaStat) |>
-    dplyr::filter(abs(stat/nCG) > ratio_cutoff) |>
-    dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
-                                     stat < 0 ~ "hypo",
-                                     .default = "none"))
+                  pct.sig=0.5)
+  if(nrow(dmrs) > 0){
+    dmrs <- dmrs |>
+      dplyr::mutate(stat = areaStat) |>
+      dplyr::filter(abs(stat/nCG) > ratio_cutoff) |>
+      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                       stat < 0 ~ "hypo",
+                                       .default = "none"))
   
-  dmrs_background <- DSS::callDMR(DML, 
-                             delta=0, 
-                             p.threshold=1.0,
-                             minlen=50, 
-                             minCG=3, 
-                             dis.merge=100, 
-                             pct.sig=0.5) |>
-    dplyr::mutate(stat = areaStat) |>
-    dplyr::filter(abs(stat/nCG) < ratio_cutoff) |>
-    dplyr::filter(length < max(dmrs$length)) |>
-    dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
-                                     stat < 0 ~ "hypo",
-                                     .default = "none")) |>
-    rbind(dmrs)
-  
-  
-  
-  return(list(sigRegions=dmrs, bgRegions=dmrs_background))
+    dmrs_background <- DSS::callDMR(DML, 
+                               delta=0, 
+                               p.threshold=1.0,
+                               minlen=50, 
+                               minCG=3, 
+                               dis.merge=100, 
+                               pct.sig=0.5) |>
+      dplyr::mutate(stat = areaStat) |>
+      dplyr::filter(abs(stat/nCG) < ratio_cutoff) |>
+      dplyr::filter(length < max(dmrs$length)) |>
+      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                       stat < 0 ~ "hypo",
+                                       .default = "none")) |>
+      rbind(dmrs)
+    
+    return(list(sigRegions=dmrs, bgRegions=dmrs_background))
+  }else{
+    message("!!! No significant DMR found at p.threshold ", pval_cutoff)
+    return(NULL)
+  }
 }
 
 #' GREAT_analysis
