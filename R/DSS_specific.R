@@ -78,15 +78,20 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
   print("desing matrix:")
   print(DMLfit$X)                
   
+  print("[DSS_multi_factor] finding DML...")
   DMLfactor1 <- DSS::DMLtest.multiFactor(DMLfit, term = factor1)
   if(!is.null(factor2)){
     DMLfactor2 <- DSS::DMLtest.multiFactor(DMLfit, term = factor2)
     DMLInter <- DSS::DMLtest.multiFactor(DMLfit, term = factor(paste0(factor1, ":", factor2)))
   }
   
+  print("[DSS_multi_factor] sample DML...")
+  print(head(DMLfactor1))
   
   rm(DMLfit)
   gc()
+  
+  print("[DSS_multi_factor] finding DMR...")
   
   dmrsfactor1 <- findDMR(DMLfactor1, 
                         pval_cutoff = pval_cutoff, 

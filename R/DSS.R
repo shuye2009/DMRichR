@@ -137,8 +137,13 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
   
-  DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, pval_cutoff, ratio_cutoff)
-  DMR_lists <- purrr::compact(DMR_lists) # remove null elements
+  if(!file.exists("DMR_lists.RDS")){
+    DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, pval_cutoff, ratio_cutoff)
+    DMR_lists <- purrr::compact(DMR_lists) # remove null elements
+    saveRDS(DMR_lists, "DMR_list.RDS")
+  }else{
+    DMR_lists <- readRDS("DMR_list.RDS")
+  }
   
   for(aname in names(DMR_lists)){
     dir.create(aname)
@@ -159,7 +164,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Summary: There are {tidySigRegions} DMRs \\
                ({tidyHyper}% hypermethylated, {tidyHypo}% hypomethylated) \\
                from {tidyRegions} background regions consisting of {tidyCpGs} CpGs \\
-               assayed at {coverage}x coverage", 
+               assayed at 20x coverage", 
                        tidySigRegions = length(sigRegions),
                        tidyHyper = round(sum(sigRegions$stat > 0) / length(sigRegions), digits = 2)*100,
                        tidyHypo = round(sum(sigRegions$stat < 0) / length(sigRegions), digits = 2)*100,
