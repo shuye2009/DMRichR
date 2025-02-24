@@ -137,7 +137,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
   
-  DMR_lists <- DSS_multi_factor(bs.filtered, desgin, factor1, factor2, pval_cutoff, ratio_cutoff)
+  DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, pval_cutoff, ratio_cutoff)
   DMR_lists <- purrr::compact(DMR_lists) # remove null elements
   
   for(aname in names(DMR_lists)){
