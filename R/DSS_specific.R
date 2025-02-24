@@ -127,7 +127,7 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
 findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
   
   DML <- DML |>
-    dplyr::filter(!is.na(chr))
+    dplyr::filter(!is.na(pvals))
   
   message("[findDMR] sample of significant DML at ", pval_cutoff, "...")
   print(head(DML[DML$pvals<pval_cutoff,]))
@@ -146,7 +146,8 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
   
   if(nrow(dmrs) > 0){
     dmrs <- dmrs |>
-      dplyr::filter(abs(areaStat/nCG) > ratio_cutoff) |>
+      dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
+      dplyr::filter(ratio > ratio_cutoff) |>
       dplyr::mutate(stat = areaStat) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
@@ -160,7 +161,8 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                dis.merge=100, 
                                pct.sig=0.5) |>
       dplyr::filter(!is.na(chr)) |>
-      dplyr::filter(abs(areaStat/nCG) < ratio_cutoff) |>
+      dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
+      dplyr::filter(ratio < ratio_cutoff) |>
       dplyr::filter(length <= max(dmrs$length)) |>
       dplyr::mutate(stat = areaStat) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
