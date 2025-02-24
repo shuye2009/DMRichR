@@ -85,7 +85,6 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
     DMLInter <- DSS::DMLtest.multiFactor(DMLfit, term = factor(paste0(factor1, ":", factor2)))
   }
 
-  
   rm(DMLfit)
   gc()
   
@@ -122,8 +121,10 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
 #' @export findDMR
 #' 
 findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
-  print(paste0("[findDMR] sample of significant DML at", pval_cutoff, "..."))
+  print(paste0("[findDMR] sample of significant DML at ", pval_cutoff, "..."))
   print(head(DML[DML$pvals<pval_cutoff,]))
+  DML <- DML |>
+    dplyr::filter(!is.na(chr))
   
   dmrs <- DSS::callDMR(DML, 
                   delta=0, 
@@ -132,8 +133,13 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                   minCG=minSites, 
                   dis.merge=100, 
                   pct.sig=0.5)
+  
+  print(paste0("[findDMR] sample of significant DMR at ", pval_cutoff, "..."))
+  print(head(dmrs))
+  
   if(nrow(dmrs) > 0){
     dmrs <- dmrs |>
+      dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(stat = areaStat) |>
       dplyr::filter(abs(stat/nCG) > ratio_cutoff) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
