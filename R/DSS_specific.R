@@ -83,23 +83,25 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
   if(!is.null(factor2)){
     message("[DSS_multi_factor] finding DML for factor ", factor2)
     DMLfactor2 <- DSS::DMLtest.multiFactor(DMLfit, term = factor2)
-    message("[DSS_multi_factor] finding DML for interaction of ", factor1, "and", factor2)
+    message("[DSS_multi_factor] finding DML for interaction of ", factor1, " and ", factor2)
     DMLInter <- DSS::DMLtest.multiFactor(DMLfit, term = factor(paste0(factor1, ":", factor2)))
   }
 
   rm(DMLfit)
   gc()
   
-  message("[DSS_multi_factor] finding DMR...")
+  message("[DSS_multi_factor] finding DMR for factor ", factor1)
   
   dmrsfactor1 <- findDMR(DMLfactor1, 
                         pval_cutoff = pval_cutoff, 
                         ratio_cutoff = ratio_cutoff,
                         minSites = minSites)
   if(!is.null(factor2)){
+    message("[DSS_multi_factor] finding DMR for factor ", factor2)
     dmrsfactor2 <- findDMR(DMLfactor2, 
                           pval_cutoff = pval_cutoff, 
                           ratio_cutoff = ratio_cutoff)
+    message("[DSS_multi_factor] finding DMR for interaction of ", factor1, " and ", factor2)
     dmrsInter <- findDMR(DMLInter, 
                          pval_cutoff = pval_cutoff, 
                          ratio_cutoff = ratio_cutoff,
@@ -123,10 +125,12 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
 #' @export findDMR
 #' 
 findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
-  message("[findDMR] sample of significant DML at ", pval_cutoff, "...")
-  print(head(DML[DML$pvals<pval_cutoff,]))
+  
   DML <- DML |>
     dplyr::filter(!is.na(chr))
+  
+  message("[findDMR] sample of significant DML at ", pval_cutoff, "...")
+  print(head(DML[DML$pvals<pval_cutoff,]))
   
   dmrs <- DSS::callDMR(DML, 
                   delta=0, 
@@ -142,8 +146,8 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
   
   if(nrow(dmrs) > 0){
     dmrs <- dmrs |>
+      dplyr::filter(abs(areaStat/nCG) > ratio_cutoff) |>
       dplyr::mutate(stat = areaStat) |>
-      dplyr::filter(abs(stat/nCG) > ratio_cutoff) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
                                        .default = "none"))
@@ -155,9 +159,10 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                minCG=3, 
                                dis.merge=100, 
                                pct.sig=0.5) |>
+      dplyr::filter(!is.na(chr)) |>
+      dplyr::filter(abs(areaStat/nCG) < ratio_cutoff) |>
+      dplyr::filter(length <= max(dmrs$length)) |>
       dplyr::mutate(stat = areaStat) |>
-      dplyr::filter(abs(stat/nCG) < ratio_cutoff) |>
-      dplyr::filter(length < max(dmrs$length)) |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
                                        .default = "none")) |>
