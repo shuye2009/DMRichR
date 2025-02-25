@@ -154,6 +154,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
 
     dir <- file.path(wd, aname)
     dir.create(dir)
+    setwd(dir)
     
     DMR <- DMR_lists[[aname]]
     print(glue::glue("Prossessing factor {aname}..."))
