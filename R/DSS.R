@@ -271,17 +271,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                     width = 11,
                                     height = 4)
                   
-                  Glimma::glMDSPlot(plotMatrix %>%
-                                      get(),
-                                    groups = cbind(bsseq::sampleNames(bs.filtered),
-                                                   pData(bs.filtered)) %>%
-                                      dplyr::as_tibble() %>% 
-                                      dplyr::select(-col) %>%
-                                      dplyr::rename(Name = bsseq..sampleNames.bs.filtered.),
-                                    path = dir,
-                                    folder = "interactiveMDS",
-                                    html = glue::glue("{title} MDS plot"),
-                                    launch = FALSE)
                 })
     
     # Heatmap -----------------------------------------------------------------
