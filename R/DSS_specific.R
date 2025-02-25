@@ -277,6 +277,6 @@ output_DMR <- function(DMR, dir){
   hypo <- dmr |>
     dplyr::filter(status == "hypo")
   
-  write.table(hyper, file.path(dir,"DMR/DMR_hyper.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
-  write.table(hypo, file.path(dir,"DMR/DMR_hypo.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(hyper, file.path(dir,"DMRs/DMR_hyper.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(hypo, file.path(dir,"DMRs/DMR_hypo.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
 }

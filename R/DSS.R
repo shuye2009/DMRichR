@@ -141,7 +141,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
   
-  if(!file.exists("DMR_lists.RDS") | override){
+  if(!file.exists("DMR_lists.RDS") || override){
     DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, 
                                   pval_cutoff, ratio_cutoff, minSites)
     DMR_lists <- purrr::compact(DMR_lists) # remove null elements
@@ -162,7 +162,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     sigRegions <- as(DMR$sigRegions, "GRanges")
     
     print(glue::glue("Exporting DMR and background region information..."))
-    dir.create(file.path(dir, "DMR"))
+    dir.create(file.path(dir, "DMRs"))
     output_DMR(DMR, dir)
     
     if(sum(sigRegions$stat > 0) > 0 & sum(sigRegions$stat < 0) > 0){
@@ -190,14 +190,14 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       DMRichR::annotateRegions(TxDb = TxDb,
                                annoDb = annoDb,
                                resPath = resPath) %T>%
-      openxlsx::write.xlsx(file = file.path(dir, "DMR/DMRs_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMRs/DMRs_annotated.xlsx"))
     
     print(glue::glue("Annotating background regions with gene symbols..."))
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
                                annoDb = annoDb,
                                resPath = resPath) %>% 
-      openxlsx::write.xlsx(file = file.path(dir, "DMR/background_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMRs/background_annotated.xlsx"))
 
     
     # HOMER -------------------------------------------------------------------
