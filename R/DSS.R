@@ -11,6 +11,7 @@
 #' @param wd Character indicating the location where the analysis results to be stored.
 #' @param cores Numeric specifying the number of cores to use. 10 is recommended. 
 #' @param resPath character specifying path to local resources if internet is not available.
+#' @param override logical indicating whether to redefine DMRs, default FALSE.
 #' 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
@@ -46,7 +47,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  factor2 = "",
                  cores = 10,
                  wd = ".",
-                 resPath = NULL){
+                 resPath = NULL,
+                 override = FALSE){
   
   if(!dir.exists(wd)) dir.create(wd)
   setwd(wd)
@@ -137,7 +139,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
   
-  if(!file.exists("DMR_lists.RDS")){
+  if(!file.exists("DMR_lists.RDS" | overide)){
     DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, 
                                   pval_cutoff, ratio_cutoff, minSites)
     DMR_lists <- purrr::compact(DMR_lists) # remove null elements

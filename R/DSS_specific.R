@@ -162,7 +162,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                minlen=50, 
                                minCG=3, 
                                dis.merge=100, 
-                               pct.sig=0.5) |>
+                               pct.sig=0.0001) |>
       dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
       dplyr::filter(length <= max(dmrs$length)) |>

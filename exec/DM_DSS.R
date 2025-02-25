@@ -34,7 +34,9 @@ option_list <- list(
   optparse::make_option(c("-1", "--factor1"), type = "character", default = NULL,
                         help = "the first factor to be tested [default = %default]"),
   optparse::make_option(c("-2", "--factor2"), type = "character", default = NULL,
-                        help = "the second factor to be tested in multifactor model [default = %default]")
+                        help = "the second factor to be tested in multifactor model [default = %default]"),
+  optparse::make_option(c("-d", "--override"), type = "logical", default = FALSE,
+                        help = "whether to redefine DMR [default = %default]")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
@@ -48,4 +50,6 @@ DMRichR::DSS.R(genome = opt$genome,
                  factor2 = opt$factor2,
                  wd = opt$wd,
                  cores = opt$cores,
-                 resPath = opt$resPath)
+                 resPath = opt$resPath,
+                 override = opt$override
+               )
