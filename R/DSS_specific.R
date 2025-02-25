@@ -258,7 +258,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
 #' 
 output_DMR <- function(DMR, dir){
   dmr <- DMR$sigRegions
-  background <- dmrs$bgRegions
+  background <- DMR$bgRegions
   
   dmr$name <- rownames(dmr)
   dmr$strand <- rep("*", nrow(dmr))
