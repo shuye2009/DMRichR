@@ -87,6 +87,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("cores = {cores}"))
   print(glue::glue("wd = {wd}"))
   print(glue::glue("resPath = {resPath}"))
+  print(glue::glue("override = {override}"))
 
   # Setup annotation databases ----------------------------------------------
   
@@ -141,7 +142,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   start_time <- Sys.time()
   
-  if(!file.exists("DMR_lists.RDS") || override){
+  if(!file.exists("DMR_list.RDS") || override){
     DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, 
                                   pval_cutoff, ratio_cutoff, minSites)
     DMR_lists <- purrr::compact(DMR_lists) # remove null elements
