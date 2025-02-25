@@ -164,7 +164,7 @@ plotDMRs2 <- function (BSseq, regions = NULL, testCovariate = NULL, extend = (en
                 stop("At least one of addLines or addPoints must be true")
         }
         if (verbose){
-                message("[plotDMRs] Plotting ", length(regions$L), " DMRs")
+                message("[plotDMRs] Plotting ", length(regions), " DMRs")
         }
         if (addLines & verbose){
                 if(bsseq::hasBeenSmoothed(BSseq)){

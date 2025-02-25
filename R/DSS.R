@@ -105,7 +105,9 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   bs.filtered <- DMRichR::processReport(design, cores)
   
-
+  print("pData")
+  print(pData(bs.filtered))
+  
   print(glue::glue("Building annotations for plotting..."))
   if(is(TxDb, "TxDb")){
     if(is.null(resPath)){
@@ -180,28 +182,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     end_time <- Sys.time()
     end_time - start_time
     
-    print(glue::glue("Annotating DMRs and plotting..."))
-    
-    pdf(file.path(dir, "DMR/DMRs.pdf"), height = 4, width = 8)
-    tryCatch({
-      DMRichR::plotDMRs2(bs.filtered,
-                         regions = sigRegions,
-                         testCovariate = NULL,
-                         extend = (end(sigRegions) - start(sigRegions) + 1)*2,
-                         addRegions = sigRegions,
-                         annoTrack = annoTrack,
-                         regionCol = "#FF00001A",
-                         lwd = 2,
-                         qval = FALSE,
-                         stat = FALSE,
-                         horizLegend = FALSE)
-    },
-    error = function(error_condition) {
-      print(glue::glue("Warning: One (or more) of your DMRs can't be plotted, \\
-                        try again later by manually loading R Data and subsetting sigRegions"))
-    })
-    dev.off()
-    
     # Annotate DMRs with gene symbols -----------------------------------------
     
     cat("\n[DMRichR] Annotating DMRs with gene symbols \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
@@ -210,10 +190,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       DMRichR::annotateRegions(TxDb = TxDb,
                                annoDb = annoDb,
                                resPath = resPath) %T>%
-      DMRichR::DMReport(regions = regions,
-                        bs.filtered = bs.filtered,
-                        coverage = 1,
-                        name = "DMReport") %>% 
       openxlsx::write.xlsx(file = file.path(dir, "DMR/DMRs_annotated.xlsx"))
     
     print(glue::glue("Annotating background regions with gene symbols..."))
