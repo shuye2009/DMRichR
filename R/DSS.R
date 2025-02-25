@@ -201,14 +201,14 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
 
     
     # HOMER -------------------------------------------------------------------
-    
+    if(0){
     sigRegions %>% 
       DMRichR::prepareHOMER(regions = regions, subfolder = dir)
     
     DMRichR::HOMER(genome = genome,
                    cores = cores,
                    subfolder = dir)
-    
+    }
     # Smoothed global, chromosomal, and CGi methylation statistics ------------
     
     dir.create(file.path(dir, "Global"))
