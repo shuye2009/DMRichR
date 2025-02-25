@@ -147,8 +147,9 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }
   
   for(aname in names(DMR_lists)){
-    dir.create(aname)
+
     dir <- file.path(wd, aname)
+    dir.create(dir)
     
     DMR <- DMR_lists[[aname]]
     print(glue::glue("Prossessing factor {aname}..."))
@@ -179,7 +180,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     print(glue::glue("Annotating DMRs and plotting..."))
     
-    pdf(file.path(dir, "DMRs/DMRs.pdf"), height = 4, width = 8)
+    pdf(file.path(dir, "DMR/DMRs.pdf"), height = 4, width = 8)
     tryCatch({
       DMRichR::plotDMRs2(bs.filtered,
                          regions = sigRegions,
@@ -211,14 +212,14 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                         bs.filtered = bs.filtered,
                         coverage = 1,
                         name = "DMReport") %>% 
-      openxlsx::write.xlsx(file = file.path(dir, "DMRs/DMRs_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMR/DMRs_annotated.xlsx"))
     
     print(glue::glue("Annotating background regions with gene symbols..."))
     regions %>%
       DMRichR::annotateRegions(TxDb = TxDb,
                                annoDb = annoDb,
                                resPath = resPath) %>% 
-      openxlsx::write.xlsx(file = file.path(dir, "DMRs/background_annotated.xlsx"))
+      openxlsx::write.xlsx(file = file.path(dir, "DMR/background_annotated.xlsx"))
 
     
     # HOMER -------------------------------------------------------------------
