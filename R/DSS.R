@@ -203,14 +203,14 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
 
     
     # HOMER -------------------------------------------------------------------
-    if(0){
+    
     sigRegions %>% 
       DMRichR::prepareHOMER(regions = regions, subfolder = dir)
     
     DMRichR::HOMER(genome = genome,
                    cores = cores,
                    subfolder = dir)
-    }
+    
     # Smoothed global, chromosomal, and CGi methylation statistics ------------
     
     dir.create("Global")
@@ -316,9 +316,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     dir.create("DMRichments")
     
-    print("... debugging ...")
-    print(head(dmrList))
-    
     purrr::walk(seq_along(dmrList),
                 DMRich)
     
@@ -395,7 +392,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                        genesetName=geneset, 
                        padj_cutoff=0.2, 
                        status=status, 
-                       dname = dname, 
+                       dname = "DMR", 
                        geneset_cutoff=200, 
                        genome=genome)
       }
