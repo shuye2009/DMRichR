@@ -14,7 +14,8 @@ processReport <- function(design, cores){
     bpparams <- BiocParallel::SnowParam(workers = detectCores()-2, progressbar = TRUE)
     smooth_params <- BiocParallel::SnowParam(workers = 1, progressbar = TRUE)
   }else{
-    bpparams <- smooth_params <- BiocParallel::MulticoreParam(workers = cores, progressbar = FALSE)
+    bpparams <-  BiocParallel::MulticoreParam(workers = cores, progressbar = FALSE)
+    smooth_params <- BiocParallel::MulticoreParam(workers = cores, progressbar = FALSE)
   }
   
   print(glue::glue("Reading cytosine reports..."))
@@ -162,7 +163,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                minlen=50, 
                                minCG=3, 
                                dis.merge=100, 
-                               pct.sig=0.01) |>
+                               pct.sig=0) |>
       dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(ratio = areaStat/nCG) |>
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
@@ -202,17 +203,17 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
   genesetName <- gsub(":", "_", genesetName, fixed = TRUE)
   
   pdf(paste0("GREAT/distance_to_TSS_", status, "_", dname, ".pdf"))
-  plotRegionGeneAssociations(res)
-  plotVolcano(res)
+  rGREAT::plotRegionGeneAssociations(res)
+  rGREAT::plotVolcano(res)
   dev.off()
   
   
-  res_table <- getEnrichmentTable(res) %>%
+  res_table <- rGREAT::getEnrichmentTable(res) %>%
     dplyr::filter(p_adjust < padj_cutoff) |>
     dplyr::filter(gene_set_size < geneset_cutoff)
   
   genes <- sapply(res_table$id, function(x){
-    gene_gr <- getRegionGeneAssociations(res, term_id = x, by_middle_points = FALSE,
+    gene_gr <- rGREAT::getRegionGeneAssociations(res, term_id = x, by_middle_points = FALSE,
                                          use_symbols = TRUE)
     gene <- unlist(gene_gr$annotated_genes)
     names(gene) <- NULL
@@ -224,7 +225,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
               paste0("GREAT/enrichment_in_", genesetName, "_", status, "_", dname, ".tsv"), 
               row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
-  gene_gr <- getRegionGeneAssociations(res, term_id = NULL, by_middle_points = FALSE,
+  gene_gr <- rGREAT::getRegionGeneAssociations(res, term_id = NULL, by_middle_points = FALSE,
                                              use_symbols = TRUE)
   gene <- gene_gr$annotated_genes
   gene_vec <- sapply(gene, function(g){
