@@ -165,7 +165,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     print(glue::glue("Exporting DMR and background region information..."))
     dir.create("DMRs")
-    output_DMR(DMR, dir)
+    output_DMR(DMR)
     
     if(sum(sigRegions$stat > 0) > 0 & sum(sigRegions$stat < 0) > 0){
       
