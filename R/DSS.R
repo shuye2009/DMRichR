@@ -221,7 +221,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                            adjustCovariate = factor2,
                            matchCovariate = NULL,
                            resPath = resPath) %>%
-      openxlsx::write.xlsx("Global/smoothed_globalStats.xlsx")
+      openxlsx::write.xlsx("Global/globalStats.xlsx")
     
     # Global plots ------------------------------------------------------------
     

@@ -67,7 +67,7 @@ globalStats <- function(bs.filtered.bsseq = bs.filtered.bsseq,
   cat("Testing for global methylation differences...")
   
   global <- data.frame(DelayedMatrixStats::colMeans2(getMeth(BSseq = bs.filtered.bsseq,
-                                                             type = "smooth",
+                                                             type = "raw",
                                                              what = "perBase"),
                                                      na.rm = TRUE))
   global$sample <- sampleNames(bs.filtered.bsseq)
@@ -92,7 +92,7 @@ globalStats <- function(bs.filtered.bsseq = bs.filtered.bsseq,
       plyranges::filter(type == "islands") %>% 
       bsseq::getMeth(BSseq = bs.filtered.bsseq,
                      regions = .,
-                     type = "smooth",
+                     type = "raw",
                      what = "perRegion") %>%
       na.omit() %>% 
       DelayedMatrixStats::colMeans2() %>%
