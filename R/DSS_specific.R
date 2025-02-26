@@ -140,7 +140,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                   dis.merge=100, 
                   pct.sig=0.5) |>
     dplyr::filter(!is.na(chr)) |>
-    dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
+    dplyr::mutate(ratio = areaStat/nCG) |>
     dplyr::mutate(stat = areaStat, .keep = "unused") |>
     dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                      stat < 0 ~ "hypo",
@@ -153,7 +153,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
   if(nrow(dmrs) > 0){
     message("select significant DMR")
     dmrs <- dmrs |>
-      dplyr::filter(ratio > ratio_cutoff)
+      dplyr::filter(abs(ratio) > ratio_cutoff)
   
     message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
@@ -162,9 +162,9 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                minlen=50, 
                                minCG=3, 
                                dis.merge=100, 
-                               pct.sig=0.5) |>
+                               pct.sig=0.01) |>
       dplyr::filter(!is.na(chr)) |>
-      dplyr::mutate(ratio = base::abs(areaStat/nCG)) |>
+      dplyr::mutate(ratio = areaStat/nCG) |>
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",

@@ -380,7 +380,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     cat("\n[DMRichR] Performing GREAT analyses \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
   
-    dir.create(dir, "GREAT")
+    dir.create("GREAT")
     
     dmr <- DMR$sigRegions
     
