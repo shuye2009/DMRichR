@@ -12,10 +12,8 @@ processReport <- function(design, cores){
   files <- design$path
   if(Sys.info()['sysname'] == "Windows"){
     bpparams <- BiocParallel::SnowParam(workers = detectCores()-2, progressbar = TRUE)
-    smooth_params <- BiocParallel::SnowParam(workers = 1, progressbar = TRUE)
   }else{
-    bpparams <-  BiocParallel::MulticoreParam(workers = cores, progressbar = FALSE)
-    smooth_params <- BiocParallel::MulticoreParam(workers = cores, progressbar = FALSE)
+    bpparams <-  BiocParallel::MulticoreParam(workers = cores, progressbar = TRUE)
   }
   
   print(glue::glue("Reading cytosine reports..."))
@@ -35,16 +33,7 @@ processReport <- function(design, cores){
     bs <- readRDS("bs.RDS")
   }
   
-  
-  if(!file.exists("bss.RDS")){
-    bss <- BSmooth(bs, BPPARAM = smooth_params)
-    
-    saveRDS(bss, "bss.RDS")
-  }else{
-    bss <- readRDS("bss.RDS")
-  }
-  
-  return(bss)
+  return(bs)
 }
 
 
@@ -70,7 +59,11 @@ DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_c
     }else{
       fomu <- as.formula(paste("~", factor1, "+", factor2, "+", factor1, ":", factor2))
     }
-    DMLfit= DSS::DMLfit.multiFactor(bss, design = design, formula = fomu)
+    DMLfit= DSS::DMLfit.multiFactor(bss, 
+                                    design = design, 
+                                    formula = fomu, 
+                                    smoothing = TRUE,
+                                    smoothing.span = 500)
     saveRDS(DMLfit, "DMLfit.RDS")
   }else{
     DMLfit <- readRDS("DMLfit.RDS")
