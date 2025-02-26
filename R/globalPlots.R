@@ -24,7 +24,7 @@ windows <- function(bs.filtered.bsseq = bs.filtered.bsseq,
     GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
     bsseq::getMeth(BSseq = bs.filtered.bsseq,
                    regions = .,
-                   type = "smooth",
+                   type = "raw",
                    what = "perRegion") %>% 
     na.omit() %>%
     return()
@@ -53,7 +53,7 @@ CGi <- function(bs.filtered.bsseq = bs.filtered.bsseq,
     plyranges::filter(type == "islands") %>% 
     bsseq::getMeth(BSseq = bs.filtered.bsseq,
                    regions = .,
-                   type = "smooth",
+                   type = "raw",
                    what = "perRegion") %>% 
     na.omit() %>%
     return()
@@ -75,7 +75,7 @@ CpGs <- function(bs.filtered.bsseq = bs.filtered.bsseq){
   
   bs.filtered.bsseq %>% 
     bsseq::getMeth(BSseq = .,
-                   type = "smooth",
+                   type = "raw",
                    what = "perBase") %>%
     na.omit() %>%
     return()
