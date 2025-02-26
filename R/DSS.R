@@ -385,25 +385,19 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
     dir.create(dir, "GREAT")
     
-    dmr_list <- list()
-    dmr_list$sigDMR <- DMR$sigRegions
-    dmr_list$background <- dmrs$bgRegions
+    dmr <- DMR$sigRegions
     
-    for(dname in names(dmr_list)[1]){
-      dmr <- dmr_list[[dname]]
-      
-      for(status in c("hyper", "hypo")){
-        gr <- as(dmr[dmr$status==status,], "GRanges")
-        for(geneset in c("GO:BP", "msigdb:C5:GO:BP", "msigdb:C2:CP:KEGG", 
-                         "msigdb:C2:CP:REACTOME")){
-          GREAT_analysis(gr, 
-                         genesetName=geneset, 
-                         padj_cutoff=0.2, 
-                         status=status, 
-                         dname = dname, 
-                         geneset_cutoff=200, 
-                         genome=genome)
-        }
+    for(status in c("hyper", "hypo")){
+      gr <- as(dmr[dmr$status==status,], "GRanges")
+      for(geneset in c("GO:BP", "msigdb:C5:GO:BP", "msigdb:C2:CP:KEGG", 
+                       "msigdb:C2:CP:REACTOME")){
+        GREAT_analysis(gr, 
+                       genesetName=geneset, 
+                       padj_cutoff=0.2, 
+                       status=status, 
+                       dname = dname, 
+                       geneset_cutoff=200, 
+                       genome=genome)
       }
     }
   }
