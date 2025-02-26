@@ -168,9 +168,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
-                                       .default = "none")) |>
-      dplyr::filter(ratio < ratio_cutoff) |>
-      rbind(dmrs)
+                                       .default = "none")) 
     
     return(list(sigRegions=dmrs, bgRegions=dmrs_background))
   }else{
@@ -194,7 +192,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
 
 GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2, 
                            status="hyper", dname = "sigDMR", geneset_cutoff=200, 
-                           dir = "./", genome="hg38"){
+                           genome="hg38"){
     
   res <- rGREAT::great(gr, 
                        gene_sets = genesetName, 
@@ -203,7 +201,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
   
   genesetName <- gsub(":", "_", genesetName, fixed = TRUE)
   
-  pdf(file.path(dir, paste0("GREAT/distance_to_TSS_", status, "_", dname, ".pdf")))
+  pdf(paste0("GREAT/distance_to_TSS_", status, "_", dname, ".pdf"))
   plotRegionGeneAssociations(res)
   plotVolcano(res)
   dev.off()
@@ -223,7 +221,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
   res_table$gene_name <- genes
   
   write.table(res_table, 
-              file.path(dir, paste0("GREAT/enrichment_in_", genesetName, "_", status, "_", dname, ".tsv")), 
+              paste0("GREAT/enrichment_in_", genesetName, "_", status, "_", dname, ".tsv"), 
               row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   gene_gr <- getRegionGeneAssociations(res, term_id = NULL, by_middle_points = FALSE,
@@ -241,7 +239,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
   gene_gr$dist_to_TSS <- dist_vec
   
   write.table(GenomicPlot::gr2df(gene_gr), 
-              file.path(dir, paste0("GREAT/Annotated_", genesetName, "_", status, "_", dname, ".bed")),
+              paste0("GREAT/Annotated_", genesetName, "_", status, "_", dname, ".bed"),
               row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
 }
@@ -255,7 +253,7 @@ GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2,
 #' 
 #' @export output_DMR
 #' 
-output_DMR <- function(DMR, dir){
+output_DMR <- function(DMR){
   dmr <- DMR$sigRegions
   background <- DMR$bgRegions
   
@@ -263,19 +261,19 @@ output_DMR <- function(DMR, dir){
   dmr$strand <- rep("*", nrow(dmr))
   dmr <- dmr[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "status")]
   
-  write.table(dmr, file.path(dir,"DMR/DMR.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(dmr, "DMRs/DMR.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   background$name <- rownames(background)
   background$strand <- rep("*", nrow(background))
   background <- background[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "status")]
   
-  write.table(background, file.path(dir, "DMR/background.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(background, "DMRs/background.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   hyper <- dmr |>
     dplyr::filter(status == "hyper")
   hypo <- dmr |>
     dplyr::filter(status == "hypo")
   
-  write.table(hyper, file.path(dir,"DMRs/DMR_hyper.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
-  write.table(hypo, file.path(dir,"DMRs/DMR_hypo.bed"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(hyper, "DMRs/DMR_hyper.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(hypo, "DMRs/DMR_hypo.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
 }
