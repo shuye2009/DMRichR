@@ -275,11 +275,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                   
                 })
     
-    # Heatmap -----------------------------------------------------------------
     
-    sigRegions %>%
-      DMRichR::smoothPheatmap(bs.filtered = bs.filtered,
-                              testCovariate = factor1)
     
     # CpG and genic enrichment testing ----------------------------------------
     
