@@ -395,17 +395,17 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     genesets <- list(gopb=gobp, hallmark=hallmark, kegg=kegg, reactome=reactome)
     for(status in c("hyper", "hypo")){
-      gr <- as(dmr[dmr$status==status,], "GRanges")
+      gr <- as(dmr[dmr$status == status,], "GRanges")
       lapply(names(genesets), function(x){
         geneset <- genesets[[x]]
         GREAT_analysis(gr, 
                        geneset = geneset,
-                       genesetName=x, 
-                       padj_cutoff=0.2, 
-                       status=status, 
+                       genesetName = x, 
+                       padj_cutoff = 0.2, 
+                       status = status, 
                        dname = "DMR", 
-                       geneset_cutoff=200, 
-                       genome=genome)
+                       geneset_cutoff = 200, 
+                       genome = genome)
       })
     }
   }
