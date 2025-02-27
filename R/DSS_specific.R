@@ -152,11 +152,11 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
     message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
                                delta=0, 
-                               p.threshold=1.0,
+                               p.threshold=0.999,
                                minlen=50, 
                                minCG=3, 
                                dis.merge=100, 
-                               pct.sig=0) |>
+                               pct.sig=0.001) |>
       dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(ratio = areaStat/nCG) |>
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
