@@ -384,18 +384,29 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     dmr <- DMR$sigRegions
     
+    gobp <- rGREAT::read_gmt(file.path(resPath, "c5.go.bp.v2024.1.Hs.symbols.gmt"),
+                         from = "SYMBOL", to = "ENTREZ", orgdb = "org.Hs.eg.db")
+    hallmark <- rGREAT::read_gmt(file.path(resPath, "h.all.v2024.1.Hs.symbols.gmt"),
+                         from = "SYMBOL", to = "ENTREZ", orgdb = "org.Hs.eg.db")
+    kegg <- rGREAT::read_gmt(file.path(resPath, "c2.cp.kegg_medicus.v2024.1.Hs.symbols.gmt"),
+                         from = "SYMBOL", to = "ENTREZ", orgdb = "org.Hs.eg.db")
+    reactome <- rGREAT::read_gmt(file.path(resPath, "c2.cp.reactome.v2024.1.Hs.symbols.gmt"),
+                     from = "SYMBOL", to = "ENTREZ", orgdb = "org.Hs.eg.db")
+    
+    genesets <- list(gopb=gobp, hallmark=hallmark, kegg=kegg, reactome=reactome)
     for(status in c("hyper", "hypo")){
       gr <- as(dmr[dmr$status==status,], "GRanges")
-      for(geneset in c("GO:BP", "msigdb:C5:GO:BP", "msigdb:C2:CP:KEGG", 
-                       "msigdb:C2:CP:REACTOME")){
+      lapply(names(genesets), function(x){
+        geneset <- genesets[[x]]
         GREAT_analysis(gr, 
-                       genesetName=geneset, 
+                       geneset = geneset,
+                       genesetName=x, 
                        padj_cutoff=0.2, 
                        status=status, 
                        dname = "DMR", 
                        geneset_cutoff=200, 
                        genome=genome)
-      }
+      })
     }
   }
     

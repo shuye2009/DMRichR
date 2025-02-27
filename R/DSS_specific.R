@@ -175,6 +175,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
 #' @title GREAT analysis
 #' @description Perform GREAT analysis for DMR
 #' @param gr a GRanges object.
+#' @param geneset a list from rGREAT::read_gmt.
 #' @param padj_cutoff Numeric cutoff value [from 0 to 1] for the adjusted p-value.
 #' @param geneset_cutoff cutoff value for the maximal size of the geneset.
 #' @param status indicates the direction of methylation changes, either hyper or hypo.
@@ -184,12 +185,12 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
 #' 
 #' @export GREAT_analysis
 
-GREAT_analysis <- function(gr, genesetName="GO:BP", padj_cutoff=0.2, 
+GREAT_analysis <- function(gr, geneset, genesetName="GO:BP", padj_cutoff=0.2, 
                            status="hyper", dname = "sigDMR", geneset_cutoff=200, 
                            genome="hg38"){
     
   res <- rGREAT::great(gr, 
-                       gene_sets = genesetName, 
+                       gene_sets = geneset, 
                        tss_source = paste0("GREAT:", genome),
                        mode = "oneClosest")
   
