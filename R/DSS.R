@@ -373,7 +373,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }, 
     error = function(error_condition) {
       print(glue::glue("Manhattan plot error"))
-      setwd("..")
+      #setwd("..")
     })
     
     # Gene Ontology, pathway analyses --------------------------------------------------
@@ -398,14 +398,19 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       gr <- as(dmr[dmr$status == status,], "GRanges")
       lapply(names(genesets), function(x){
         geneset <- genesets[[x]]
-        GREAT_analysis(gr, 
-                       geneset = geneset,
-                       genesetName = x, 
-                       padj_cutoff = 0.2, 
-                       status = status, 
-                       dname = "DMR", 
-                       geneset_cutoff = 200, 
-                       genome = genome)
+        tryCatch({
+          GREAT_analysis(gr, 
+                         geneset = geneset,
+                         genesetName = x, 
+                         padj_cutoff = 0.2, 
+                         status = status, 
+                         dname = "DMR", 
+                         geneset_cutoff = 200, 
+                         genome = genome)
+        }, 
+        error = function(error_condition) {
+          print(glue::glue("GREAT for {x} error"))
+        })
       })
     }
   }
