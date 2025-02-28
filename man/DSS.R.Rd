@@ -14,7 +14,8 @@ DSS.R(
   factor2 = "",
   cores = 10,
   wd = ".",
-  resPath = NULL
+  resPath = NULL,
+  override = FALSE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ DSS.R(
 \item{wd}{Character indicating the location where the analysis results to be stored.}
 
 \item{resPath}{character specifying path to local resources if internet is not available.}
+
+\item{override}{logical indicating whether to redefine DMRs, default FALSE.}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 

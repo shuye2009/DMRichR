@@ -6,17 +6,19 @@
 \usage{
 GREAT_analysis(
   gr,
+  geneset,
   genesetName = "GO:BP",
   padj_cutoff = 0.2,
   status = "hyper",
   dname = "sigDMR",
   geneset_cutoff = 200,
-  dir = "./",
   genome = "hg38"
 )
 }
 \arguments{
 \item{gr}{a GRanges object.}
+
+\item{geneset}{a list from rGREAT::read_gmt.}
 
 \item{padj_cutoff}{Numeric cutoff value [from 0 to 1] for the adjusted p-value.}
 
@@ -26,9 +28,9 @@ GREAT_analysis(
 
 \item{geneset_cutoff}{cutoff value for the maximal size of the geneset.}
 
-\item{dir}{path for saving GREAT analysis results.}
-
 \item{genome}{Character specifying the genome.}
+
+\item{dir}{path for saving GREAT analysis results.}
 }
 \description{
 Perform GREAT analysis for DMR

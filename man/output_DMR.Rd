@@ -4,7 +4,7 @@
 \alias{output_DMR}
 \title{Output DMRs}
 \usage{
-output_DMR(DMR, dir)
+output_DMR(DMR)
 }
 \arguments{
 \item{DMR}{a list of two dataframes.}

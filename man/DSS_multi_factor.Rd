@@ -6,7 +6,7 @@
 \usage{
 DSS_multi_factor(
   bss,
-  desgin,
+  design,
   factor1,
   factor2,
   pval_cutoff,
@@ -17,6 +17,8 @@ DSS_multi_factor(
 \arguments{
 \item{bss}{a smoothed bsseq object.}
 
+\item{design}{sample information dataframe.}
+
 \item{factor1}{Character indicating factor of interest from the design matrix.}
 
 \item{factor2}{Character indicating co-factor of interest from the design matrix.}
@@ -26,8 +28,6 @@ DSS_multi_factor(
 \item{ratio_cutoff}{cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection.}
 
 \item{minSites}{Numeric for the minimum number of Cytosines for a DMR.}
-
-\item{design}{sample information dataframe.}
 }
 \value{
 a list of DMRs for all factors and interaction. See \code{findDMR} for details
