@@ -7,6 +7,10 @@
 DSS.R(
   genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10", "rheMac8", "rn6", "danRer11",
     "galGal6", "bosTau9", "panTro6", "dm6", "susScr11", "canFam3", "TAIR10", "TAIR9"),
+  analysisType = "twoGroup",
+  condition1 = "",
+  condition2 = "",
+  minDiff = 0.1,
   pval_cutoff = 0.05,
   minSites = 3,
   ratio_cutoff = 2,
@@ -22,6 +26,12 @@ DSS.R(
 }
 \arguments{
 \item{genome}{Character specifying the genome.}
+
+\item{analysisType}{Character indicating type of analysis design, either 'general' or 'twoGroup'.}
+
+\item{condition1}{Character indicating the group1.}
+
+\item{condition2}{Character indicating the group2.}
 
 \item{pval_cutoff}{Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.}
 
@@ -44,6 +54,9 @@ DSS.R(
 \item{resPath}{character specifying path to local resources if internet is not available.}
 
 \item{override}{logical indicating whether to redefine DMRs, default FALSE.}
+
+\item{minDifff}{cutoff value [from 0 to inf] for the minimum difference between mean methylation 
+levels between group1 and group2 during DMR detection for twoGroup analysis.}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 
