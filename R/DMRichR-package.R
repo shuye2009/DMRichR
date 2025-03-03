@@ -1,8 +1,9 @@
 #' DMRichR
 #'
 #' Enrich your DMR analysis
+#' _PACKAGE
 #' @name DMRichR
-#' @docType package
+#' 
 NULL
 
 #' onAttach

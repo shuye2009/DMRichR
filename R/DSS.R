@@ -8,6 +8,8 @@
 #' @param minSites Numeric for the minimum number of Cytosines for a DMR.
 #' @param factor1 Character indicating factor of interest from the design matrix. 
 #' @param factor2 Character indicating co-factor of interest from the design matrix.
+#' @param ref1 Character indicating reference condition for the factor of interest from the design matrix. 
+#' @param ref2 Character indicating reference condition for the co-factor of interest from the design matrix.
 #' @param wd Character indicating the location where the analysis results to be stored.
 #' @param cores Numeric specifying the number of cores to use. 10 is recommended. 
 #' @param resPath character specifying path to local resources if internet is not available.
@@ -45,6 +47,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  ratio_cutoff = 2,
                  factor1 = "",
                  factor2 = "",
+                 ref1 = "",
+                 ref2 = "",
                  cores = 10,
                  wd = ".",
                  resPath = NULL,
@@ -72,9 +76,12 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                           "bosTau9", "panTro6", "dm6", "susScr11",
                           "canFam3", "TAIR10", "TAIR9"))
   
-  # Check for more permutations than samples, 
-  # factor1 and factor2 must be in the columns of design
-  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) 
+  
+  # factor1 and factor2 must be in the columns of design, must be releveled 
+  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
+    dplyr::mutate(!!factor1:=factor(.data[[!!factor1]]), !!factor2:=factor(.data[[!!factor2]])) |>
+    dplyr::mutate(!!factor1:=relevel(.data[[!!factor1]], ref1)) |>
+    dplyr::mutate(!!factor2:=relevel(.data[[!!factor2]], ref2))
   print(design)
   
   # Print

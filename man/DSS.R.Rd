@@ -12,6 +12,8 @@ DSS.R(
   ratio_cutoff = 2,
   factor1 = "",
   factor2 = "",
+  ref1 = "",
+  ref2 = "",
   cores = 10,
   wd = ".",
   resPath = NULL,
@@ -30,6 +32,10 @@ DSS.R(
 \item{factor1}{Character indicating factor of interest from the design matrix.}
 
 \item{factor2}{Character indicating co-factor of interest from the design matrix.}
+
+\item{ref1}{Character indicating reference condition for the factor of interest from the design matrix.}
+
+\item{ref2}{Character indicating reference condition for the co-factor of interest from the design matrix.}
 
 \item{cores}{Numeric specifying the number of cores to use. 10 is recommended.}
 
