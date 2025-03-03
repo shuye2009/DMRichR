@@ -3,6 +3,11 @@
 #' @description Performs the entire DMRichR analysis pipeline, 
 #' which runs most functions in the package.
 #' @param genome Character specifying the genome.
+#' @param minDifff cutoff value [from 0 to inf] for the minimum difference between mean methylation 
+#' levels between group1 and group2 during DMR detection for twoGroup analysis.
+#' @param analysisType Character indicating type of analysis design, either 'general' or 'twoGroup'.
+#' @param condition1 Character indicating the group1. 
+#' @param condition2 Character indicating the group2.
 #' @param pval_cutoff Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.
 #' @param ratio_cutoff cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection.
 #' @param minSites Numeric for the minimum number of Cytosines for a DMR.
@@ -42,6 +47,10 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                             "rheMac8", "rn6", "danRer11", "galGal6",
                             "bosTau9", "panTro6", "dm6", "susScr11",
                             "canFam3", "TAIR10", "TAIR9"),
+                 analysisType = "twoGroup",
+                 condition1 = "",
+                 condition2 = "",
+                 minDiff = 0.1,
                  pval_cutoff = 0.05,
                  minSites = 3,
                  ratio_cutoff = 2,
@@ -76,16 +85,12 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                           "bosTau9", "panTro6", "dm6", "susScr11",
                           "canFam3", "TAIR10", "TAIR9"))
   
-  
-  # factor1 and factor2 must be in the columns of design, must be releveled 
-  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
-    dplyr::mutate(!!factor1:=factor(.data[[!!factor1]]), !!factor2:=factor(.data[[!!factor2]])) |>
-    dplyr::mutate(!!factor1:=relevel(.data[[!!factor1]], ref1)) |>
-    dplyr::mutate(!!factor2:=relevel(.data[[!!factor2]], ref2))
-  print(design)
-  
   # Print
   print(glue::glue("genome = {genome}"))
+  print(glue::glue("analysisType = {analysisType}"))
+  print(glue::glue("minDiff = {minDiff}"))
+  print(glue::glue("condition1 = {condition1}"))
+  print(glue::glue("condition2 = {condition2}"))
   print(glue::glue("ratio_cutoff = {ratio_cutoff}"))
   print(glue::glue("pval_cutoff = {pval_cutoff}"))
   print(glue::glue("minSites = {minSites}"))
@@ -95,6 +100,16 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("wd = {wd}"))
   print(glue::glue("resPath = {resPath}"))
   print(glue::glue("override = {override}"))
+  
+  # Experimental design ------------------------------------------------------
+  # factor1 and factor2 must be in the columns of design, must be releveled 
+  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
+    dplyr::mutate(!!factor1:=factor(.data[[!!factor1]]), !!factor2:=factor(.data[[!!factor2]])) |>
+    dplyr::mutate(!!factor1:=relevel(.data[[!!factor1]], ref1)) |>
+    dplyr::mutate(!!factor2:=relevel(.data[[!!factor2]], ref2)) |>
+    dplyr::mutate(!!group:=factor(.data[[!!group]]))
+  print(design)
+  
 
   # Setup annotation databases ----------------------------------------------
   
@@ -144,28 +159,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                 quote = FALSE,
                 row.names = FALSE)
   
-  # DMRs --------------------------------------------------------------------
-  
-  cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-  start_time <- Sys.time()
-  
-  if(!file.exists("DMR_list.RDS") || override){
-    DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, 
-                                  pval_cutoff, ratio_cutoff, minSites)
-    DMR_lists <- purrr::compact(DMR_lists) # remove null elements
-    saveRDS(DMR_lists, "DMR_list.RDS")
-  }else{
-    DMR_lists <- readRDS("DMR_list.RDS")
-  }
-  
-  for(aname in names(DMR_lists)){
-
-    dir <- file.path(wd, aname)
-    dir.create(dir)
-    setwd(dir)
-    
-    DMR <- DMR_lists[[aname]]
-    print(glue::glue("Prossessing factor {aname}..."))
+  characterize_DMR <- function(DMR, dir){
     
     regions <- as(DMR$bgRegions, "GRanges")
     sigRegions <- as(DMR$sigRegions, "GRanges")
@@ -187,9 +181,6 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                        tidyCpGs = nrow(bs.filtered)))
     }
     
-    print(glue::glue("DMR timing..."))
-    end_time <- Sys.time()
-    end_time - start_time
     
     # Annotate DMRs with gene symbols -----------------------------------------
     
@@ -420,52 +411,91 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         })
       })
     }
+    
+    
+    # SUMMARY -------------------------------------------------------------------
+    
+    cat("\n[DMRichR] Summary \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    
+    print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
+                     The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
+                     {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. \\
+                     The methylomes consisted of {tidyCpGs} CpGs.", 
+                     dmrLength = sigRegions %>%
+                       length() %>%
+                       formatC(format = "d", big.mark = ","),
+                     backgroundLength = regions %>%
+                       length() %>%
+                       formatC(format = "d", big.mark = ","),
+                     tidyHyper = (sum(sigRegions$stat > 0) / length(sigRegions)) %>%
+                       scales::percent(),
+                     tidyHypo = (sum(sigRegions$stat < 0) / length(sigRegions)) %>%
+                       scales::percent(),
+                     tidyCpGs = nrow(bs.filtered) %>%
+                       formatC(format = "d", big.mark = ","),
+                     genomeSize = goi %>%
+                       seqinfo() %>%
+                       GenomeInfoDb::keepStandardChromosomes() %>%
+                       as.data.frame() %>%
+                       purrr::pluck("seqlengths") %>%
+                       sum(),
+                     dmrSize = sigRegions %>%
+                       dplyr::as_tibble() %>%
+                       purrr::pluck("width") %>%
+                       sum(),
+                     backgroundSize = regions  %>%
+                       dplyr::as_tibble() %>%
+                       purrr::pluck("width") %>%
+                       sum(),
+                     sigRegionPercent = (dmrSize/genomeSize) %>%
+                       scales::percent(accuracy = 0.01),
+                     regionPercent = (backgroundSize/genomeSize) %>%
+                       scales::percent(accuracy = 0.01)
+    ))
   }
+  
+  # DMRs --------------------------------------------------------------------
+  
+  cat("\n[DMRichR] Testing for DMRs with DSS \t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+  start_time <- Sys.time()
+  
+  if(analysisType == "general"){
+    if(!file.exists("DMR_list.RDS") || override){
+      DMR_lists <- DSS_multi_factor(bs.filtered, design, factor1, factor2, 
+                                    pval_cutoff, ratio_cutoff, minSites)
+      DMR_lists <- purrr::compact(DMR_lists) # remove null elements
+      saveRDS(DMR_lists, "DMR_list.RDS")
+    }else{
+      DMR_lists <- readRDS("DMR_list.RDS")
+    }
     
+    for(aname in names(DMR_lists)){
+      
+      dir <- file.path(wd, aname)
+      dir.create(dir)
+      setwd(dir)
+      DMR <- DMR_lists[[aname]]
+      print(glue::glue("Prossessing factor {aname}..."))
+      characterize_DMR(DMR, dir)
+    }
+  }else if(analysisType=="twoGroup"){
+    aname <- paste0(condition2, "_vs_", condition1)
+    dir <- file.path(wd, aname)
+    dir.create(dir)
+    setwd(dir)
     
-    
-    
+    DMR <- DSS_pairwise(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3)
+    print(glue::glue("Prossessing comparison {aname}..."))
+    characterize_DMR(DMR, dir)
+  }else{
+    print(glue::glue("Analysis type {analysisType} is not supported!"))
+  }
+  
+  print(glue::glue("DMR timing..."))
+  end_time <- Sys.time()
+  end_time - start_time
+  
   # End ---------------------------------------------------------------------
-  
-  cat("\n[DMRichR] Summary \t\t\t\t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
-  
-  print(glue::glue("Summary: There were {dmrLength} DMRs that covered {sigRegionPercent} of the genome. \\
-                   The DMRs were identified from {backgroundLength } background regions that covered {regionPercent} of the genome.
-                   {tidyHyper} of the DMRs were hypermethylated, and {tidyHypo} were hypomethylated. \\
-                   The methylomes consisted of {tidyCpGs} CpGs.", 
-                   dmrLength = sigRegions %>%
-                     length() %>%
-                     formatC(format = "d", big.mark = ","),
-                   backgroundLength = regions %>%
-                     length() %>%
-                     formatC(format = "d", big.mark = ","),
-                   tidyHyper = (sum(sigRegions$stat > 0) / length(sigRegions)) %>%
-                     scales::percent(),
-                   tidyHypo = (sum(sigRegions$stat < 0) / length(sigRegions)) %>%
-                     scales::percent(),
-                   tidyCpGs = nrow(bs.filtered) %>%
-                     formatC(format = "d", big.mark = ","),
-                   genomeSize = goi %>%
-                     seqinfo() %>%
-                     GenomeInfoDb::keepStandardChromosomes() %>%
-                     as.data.frame() %>%
-                     purrr::pluck("seqlengths") %>%
-                     sum(),
-                   dmrSize = sigRegions %>%
-                     dplyr::as_tibble() %>%
-                     purrr::pluck("width") %>%
-                     sum(),
-                   backgroundSize = regions  %>%
-                     dplyr::as_tibble() %>%
-                     purrr::pluck("width") %>%
-                     sum(),
-                   sigRegionPercent = (dmrSize/genomeSize) %>%
-                     scales::percent(accuracy = 0.01),
-                   regionPercent = (backgroundSize/genomeSize) %>%
-                     scales::percent(accuracy = 0.01)
-  ))
- 
-  
   writeLines(capture.output(sessionInfo()), "sessionInfo.txt")
   if(file.exists("Rplots.pdf")){file.remove("Rplots.pdf")}
    

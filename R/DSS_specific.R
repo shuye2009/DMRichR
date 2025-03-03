@@ -37,7 +37,7 @@ processReport <- function(design, cores){
 }
 
 
-#' DSS_multi_factor
+#' DSS_multifactor
 #' @title DML and DMR calling with DSS method
 #' @description Call DML using multifactor design, then get DMRS for each factor 
 #' and interaction effect if two factors are provided in the design
@@ -50,9 +50,9 @@ processReport <- function(design, cores){
 #' @param factor2 Character indicating co-factor of interest from the design matrix.
 #' 
 #' @return a list of DMRs for all factors and interaction. See \code{findDMR} for details
-#' @export DSS_multi_factor
+#' @export DSS_multifactor
 
-DSS_multi_factor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cutoff, minSites=3){
+DSS_multifactor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cutoff, minSites=3){
   if(!file.exists("DMLfit.RDS")){
     if(is.null(factor2)){
       fomu <- as.formula(paste("~", factor1))
@@ -271,4 +271,69 @@ output_DMR <- function(DMR){
   
   write.table(hyper, "DMRs/DMR_hyper.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   write.table(hypo, "DMRs/DMR_hypo.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+}
+
+#' DSS_pairwise
+#' @title DML and DMR calling with DSS method for two groups
+#' @description Call DML using two group design, then get DMRS and background regions.
+#' @param bss a bsseq object.
+#' @param pval_cutoff Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.
+#' @param minDifff cutoff value [from 0 to inf] for the minimum difference between mean methylation 
+#' levels between group1 and group2 during DMR detection.
+#' @param minSites Numeric for the minimum number of Cytosines for a DMR.
+#' @param condition1 Character indicating the group1. 
+#' @param condition2 Character indicating the group2.
+#' 
+#' @return a list of DMRs and background regions
+#' @export DSS_pairwise
+
+DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3){
+  aname <- paste0(condition2, "_vs_", condition1)
+  samples1 <- bss$pData |>
+    dplyr::filter(group == condition1) |>
+    rownames()
+  samples2 <- bss$pData |>
+    dplyr::filter(group == condition2) |>
+    rownames()
+ 
+  if(!file.exists(paste0(aname,"_DML.RDS"))){
+    DML= DMLtest(bss[, c(samples1, samples2)], 
+                 group1=samples1,
+                 group2=samples2, 
+                 smoothing=TRUE)
+    saveRDS(DML, paste0(aname,"_DML.RDS"))
+  }else{
+    DML <- readRDS(paste0(aname,"_DML.RDS"))
+  }
+  
+  if(!file.exists(paste0(aname,"_DMLs.RDS"))){
+    DMLs = callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
+    DMLs <- na.omit(DMLs)
+    saveRDS(DMLs, paste0(aname,"_DMLs.RDS"))
+  }else{
+    DMLs <- readRDS(paste0(aname,"_DMLs.RDS"))
+  }
+  
+  if(!file.exists(paste0(aname,"_DMRs.RDS"))){
+    dmrs <- callDMR(DML, 
+                    p.threshold = pval_cutoff, 
+                    delta = 0.1, 
+                    minCG = minSites,
+                    pct.sig = 0.5) |>
+      filter(abs(diff.Methy) > minDiff)
+    
+    dmrs_background <- callDMR(DML, 
+                    p.threshold = 0.999, 
+                    delta = 0.01, 
+                    minCG = minSites,
+                    pct.sig = 0.001)
+    saveRDS(dmrs, paste0(aname,"_DMRs.RDS"))
+    saveRDS(dmrs_background, paste0(aname,"_background.RDS"))
+  }else{
+    dmrs <- readRDS(paste0(aname,"_DMRs.RDS"))
+    dmrs_background <- readRDS(paste0(aname,"_background.RDS"))
+    
+  }
+  
+  return(list(sigRegion = dmrs, bgRegion = dmrs_background))
 }
