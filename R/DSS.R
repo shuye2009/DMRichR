@@ -96,6 +96,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("minSites = {minSites}"))
   print(glue::glue("factor1 = {factor1}"))
   print(glue::glue("factor2 = {factor2}"))
+  print(glue::glue("ref1 = {ref1}"))
+  print(glue::glue("ref2 = {ref2}"))
   print(glue::glue("cores = {cores}"))
   print(glue::glue("wd = {wd}"))
   print(glue::glue("resPath = {resPath}"))
@@ -491,7 +493,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     print(glue::glue("Analysis type {analysisType} is not supported!"))
   }
   
-  print(glue::glue("DMR timing..."))
+  print(glue::glue("DMR timing...in seconds"))
   end_time <- Sys.time()
   end_time - start_time
   

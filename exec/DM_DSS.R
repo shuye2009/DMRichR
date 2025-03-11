@@ -39,6 +39,14 @@ option_list <- list(
                         help = "reference condition for the first factor to be tested [default = %default]"),
   optparse::make_option(c("--ref2"), type = "character", default = "",
                         help = "reference condition for the second factor to be tested in multifactor model [default = %default]"),
+  optparse::make_option(c("--condition1"), type = "character", default = "",
+                        help = "reference condition for the two-group model [default = %default]"),
+  optparse::make_option(c("--condition2"), type = "character", default = "",
+                        help = "test condition for the two-group model [default = %default]"),
+  optparse::make_option(c("--minDiff"), type = "double", default = 0.1,
+                        help = "Choose the cutoff value [from 0 to 1] for the minimum methylation level difference between two groups [default = %default]"),
+  optparse::make_option(c("--analysisType"), type = "character", default = "twoGroup",
+                        help = "type of model of comparison, either 'twoGroup' or 'general' [default = %default]"),
   optparse::make_option(c("-d", "--override"), type = "logical", default = TRUE,
                         help = "whether to redefine DMR [default = %default]")
 )
@@ -47,15 +55,19 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 # DM.R --------------------------------------------------------------------
 
 DMRichR::DSS.R(genome = opt$genome,
-                 minSites =  opt$minSites,
-                 pval_cutoff = opt$pval_cutoff,
-                 ratio_cutoff = opt$ratio_cutoff,
-                 factor1 = opt$factor1,
-                 factor2 = opt$factor2,
-                 ref1 = opt$ref1,
-                 ref2 = opt$ref2,
-                 wd = opt$wd,
-                 cores = opt$cores,
-                 resPath = opt$resPath,
-                 override = opt$override
-               )
+               analysisType = opt$analysisType,
+               condition1 = opt$condition1,
+               condition2 = opt$condition2,
+               minDiff = opt$minDiff,
+               minSites =  opt$minSites,
+               pval_cutoff = opt$pval_cutoff,
+               ratio_cutoff = opt$ratio_cutoff,
+               factor1 = opt$factor1,
+               factor2 = opt$factor2,
+               ref1 = opt$ref1,
+               ref2 = opt$ref2,
+               wd = opt$wd,
+               cores = opt$cores,
+               resPath = opt$resPath,
+               override = opt$override
+             )
