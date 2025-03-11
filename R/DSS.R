@@ -104,12 +104,20 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("override = {override}"))
   
   # Experimental design ------------------------------------------------------
-  # factor1 and factor2 must be in the columns of design, must be releveled 
-  design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
-    dplyr::mutate(!!factor1:=factor(.data[[!!factor1]]), !!factor2:=factor(.data[[!!factor2]])) |>
-    dplyr::mutate(!!factor1:=relevel(.data[[!!factor1]], ref1)) |>
-    dplyr::mutate(!!factor2:=relevel(.data[[!!factor2]], ref2)) |>
-    dplyr::mutate(!!group:=factor(.data[[!!group]]))
+  if(analysisType == "general"){
+    # factor1 and factor2 must be in the columns of design, must be releveled 
+    design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
+      dplyr::mutate(!!factor1:=factor(.data[[!!factor1]]), !!factor2:=factor(.data[[!!factor2]])) |>
+      dplyr::mutate(!!factor1:=relevel(.data[[!!factor1]], ref1)) |>
+      dplyr::mutate(!!factor2:=relevel(.data[[!!factor2]], ref2)) 
+  }else if(analysisType == "twoGroup"){
+    # factor1 and factor2 must be in the columns of design, must be releveled 
+    design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
+      dplyr::mutate(!!group:=factor(.data[[!!group]]))
+  }else{
+    stop("analysis type ", analysisType, " is not supported!")
+  }
+  
   print(design)
   
 
