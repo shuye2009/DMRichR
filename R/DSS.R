@@ -113,7 +113,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }else if(analysisType == "twoGroup"){
     # factor1 and factor2 must be in the columns of design, must be releveled 
     design <- read.delim(file.path(wd, "sample_info.txt"), header = TRUE) |>
-      dplyr::mutate(!!group:=factor(.data[[!!group]]))
+      dplyr::mutate(group=factor(group))
   }else{
     stop("analysis type ", analysisType, " is not supported!")
   }
