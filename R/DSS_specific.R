@@ -302,7 +302,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
  
   message("[DSS_pairwise] DML test ..")
   if(!file.exists(paste0(aname,"_DML.RDS"))){
-    DML= DMLtest(bss[, c(samples1, samples2)], 
+    DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
                  group1=samples1,
                  group2=samples2, 
                  smoothing=TRUE)
@@ -313,7 +313,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
   
   message("[DSS_pairwise] call DML ..")
   if(!file.exists(paste0(aname,"_DMLs.RDS"))){
-    DMLs = callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
+    DMLs = DSS::callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
     DMLs <- na.omit(DMLs)
     saveRDS(DMLs, paste0(aname,"_DMLs.RDS"))
   }else{
@@ -322,7 +322,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
   
   message("[DSS_pairwise] call DMR ..")
   if(!file.exists(paste0(aname,"_DMRs.RDS"))){
-    dmrs <- callDMR(DML, 
+    dmrs <- DSS::callDMR(DML, 
                     p.threshold = pval_cutoff, 
                     delta = 0.1, 
                     minCG = minSites,
