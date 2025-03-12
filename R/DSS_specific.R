@@ -11,7 +11,7 @@
 processReport <- function(design, cores){
   files <- design$path
   if(Sys.info()['sysname'] == "Windows"){
-    bpparams <- BiocParallel::SnowParam(workers = detectCores()-2, progressbar = TRUE)
+    bpparams <- BiocParallel::SnowParam(workers = parallel::detectCores()-2, progressbar = TRUE)
   }else{
     bpparams <-  BiocParallel::MulticoreParam(workers = cores, progressbar = TRUE)
   }
@@ -286,6 +286,9 @@ output_DMR <- function(DMR){
 #' @param cores number of cpus.
 #' 
 #' @return a list of DMRs and background regions
+#' 
+#' @importFrom parallel detectCores
+#' 
 #' @export DSS_pairwise
 
 DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3, cores=5){
