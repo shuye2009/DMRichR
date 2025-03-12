@@ -293,10 +293,10 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
   print(pData(bss))
   
   aname <- paste0(condition2, "_vs_", condition1)
-  samples1 <- pData(bss) |>
+  samples1 <- as.data.frame(pData(bss)) |>
     dplyr::filter(group == condition1) |>
     rownames()
-  samples2 <- pData(bss) |>
+  samples2 <- as.data.frame(pData(bss)) |>
     dplyr::filter(group == condition2) |>
     rownames()
  
