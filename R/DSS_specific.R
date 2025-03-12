@@ -288,13 +288,15 @@ output_DMR <- function(DMR){
 #' @export DSS_pairwise
 
 DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3){
-  message("[DSS_pairwise] starting ..")
+  message("[DSS_pairwise] starting ... condition1: ", 
+          condition1, " condition2: ", condition2)
+  print(bss$pData)
   
   aname <- paste0(condition2, "_vs_", condition1)
-  samples1 <- bss$pData |>
+  samples1 <- as.date.frame(bss$pData) |>
     dplyr::filter(group == condition1) |>
     rownames()
-  samples2 <- bss$pData |>
+  samples2 <- as.date.frame(bss$pData) |>
     dplyr::filter(group == condition2) |>
     rownames()
  
