@@ -4,7 +4,15 @@
 \alias{DSS_pairwise}
 \title{DML and DMR calling with DSS method for two groups}
 \usage{
-DSS_pairwise(bss, condition1, condition2, pval_cutoff, minDiff, minSites = 3)
+DSS_pairwise(
+  bss,
+  condition1,
+  condition2,
+  pval_cutoff,
+  minDiff,
+  minSites = 3,
+  cores = 5
+)
 }
 \arguments{
 \item{bss}{a bsseq object.}
@@ -16,6 +24,8 @@ DSS_pairwise(bss, condition1, condition2, pval_cutoff, minDiff, minSites = 3)
 \item{pval_cutoff}{Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.}
 
 \item{minSites}{Numeric for the minimum number of Cytosines for a DMR.}
+
+\item{cores}{number of cpus.}
 
 \item{minDifff}{cutoff value [from 0 to inf] for the minimum difference between mean methylation 
 levels between group1 and group2 during DMR detection.}

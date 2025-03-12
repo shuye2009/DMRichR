@@ -283,11 +283,12 @@ output_DMR <- function(DMR){
 #' @param minSites Numeric for the minimum number of Cytosines for a DMR.
 #' @param condition1 Character indicating the group1. 
 #' @param condition2 Character indicating the group2.
+#' @param cores number of cpus.
 #' 
 #' @return a list of DMRs and background regions
 #' @export DSS_pairwise
 
-DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3){
+DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3, cores=5){
   message("[DSS_pairwise] starting ... condition1: ", 
           condition1, " condition2: ", condition2)
   print(pData(bss))
@@ -305,7 +306,8 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
     DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
                  group1=samples1,
                  group2=samples2, 
-                 smoothing=TRUE)
+                 smoothing=TRUE,
+                 ncores=cores)
     saveRDS(DML, paste0(aname,"_DML.RDS"))
   }else{
     DML <- readRDS(paste0(aname,"_DML.RDS"))
