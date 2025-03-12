@@ -292,7 +292,8 @@ output_DMR <- function(DMR){
 #' 
 #' @export DSS_pairwise
 
-DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3, cores=5){
+DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, 
+                         minSites=3, cores=5){
   message("[DSS_pairwise] starting ... condition1: ", 
           condition1, " condition2: ", condition2)
   print(pData(bss))
@@ -307,6 +308,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
  
   message("[DSS_pairwise] DML test ..")
   if(!file.exists(paste0(aname,"_DML.RDS"))){
+    library(parallel) ## handle the problem of detectCores in DMLtest
     DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
                  group1=samples1,
                  group2=samples2, 
