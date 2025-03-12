@@ -494,7 +494,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     dir.create(dir)
     setwd(dir)
     
-    DMR <- DSS_pairwise(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3)
+    DMR <- DSS_pairwise(bs.filtered, condition1, condition2, pval_cutoff, minDiff, minSites=3)
     print(glue::glue("Prossessing comparison {aname}..."))
     characterize_DMR(DMR, dir)
   }else{
