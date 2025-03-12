@@ -288,6 +288,7 @@ output_DMR <- function(DMR){
 #' @return a list of DMRs and background regions
 #' 
 #' @importFrom parallel detectCores
+#' @importFrom DSS DMLtest callDML callDMR
 #' 
 #' @export DSS_pairwise
 

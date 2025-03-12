@@ -39,6 +39,8 @@
 #' @importFrom enrichR listEnrichrDbs setEnrichrSite enrichr 
 #' @importFrom utils write.table sessionInfo
 #' @importFrom grDevices pdf dev.off
+#' @importFrom parallel detectCores
+#' @importFrom DSS DMLtest callDML callDMR
 #' @importClassesFrom bsseq BSseq 
 #' @importMethodsFrom bsseq pData seqnames sampleNames
 #' @export DSS.R
