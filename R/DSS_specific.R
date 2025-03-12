@@ -288,6 +288,8 @@ output_DMR <- function(DMR){
 #' @export DSS_pairwise
 
 DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minSites=3){
+  message("[DSS_pairwise] starting ..")
+  
   aname <- paste0(condition2, "_vs_", condition1)
   samples1 <- bss$pData |>
     dplyr::filter(group == condition1) |>
@@ -296,6 +298,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
     dplyr::filter(group == condition2) |>
     rownames()
  
+  message("[DSS_pairwise] DML test ..")
   if(!file.exists(paste0(aname,"_DML.RDS"))){
     DML= DMLtest(bss[, c(samples1, samples2)], 
                  group1=samples1,
@@ -306,6 +309,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
     DML <- readRDS(paste0(aname,"_DML.RDS"))
   }
   
+  message("[DSS_pairwise] call DML ..")
   if(!file.exists(paste0(aname,"_DMLs.RDS"))){
     DMLs = callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
     DMLs <- na.omit(DMLs)
@@ -314,13 +318,14 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
     DMLs <- readRDS(paste0(aname,"_DMLs.RDS"))
   }
   
+  message("[DSS_pairwise] call DMR ..")
   if(!file.exists(paste0(aname,"_DMRs.RDS"))){
     dmrs <- callDMR(DML, 
                     p.threshold = pval_cutoff, 
                     delta = 0.1, 
                     minCG = minSites,
                     pct.sig = 0.5) |>
-      filter(abs(diff.Methy) > minDiff)
+      dplyr::filter(abs(diff.Methy) > minDiff)
     
     dmrs_background <- callDMR(DML, 
                     p.threshold = 0.999, 
@@ -335,5 +340,6 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, minS
     
   }
   
+  message("[DSS_pairwise] finished ..")
   return(list(sigRegion = dmrs, bgRegion = dmrs_background))
 }
