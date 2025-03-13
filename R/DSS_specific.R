@@ -351,5 +351,5 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   }
   
   message("[DSS_pairwise] finished ..")
-  return(list(sigRegion = dmrs, bgRegion = dmrs_background))
+  return(list(sigRegions = dmrs, bgRegions = dmrs_background))
 }
