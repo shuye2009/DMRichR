@@ -227,8 +227,8 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     bs.filtered %>%
       DMRichR::globalStats(genome = genome,
-                           testCovariate = factor1,
-                           adjustCovariate = factor2,
+                           testCovariate = NULL,
+                           adjustCovariate = NULL,
                            matchCovariate = NULL,
                            resPath = resPath) %>%
       openxlsx::write.xlsx("Global/globalStats.xlsx")

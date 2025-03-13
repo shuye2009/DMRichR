@@ -335,13 +335,25 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                     delta = 0.1, 
                     minCG = minSites,
                     pct.sig = 0.5) |>
-      dplyr::filter(abs(diff.Methy) > minDiff)
+      dplyr::filter(abs(diff.Methy) > minDiff) |>
+      dplyr::filter(!is.na(chr)) |>
+      dplyr::mutate(ratio = areaStat/nCG) |>
+      dplyr::mutate(stat = areaStat, .keep = "unused") |>
+      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                       stat < 0 ~ "hypo",
+                                       .default = "none"))
     
     dmrs_background <- callDMR(DML, 
                     p.threshold = 0.999, 
                     delta = 0.01, 
                     minCG = minSites,
-                    pct.sig = 0.001)
+                    pct.sig = 0.001) |>
+      dplyr::filter(!is.na(chr)) |>
+      dplyr::mutate(ratio = areaStat/nCG) |>
+      dplyr::mutate(stat = areaStat, .keep = "unused") |>
+      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                       stat < 0 ~ "hypo",
+                                       .default = "none"))
     saveRDS(dmrs, paste0(aname,"_DMRs.RDS"))
     saveRDS(dmrs_background, paste0(aname,"_background.RDS"))
   }else{
@@ -351,5 +363,15 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   }
   
   message("[DSS_pairwise] finished ..")
-  return(list(sigRegions = dmrs, bgRegions = dmrs_background))
+  
+  if(nrow(dmrs) > 0){
+    message("select significant DMR")
+    dmrs <- dmrs |>
+      dplyr::filter(abs(ratio) > ratio_cutoff)
+  
+    return(list(sigRegions = dmrs, bgRegions = dmrs_background))
+  }else{
+    message("!!! No significant DMR found at p.threshold ", pval_cutoff)
+    return(NULL)
+  }
 }
