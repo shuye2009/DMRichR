@@ -225,13 +225,16 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     dir.create("Global")
     
-    bs.filtered %>%
-      DMRichR::globalStats(genome = genome,
-                           testCovariate = NULL,
-                           adjustCovariate = NULL,
-                           matchCovariate = NULL,
-                           resPath = resPath) %>%
-      openxlsx::write.xlsx("Global/globalStats.xlsx")
+    if(analysisType == "general"){
+      bs.filtered %>%
+        DMRichR::globalStats(genome = genome,
+                             testCovariate = factor1,
+                             adjustCovariate = facotor2,
+                             matchCovariate = NULL,
+                             resPath = resPath) %>%
+        openxlsx::write.xlsx("Global/globalStats.xlsx")
+    }
+    
     
     # Global plots ------------------------------------------------------------
     
@@ -492,11 +495,18 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }
   }else if(analysisType=="twoGroup"){
     aname <- paste0(condition2, "_vs_", condition1)
+   
     dir <- file.path(wd, aname)
     dir.create(dir)
     setwd(dir)
     
-    DMR <- DSS_pairwise(bs.filtered, condition1, condition2, pval_cutoff, minDiff, minSites=3, cores=cores)
+    if(!file.exists("DMR.RDS") || override){
+      DMR <- DSS_pairwise(bs.filtered, condition1, condition2, pval_cutoff, minDiff, minSites=3, cores=cores)
+      saveRDS(DMR, "DMR.RDS")
+    }else{
+      DMR <- readRDS("DMR.RDS")
+    }
+    
     print(glue::glue("Prossessing comparison {aname}..."))
     characterize_DMR(DMR, dir)
   }else{

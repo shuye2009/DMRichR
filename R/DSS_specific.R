@@ -135,6 +135,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                   pct.sig=0.5) |>
     dplyr::filter(!is.na(chr)) |>
     dplyr::mutate(ratio = areaStat/nCG) |>
+    dplyr::filter(abs(ratio) > ratio_cutoff) |>
     dplyr::mutate(stat = areaStat, .keep = "unused") |>
     dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                      stat < 0 ~ "hypo",
@@ -145,10 +146,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
   print(head(dmrs))
   
   if(nrow(dmrs) > 0){
-    message("select significant DMR")
-    dmrs <- dmrs |>
-      dplyr::filter(abs(ratio) > ratio_cutoff)
-  
+    
     message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
                                delta=0, 
@@ -308,68 +306,52 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
     rownames()
  
   message("[DSS_pairwise] DML test ..")
-  if(!file.exists(paste0(aname,"_DML.RDS"))){
-    library(parallel) ## handle the problem of detectCores in DMLtest
-    DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
-                 group1=samples1,
-                 group2=samples2, 
-                 smoothing=TRUE,
-                 ncores=cores)
-    saveRDS(DML, paste0(aname,"_DML.RDS"))
-  }else{
-    DML <- readRDS(paste0(aname,"_DML.RDS"))
-  }
   
-  message("[DSS_pairwise] call DML ..")
-  if(!file.exists(paste0(aname,"_DMLs.RDS"))){
-    DMLs = DSS::callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
-    DMLs <- na.omit(DMLs)
-    saveRDS(DMLs, paste0(aname,"_DMLs.RDS"))
-  }else{
-    DMLs <- readRDS(paste0(aname,"_DMLs.RDS"))
-  }
+  library(parallel) ## handle the problem of detectCores in DMLtest
+  DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
+               group1=samples1,
+               group2=samples2, 
+               smoothing=TRUE,
+               ncores=cores)
+  
+  
+  #message("[DSS_pairwise] call DML ..")
+  
+  #DMLs = DSS::callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
+  #DMLs <- na.omit(DMLs)
   
   message("[DSS_pairwise] call DMR ..")
-  if(!file.exists(paste0(aname,"_DMRs.RDS"))){
-    dmrs <- DSS::callDMR(DML, 
-                    p.threshold = pval_cutoff, 
-                    delta = 0.1, 
-                    minCG = minSites,
-                    pct.sig = 0.5) |>
-      dplyr::filter(abs(diff.Methy) > minDiff) |>
-      dplyr::filter(!is.na(chr)) |>
-      dplyr::mutate(ratio = areaStat/nCG) |>
-      dplyr::mutate(stat = areaStat, .keep = "unused") |>
-      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
-                                       stat < 0 ~ "hypo",
-                                       .default = "none"))
+  
+  dmrs <- DSS::callDMR(DML, 
+                  p.threshold = pval_cutoff, 
+                  delta = 0.1, 
+                  minCG = minSites,
+                  pct.sig = 0.5) |>
+    dplyr::filter(abs(diff.Methy) > minDiff) |>
+    dplyr::filter(!is.na(chr)) |>
+    dplyr::mutate(ratio = areaStat/nCG) |>
+    dplyr::mutate(stat = areaStat, .keep = "unused") |>
+    dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                     stat < 0 ~ "hypo",
+                                     .default = "none"))
+  
+  dmrs_background <- callDMR(DML, 
+                  p.threshold = 0.999, 
+                  delta = 0.001, 
+                  minCG = 1,
+                  pct.sig = 0.001) |>
+    dplyr::filter(!is.na(chr)) |>
+    dplyr::mutate(ratio = areaStat/nCG) |>
+    dplyr::filter(abs(ratio) > ratio_cutoff) |>
+    dplyr::mutate(stat = areaStat, .keep = "unused") |>
+    dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
+                                     stat < 0 ~ "hypo",
+                                     .default = "none"))
     
-    dmrs_background <- callDMR(DML, 
-                    p.threshold = 0.999, 
-                    delta = 0.01, 
-                    minCG = minSites,
-                    pct.sig = 0.001) |>
-      dplyr::filter(!is.na(chr)) |>
-      dplyr::mutate(ratio = areaStat/nCG) |>
-      dplyr::mutate(stat = areaStat, .keep = "unused") |>
-      dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
-                                       stat < 0 ~ "hypo",
-                                       .default = "none"))
-    saveRDS(dmrs, paste0(aname,"_DMRs.RDS"))
-    saveRDS(dmrs_background, paste0(aname,"_background.RDS"))
-  }else{
-    dmrs <- readRDS(paste0(aname,"_DMRs.RDS"))
-    dmrs_background <- readRDS(paste0(aname,"_background.RDS"))
-    
-  }
   
   message("[DSS_pairwise] finished ..")
   
   if(nrow(dmrs) > 0){
-    message("select significant DMR")
-    dmrs <- dmrs |>
-      dplyr::filter(abs(ratio) > ratio_cutoff)
-  
     return(list(sigRegions = dmrs, bgRegions = dmrs_background))
   }else{
     message("!!! No significant DMR found at p.threshold ", pval_cutoff)
