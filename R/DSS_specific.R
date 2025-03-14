@@ -284,6 +284,7 @@ output_DMR <- function(DMR){
 #' @param condition1 Character indicating the group1. 
 #' @param condition2 Character indicating the group2.
 #' @param cores number of cpus.
+#' @param ratio_cutoff cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection.
 #' 
 #' @return a list of DMRs and background regions
 #' 
@@ -293,7 +294,7 @@ output_DMR <- function(DMR){
 #' @export DSS_pairwise
 
 DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff, 
-                         minSites=3, cores=5){
+                         minSites=3, cores=5, ratio_cutoff=2){
   message("[DSS_pairwise] starting ... condition1: ", 
           condition1, " condition2: ", condition2)
   print(pData(bss))
