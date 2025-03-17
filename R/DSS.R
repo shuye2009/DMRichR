@@ -255,38 +255,40 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       plots <- c("windows", "CpGs", "CGi")
     }
     
-    purrr::walk(plots,
-                function(plotMatrix,
-                         group =  bs.filtered %>%
-                           pData() %>%
-                           dplyr::as_tibble() %>%
-                           dplyr::pull(!!factor1) %>%
-                           forcats::fct_rev()){
-                  
-                  title <- dplyr::case_when(plotMatrix == "windows" ~ "20Kb Windows",
-                                            plotMatrix == "CpGs" ~ "Single CpG",
-                                            plotMatrix == "CGi" ~ "CpG Island")
-                  
-                  plotMatrix %>%
-                    get() %>% 
-                    DMRichR::PCA(testCovariate = factor1,
-                                 bs.filtered = bs.filtered) %>%
-                    ggplot2::ggsave(glue::glue("Global/{title} PCA.pdf"),
-                                    plot = .,
-                                    device = NULL,
-                                    width = 11,
-                                    height = 8.5)
-                  
-                  plotMatrix %>%
-                    get() %>% 
-                    DMRichR::densityPlot(group = group) %>% 
-                    ggplot2::ggsave(glue::glue("Global/{title} Density Plot.pdf"),
-                                    plot = .,
-                                    device = NULL,
-                                    width = 11,
-                                    height = 4)
-                  
-                })
+    if(analysisType == "general"){
+      purrr::walk(plots,
+                  function(plotMatrix,
+                           group =  bs.filtered %>%
+                             pData() %>%
+                             dplyr::as_tibble() %>%
+                             dplyr::pull(!!factor1) %>%
+                             forcats::fct_rev()){
+                    
+                    title <- dplyr::case_when(plotMatrix == "windows" ~ "20Kb Windows",
+                                              plotMatrix == "CpGs" ~ "Single CpG",
+                                              plotMatrix == "CGi" ~ "CpG Island")
+                    
+                    plotMatrix %>%
+                      get() %>% 
+                      DMRichR::PCA(testCovariate = factor1,
+                                   bs.filtered = bs.filtered) %>%
+                      ggplot2::ggsave(glue::glue("Global/{title} PCA.pdf"),
+                                      plot = .,
+                                      device = NULL,
+                                      width = 11,
+                                      height = 8.5)
+                    
+                    plotMatrix %>%
+                      get() %>% 
+                      DMRichR::densityPlot(group = group) %>% 
+                      ggplot2::ggsave(glue::glue("Global/{title} Density Plot.pdf"),
+                                      plot = .,
+                                      device = NULL,
+                                      width = 11,
+                                      height = 4)
+                    
+                  })
+    }
     
     
     
