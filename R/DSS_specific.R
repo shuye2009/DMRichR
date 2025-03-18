@@ -1,4 +1,3 @@
-
 #' processReport
 #' @title Process methylation report files
 #' @description Build bsseq object from report files and perform smoothing
@@ -307,7 +306,9 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
  
   message("[DSS_pairwise] DML test ..")
   
-  library(parallel) ## handle the problem of detectCores in DMLtest
+  # make detectCores available in DSS
+  detectCores <- parallel::detectCores
+  
   DML= DSS::DMLtest(bss, 
                group1=samples1,
                group2=samples2, 
