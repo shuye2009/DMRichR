@@ -251,13 +251,13 @@ output_DMR <- function(DMR){
   
   dmr$name <- rownames(dmr)
   dmr$strand <- rep("*", nrow(dmr))
-  dmr <- dmr[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "status")]
+  dmr <- dmr[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "ratio", "status")]
   
   write.table(dmr, "DMRs/DMR.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   background$name <- rownames(background)
   background$strand <- rep("*", nrow(background))
-  background <- background[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "status")]
+  background <- background[, c("chr", "start", "end", "name", "stat", "strand", "length", "nCG", "ratio", "status")]
   
   write.table(background, "DMRs/background.bed", row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
@@ -340,8 +340,8 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   dmrs_background <- callDMR(DML, 
                   p.threshold = 1, 
                   delta = 0, 
-                  minCG = minSites,
-                  pct.sig = 0.5) |>
+                  minCG = minSites, # keep same as dmrs to avoid merging regions
+                  pct.sig = 0.5) |> # keep same as dmrs to avoid merging regions
     dplyr::filter(!is.na(chr)) |>
     dplyr::mutate(ratio = areaStat/nCG) |>
     dplyr::mutate(stat = areaStat, .keep = "unused") |>
