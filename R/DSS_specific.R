@@ -68,7 +68,7 @@ DSS_multifactor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cu
     DMLfit <- readRDS("DMLfit.RDS")
   }
   
-  message("desing matrix:")
+  message("design matrix:")
   print(DMLfit$X)                
   
   message("[DSS_multi_factor] finding DML for factor ", factor1)
@@ -81,7 +81,6 @@ DSS_multifactor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cu
   }
 
   rm(DMLfit)
-  gc()
   
   message("[DSS_multi_factor] finding DMR for factor ", factor1)
   
@@ -93,7 +92,8 @@ DSS_multifactor <- function(bss, design, factor1, factor2, pval_cutoff, ratio_cu
     message("[DSS_multi_factor] finding DMR for factor ", factor2)
     dmrsfactor2 <- findDMR(DMLfactor2, 
                           pval_cutoff = pval_cutoff, 
-                          ratio_cutoff = ratio_cutoff)
+                          ratio_cutoff = ratio_cutoff,
+                          minSites = minSites)
     message("[DSS_multi_factor] finding DMR for interaction of ", factor1, " and ", factor2)
     dmrsInter <- findDMR(DMLInter, 
                          pval_cutoff = pval_cutoff, 
@@ -149,11 +149,11 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
     message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
                                delta=0, 
-                               p.threshold=0.999,
+                               p.threshold=1,
                                minlen=50, 
-                               minCG=3, 
-                               dis.merge=100, 
-                               pct.sig=0.001) |>
+                               minCG=minSites, 
+                               dis.merge=0, # do not merge regions
+                               pct.sig=0.5) |>
       dplyr::filter(!is.na(chr)) |>
       dplyr::mutate(ratio = areaStat/nCG) |>
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
@@ -326,7 +326,9 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   dmrs <- DSS::callDMR(DML, 
                   p.threshold = pval_cutoff, 
                   delta = 0.1, 
-                  minCG = minSites,
+                  minlen=50, 
+                  minCG=minSites, 
+                  dis.merge=100, 
                   pct.sig = 0.5) |>
     dplyr::filter(abs(diff.Methy) > minDiff) |>
     dplyr::filter(!is.na(chr)) |>
@@ -340,7 +342,9 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   dmrs_background <- callDMR(DML, 
                   p.threshold = 1, 
                   delta = 0, 
-                  minCG = minSites, # keep same as dmrs to avoid merging regions
+                  minlen=50, 
+                  minCG=minSites, 
+                  dis.merge=0, # do not merge regions
                   pct.sig = 0.5) |> # keep same as dmrs to avoid merging regions
     dplyr::filter(!is.na(chr)) |>
     dplyr::mutate(ratio = areaStat/nCG) |>
