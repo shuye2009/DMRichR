@@ -308,7 +308,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   message("[DSS_pairwise] DML test ..")
   
   library(parallel) ## handle the problem of detectCores in DMLtest
-  DML= DSS::DMLtest(bss[, c(samples1, samples2)], 
+  DML= DSS::DMLtest(bss, 
                group1=samples1,
                group2=samples2, 
                smoothing=TRUE,
@@ -330,19 +330,19 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
     dplyr::filter(abs(diff.Methy) > minDiff) |>
     dplyr::filter(!is.na(chr)) |>
     dplyr::mutate(ratio = areaStat/nCG) |>
+    dplyr::filter(abs(ratio) > ratio_cutoff) |>
     dplyr::mutate(stat = areaStat, .keep = "unused") |>
     dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                      stat < 0 ~ "hypo",
                                      .default = "none"))
   
   dmrs_background <- callDMR(DML, 
-                  p.threshold = 0.999, 
-                  delta = 0.001, 
-                  minCG = 1,
-                  pct.sig = 0.001) |>
+                  p.threshold = 1, 
+                  delta = 0, 
+                  minCG = minSites,
+                  pct.sig = 0.5) |>
     dplyr::filter(!is.na(chr)) |>
     dplyr::mutate(ratio = areaStat/nCG) |>
-    dplyr::filter(abs(ratio) > ratio_cutoff) |>
     dplyr::mutate(stat = areaStat, .keep = "unused") |>
     dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                      stat < 0 ~ "hypo",
