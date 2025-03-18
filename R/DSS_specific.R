@@ -155,7 +155,15 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
                                dis.merge=0, # do not merge regions
                                pct.sig=0.5) |>
       dplyr::filter(!is.na(chr)) |>
-      dplyr::mutate(ratio = areaStat/nCG) |>
+      dplyr::mutate(ratio = areaStat/nCG) |># Replace these lines:
+      # make detectCores available in DSS
+      detectCores <- parallel::detectCores
+      
+      # With these lines:
+      # Make detectCores available to DSS package by injecting it into its namespace
+      if (!exists("detectCores", envir = asNamespace("DSS"))) {
+        assignInNamespace("detectCores", parallel::detectCores, ns = "DSS")
+      }
       dplyr::mutate(stat = areaStat, .keep = "unused") |>
       dplyr::mutate(status = case_when(stat > 0 ~ "hyper",
                                        stat < 0 ~ "hypo",
@@ -306,8 +314,11 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
  
   message("[DSS_pairwise] DML test ..")
   
-  # make detectCores available in DSS
-  detectCores <- parallel::detectCores
+
+# Make detectCores available to DSS package by injecting it into its namespace
+if (!exists("detectCores", envir = asNamespace("DSS"))) {
+  assignInNamespace("detectCores", parallel::detectCores, ns = "DSS")
+}
   
   DML= DSS::DMLtest(bss, 
                group1=samples1,
