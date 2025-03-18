@@ -306,11 +306,9 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
  
   message("[DSS_pairwise] DML test ..")
   
-
-  # Make detectCores available to DSS package by injecting it into its namespace
-  if (!exists("detectCores", envir = asNamespace("DSS"))) {
-    assignInNamespace("detectCores", parallel::detectCores, ns = "DSS")
-  }
+  # Load the parallel package to make detectCores available
+  # This is needed for DSS::DMLtest which uses detectCores internally
+  library(parallel)
   
   DML= DSS::DMLtest(bss, 
                group1=samples1,
