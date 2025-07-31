@@ -496,7 +496,7 @@ DSS.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       characterize_DMR(DMR, dir)
     }
   }else if(analysisType=="twoGroup"){
-    aname <- paste0(condition2, "_vs_", condition1)
+    aname <- paste0(condition1, "_vs_", condition2)
    
     dir <- file.path(wd, aname)
     dir.create(dir)

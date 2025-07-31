@@ -149,7 +149,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
     message("select background DMR")
     dmrs_background <- DSS::callDMR(DML, 
                                delta=0, 
-                               p.threshold=1,
+                               p.threshold=0.5,
                                minlen=50, 
                                minCG=minSites, 
                                dis.merge=0, # do not merge regions
@@ -296,7 +296,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
           condition1, " condition2: ", condition2)
   print(pData(bss))
   
-  aname <- paste0(condition2, "_vs_", condition1)
+  aname <- paste0(condition1, "_vs_", condition2)
   samples1 <- as.data.frame(pData(bss)) |>
     dplyr::filter(group == condition1) |>
     rownames()
@@ -317,7 +317,8 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                ncores=cores)
   
   
-  #message("[DSS_pairwise] call DML ..")
+  # Output DML to tsv file
+  write.table(DML, paste0("DML_", aname, ".tsv"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   #DMLs = DSS::callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
   #DMLs <- na.omit(DMLs)
@@ -327,9 +328,9 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
   dmrs <- DSS::callDMR(DML, 
                   p.threshold = pval_cutoff, 
                   delta = 0.1, 
-                  minlen=50, 
-                  minCG=minSites, 
-                  dis.merge=100, 
+                  minlen = 50, 
+                  minCG = minSites, 
+                  dis.merge = 100, 
                   pct.sig = 0.5) |>
     dplyr::filter(abs(diff.Methy) > minDiff) |>
     dplyr::filter(!is.na(chr)) |>
@@ -341,7 +342,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                                      .default = "none"))
   
   dmrs_background <- callDMR(DML, 
-                  p.threshold = 1, 
+                  p.threshold = 0.5, 
                   delta = 0, 
                   minlen=50, 
                   minCG=minSites, 
