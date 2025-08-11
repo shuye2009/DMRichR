@@ -316,7 +316,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                smoothing=TRUE,
                ncores=cores) %>%
     dplyr::filter(fdr < pval_cutoff) %>%
-    dplyr::filter(abs(diff.Methy) > minDiff) 
+    dplyr::filter(abs(diff) > minDiff) 
   
   
   # Output DML to tsv file
