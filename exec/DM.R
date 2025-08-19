@@ -60,7 +60,9 @@ option_list <- list(
   optparse::make_option(c("--filePattern"), type = "character", default = NULL,
                         help = "To allow flexible input file names [default = %default]"),
   optparse::make_option(c("--resPath"), type = "character", default = NULL,
-                        help = "Path to local resources [default = %default]")
+                        help = "Path to local resources [default = %default]"),
+  optparse::make_option(c("--targetRegion"), type = "character", default = NULL,
+                        help = "Name of BED file in the resPath directory with genomic intervals for targeted differential methylation testing [default = %default]")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list = option_list))
 
@@ -88,5 +90,6 @@ DMRichR::DM.R(genome = opt$genome,
               sexCheck = opt$sexCheck,
               EnsDb = opt$EnsDb,
               filePattern = opt$filePattern,
-              resPath = opt$resPath)
+              resPath = opt$resPath,
+              targetRegion = opt$targetRegion)
     

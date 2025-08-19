@@ -29,6 +29,7 @@
 #' This is recommended for non-model organisms. 
 #' @param filePattern character indicating cytosine report file name pattern
 #' @param resPath character specifying path to local resources if internet is not available
+#' @param targetRegion character specifying path to BED file with genomic intervals for targeted differential methylation testing. If provided, dmrseq will be run on these specific regions and results saved to Targeted directory.
 #' 
 #' @importFrom dmrseq getAnnot dmrseq plotDMRs
 #' @importFrom ggplot2 ggsave
@@ -71,7 +72,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                  sexCheck = FALSE,
                  EnsDb = FALSE,
                  filePattern = "*.CpG_report.txt.gz",
-                 resPath = NULL){
+                 resPath = NULL,
+                 targetRegion = NULL){
   
   
   # Check dmrseq version 
@@ -131,6 +133,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   print(glue::glue("sexCheck = {sexCheck}"))
   print(glue::glue("EnsDb = {EnsDb}"))
   print(glue::glue("GOfuncR = {GOfuncR}"))
+  print(glue::glue("targetRegion = {targetRegion}"))
   
   # Setup annotation databases ----------------------------------------------
   
@@ -792,6 +795,125 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }
   
   
+  # Targeted differential methylation testing --------------------------------
+  
+  if(!is.null(targetRegion)){
+    cat("\n[DMRichR] Testing targeted regions with dmrseq \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    
+    # Validate and read BED file
+    if(!file.exists(targetRegion)){
+      stop(glue::glue("Target region BED file not found: {targetRegion}"))
+    }
+    
+    print(glue::glue("Reading target regions from: {targetRegion}"))
+    
+    # Read BED file and convert to GRanges
+    tryCatch({
+      targetBed <- read.table(file.path(resPath, targetRegion), header = FALSE, sep = "\t", stringsAsFactors = FALSE)
+      colnames(targetBed)[1:3] <- c("chr", "start", "end")
+      
+      # Add additional columns if they exist
+      if(ncol(targetBed) > 3){
+        colnames(targetBed)[4:ncol(targetBed)] <- paste0("V", 4:ncol(targetBed))
+      }
+      
+      targetRegions <- GenomicRanges::makeGRangesFromDataFrame(targetBed, keep.extra.columns = TRUE)
+      
+      print(glue::glue("Loaded {length(targetRegions)} target regions"))
+      
+      # Run dmrseq on target regions
+      start_time <- Sys.time()
+      
+      targetResults <- dmrseq::dmrseq(bs = bs.filtered,
+                                      cutoff = cutoff,
+                                      minNumRegion = minCpGs,
+                                      maxPerms = maxPerms,
+                                      testCovariate = testCovariate,
+                                      adjustCovariate = adjustCovariate,
+                                      matchCovariate = matchCovariate,
+                                      regions = targetRegions,
+                                      BPPARAM = BiocParallel::MulticoreParam(workers = cores))
+      
+      print(glue::glue("Target region analysis timing..."))
+      end_time <- Sys.time()
+      print(end_time - start_time)
+      
+      # Process results
+      if(length(targetResults) > 0){
+        targetResults <- targetResults %>% 
+          plyranges::mutate(direction = dplyr::case_when(stat > 0 ~ "Hypermethylated",
+                                                         stat < 0 ~ "Hypomethylated"),
+                            difference = round(beta/pi * 100))
+        
+        # Select significant results
+        if(sum(targetResults$qval < 0.05) < 100 & sum(targetResults$pval < 0.05) != 0){
+          sigTargetResults <- targetResults %>%
+            plyranges::filter(pval < 0.05)
+        }else if(sum(targetResults$qval < 0.05) >= 100){
+          sigTargetResults <- targetResults %>%
+            plyranges::filter(qval < 0.05)
+        }else{
+          sigTargetResults <- targetResults[0] # Empty GRanges
+        }
+        
+        # Create Targeted directory
+        dir.create("Targeted", showWarnings = FALSE)
+        
+        # Export results
+        print(glue::glue("Exporting targeted region results..."))
+        gr2bed(targetResults, "Targeted/targeted_regions_all.bed")
+        
+        if(length(sigTargetResults) > 0){
+          print(glue::glue("Found {length(sigTargetResults)} significant targeted regions"))
+          gr2bed(sigTargetResults, "Targeted/targeted_regions_significant.bed")
+          
+          # Plot significant targeted regions
+          if(length(sigTargetResults) > 0){
+            pdf("Targeted/Targeted_regions.pdf", height = 4, width = 8)
+            tryCatch({
+              DMRichR::plotDMRs2(bs.filtered,
+                                 regions = sigTargetResults,
+                                 testCovariate = testCovariate,
+                                 extend = (end(sigTargetResults) - start(sigTargetResults) + 1)*2,
+                                 addRegions = sigTargetResults,
+                                 annoTrack = annoTrack,
+                                 regionCol = "#FF00001A",
+                                 lwd = 2,
+                                 qval = FALSE,
+                                 stat = FALSE,
+                                 horizLegend = FALSE)
+            },
+            error = function(error_condition) {
+              print(glue::glue("Warning: One (or more) targeted regions can't be plotted"))
+            })
+            dev.off()
+          }
+          
+          # Extract individual smoothed methylation values for targeted regions
+          if(exists("bs.filtered.bsseq")){
+            print(glue::glue("Extracting individual smoothed methylation values for targeted regions..."))
+            bs.filtered.bsseq %>%
+              DMRichR::smooth2txt(regions = sigTargetResults,
+                                  txt = "Targeted/targeted_individual_smoothed_methylation.txt")
+          }
+        }else{
+          print(glue::glue("No significant targeted regions found"))
+        }
+        
+        # Save RData
+        print(glue::glue("Saving targeted results RData..."))
+        save(targetResults, sigTargetResults, file = "RData/targeted.RData")
+        
+      }else{
+        print(glue::glue("No results found for targeted regions"))
+      }
+      
+    },
+    error = function(error_condition) {
+      print(glue::glue("Error processing target regions: {error_condition$message}"))
+    })
+  }
+
   # Machine learning --------------------------------------------------------
   tryCatch({
     methylLearnOutput <- DMRichR::methylLearn(bs.filtered.bsseq = bs.filtered.bsseq,
