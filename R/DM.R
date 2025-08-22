@@ -799,6 +799,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   if(!is.null(targetRegion)){
     cat("\n[DMRichR] Testing targeted regions with dmrseq \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    targetRegion <- file.path(resPath, targetRegion)
     
     # Validate and read BED file
     if(!file.exists(targetRegion)){
@@ -809,7 +810,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     # Read BED file and convert to GRanges
     tryCatch({
-      targetBed <- read.table(file.path(resPath, targetRegion), header = FALSE, sep = "\t", stringsAsFactors = FALSE)
+      targetBed <- read.table(targetRegion, header = FALSE, sep = "\t", stringsAsFactors = FALSE)
       colnames(targetBed)[1:3] <- c("chr", "start", "end")
       
       # Add additional columns if they exist
