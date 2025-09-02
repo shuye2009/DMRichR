@@ -286,7 +286,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         openxlsx::write.xlsx(file = "Blocks/background_blocks_annotated.xlsx")
     }
     
-    print(glue::glue("Saving RData..."))
+    print(glue::glue("Saving Rdata..."))
     save(blocks, file = "RData/Blocks.RData")
     #load("RData/Blocks.RData")
     
@@ -798,7 +798,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   # Targeted differential methylation testing --------------------------------
   
   if(!is.null(targetRegion)){
-    cat("\n[DMRichR] Testing targeted regions with dmrseq \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    cat("\n[DMRichR] Testing targeted regions with methylKit \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
     targetRegion <- file.path(resPath, targetRegion)
     
     # Validate and read BED file
@@ -822,92 +822,157 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
       print(glue::glue("Loaded {length(targetRegions)} target regions"))
       
-      # Run dmrseq on target regions
-      start_time <- Sys.time()
+      # Convert BSseq to methylKit format for region-based testing
+      cat("Converting BSseq to methylKit format...\n")
       
-      targetResults <- dmrseq::dmrseq(bs = bs.filtered,
-                                      cutoff = cutoff,
-                                      minNumRegion = minCpGs,
-                                      maxPerms = maxPerms,
-                                      testCovariate = testCovariate,
-                                      adjustCovariate = adjustCovariate,
-                                      matchCovariate = matchCovariate,
-                                      regions = targetRegions,
-                                      BPPARAM = BiocParallel::MulticoreParam(workers = cores))
+      # Extract methylation data from BSseq object
+      meth_data <- bsseq::getMeth(bs.filtered, type = "raw")
+      cov_data <- bsseq::getCoverage(bs.filtered)
+      pos_data <- GenomicRanges::granges(bs.filtered)
       
-      print(glue::glue("Target region analysis timing..."))
-      end_time <- Sys.time()
-      print(end_time - start_time)
+      # Get sample information
+      sample_info <- bsseq::pData(bs.filtered)
       
-      # Process results
-      if(length(targetResults) > 0){
-        targetResults <- targetResults %>% 
-          plyranges::mutate(direction = dplyr::case_when(stat > 0 ~ "Hypermethylated",
-                                                         stat < 0 ~ "Hypomethylated"),
-                            difference = round(beta/pi * 100))
+      # Create methylKit objects for each sample
+      methylkit_list <- list()
+      for(i in 1:ncol(meth_data)) {
+        sample_name <- colnames(meth_data)[i]
         
-        # Select significant results
-        if(sum(targetResults$qval < 0.05) < 100 & sum(targetResults$pval < 0.05) != 0){
-          sigTargetResults <- targetResults %>%
-            plyranges::filter(pval < 0.05)
-        }else if(sum(targetResults$qval < 0.05) >= 100){
-          sigTargetResults <- targetResults %>%
-            plyranges::filter(qval < 0.05)
-        }else{
-          sigTargetResults <- targetResults[0] # Empty GRanges
-        }
+        # Create data frame for this sample
+        sample_df <- data.frame(
+          chr = as.character(seqnames(pos_data)),
+          start = start(pos_data),
+          end = end(pos_data),
+          strand = "*",
+          coverage = cov_data[,i],
+          freqC = round(meth_data[,i] * 100, 2),
+          freqT = round((1 - meth_data[,i]) * 100, 2)
+        )
         
-        # Create Targeted directory
-        dir.create("Targeted", showWarnings = FALSE)
+        # Remove rows with NA values
+        sample_df <- sample_df[complete.cases(sample_df),]
         
-        # Export results
-        print(glue::glue("Exporting targeted region results..."))
-        gr2bed(targetResults, "Targeted/targeted_regions_all.bed")
-        
-        if(length(sigTargetResults) > 0){
-          print(glue::glue("Found {length(sigTargetResults)} significant targeted regions"))
-          gr2bed(sigTargetResults, "Targeted/targeted_regions_significant.bed")
-          
-          # Plot significant targeted regions
-          if(length(sigTargetResults) > 0){
-            pdf("Targeted/Targeted_regions.pdf", height = 4, width = 8)
-            tryCatch({
-              DMRichR::plotDMRs2(bs.filtered,
-                                 regions = sigTargetResults,
-                                 testCovariate = testCovariate,
-                                 extend = (end(sigTargetResults) - start(sigTargetResults) + 1)*2,
-                                 addRegions = sigTargetResults,
-                                 annoTrack = annoTrack,
-                                 regionCol = "#FF00001A",
-                                 lwd = 2,
-                                 qval = FALSE,
-                                 stat = FALSE,
-                                 horizLegend = FALSE)
-            },
-            error = function(error_condition) {
-              print(glue::glue("Warning: One (or more) targeted regions can't be plotted"))
-            })
-            dev.off()
-          }
-          
-          # Extract individual smoothed methylation values for targeted regions
-          if(exists("bs.filtered.bsseq")){
-            print(glue::glue("Extracting individual smoothed methylation values for targeted regions..."))
-            bs.filtered.bsseq %>%
-              DMRichR::smooth2txt(regions = sigTargetResults,
-                                  txt = "Targeted/targeted_individual_smoothed_methylation.txt")
-          }
-        }else{
-          print(glue::glue("No significant targeted regions found"))
-        }
-        
-        # Save RData
-        print(glue::glue("Saving targeted results RData..."))
-        save(targetResults, sigTargetResults, file = "RData/targeted.RData")
-        
-      }else{
-        print(glue::glue("No results found for targeted regions"))
+        # Create methylRaw object
+        methylkit_list[[i]] <- methylKit::new("methylRaw",
+                                              sample_df,
+                                              sample.id = sample_name,
+                                              assembly = genome,
+                                              context = "CpG",
+                                              resolution = "base")
       }
+      
+      # Create treatment vector based on your design
+      treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
+      
+      # Create methylRawList
+      myobj <- methylKit::new("methylRawList", methylkit_list, treatment = treatment_vector)
+      
+      # Unite samples (keep sites covered in at least 50% of samples per group)
+      meth_united <- methylKit::unite(myobj, destrand = FALSE, min.per.group = ceiling(length(methylkit_list) * 0.5))
+      
+      # Calculate regional methylation for target regions
+      cat("Calculating regional methylation for target regions...\n")
+      
+      # Convert target regions to methylKit format
+      target_regions_df <- data.frame(
+        chr = as.character(seqnames(targetRegions)),
+        start = start(targetRegions),
+        end = end(targetRegions),
+        strand = "*"
+      )
+      
+      # Get regional methylation
+      regional_meth <- methylKit::regionCounts(meth_united, targetRegions, 
+                                               cov.bases = minCpGs, 
+                                               strand.aware = FALSE)
+      
+      # Perform differential methylation testing on regions
+      cat("Performing differential methylation testing on target regions...\n")
+      
+      # Calculate differential methylation for regions
+      target_diff <- methylKit::calculateDiffMeth(regional_meth, 
+                                                  overdispersion = "MN",
+                                                  test = "Chisq",
+                                                  mc.cores = cores)
+      
+      # Filter significant results
+      target_diff_sig <- methylKit::getMethylDiff(target_diff, 
+                                                  difference = cutoff * 100,  # Convert to percentage
+                                                  qvalue = 0.05)
+      
+      # Convert results back to GRanges format
+      if(nrow(target_diff_sig) > 0) {
+        targetResults <- GenomicRanges::makeGRangesFromDataFrame(
+          target_diff_sig,
+          seqnames.field = "chr",
+          start.field = "start", 
+          end.field = "end",
+          keep.extra.columns = TRUE
+        )
+        
+        # Add direction information
+        targetResults$direction <- ifelse(targetResults$meth.diff > 0, 
+                                         "Hypermethylated", 
+                                         "Hypomethylated")
+        targetResults$difference <- abs(targetResults$meth.diff)
+        targetResults$stat <- targetResults$meth.diff
+        targetResults$pval <- targetResults$pvalue
+        targetResults$qval <- targetResults$qvalue
+        
+        print(glue::glue("Found {length(targetResults)} significantly differentially methylated target regions"))
+        
+      } else {
+        targetResults <- GenomicRanges::GRanges()
+        print("No significantly differentially methylated target regions found")
+      }
+      
+      # Create Targeted directory
+      dir.create("Targeted", showWarnings = FALSE)
+      
+      # Export results
+      print(glue::glue("Exporting targeted region results..."))
+      gr2bed(targetResults, "Targeted/targeted_regions_all.bed")
+      
+      if(length(targetResults) > 0){
+        print(glue::glue("Found {length(targetResults)} significant targeted regions"))
+        gr2bed(targetResults, "Targeted/targeted_regions_significant.bed")
+        
+        # Plot significant targeted regions
+        if(length(targetResults) > 0){
+          pdf("Targeted/Targeted_regions.pdf", height = 4, width = 8)
+          tryCatch({
+            DMRichR::plotDMRs2(bs.filtered,
+                               regions = targetResults,
+                               testCovariate = testCovariate,
+                               extend = (end(targetResults) - start(targetResults) + 1)*2,
+                               addRegions = targetResults,
+                               annoTrack = annoTrack,
+                               regionCol = "#FF00001A",
+                               lwd = 2,
+                               qval = FALSE,
+                               stat = FALSE,
+                               horizLegend = FALSE)
+          },
+          error = function(error_condition) {
+            print(glue::glue("Warning: One (or more) targeted regions can't be plotted"))
+          })
+          dev.off()
+        }
+        
+        # Extract individual smoothed methylation values for targeted regions
+        if(exists("bs.filtered.bsseq")){
+          print(glue::glue("Extracting individual smoothed methylation values for targeted regions..."))
+          bs.filtered.bsseq %>%
+            DMRichR::smooth2txt(regions = targetResults,
+                                txt = "Targeted/targeted_individual_smoothed_methylation.txt")
+        }
+      }else{
+        print(glue::glue("No significant targeted regions found"))
+      }
+      
+      # Save RData
+      print(glue::glue("Saving targeted results RData..."))
+      save(targetResults, file = "RData/targeted.RData")
       
     },
     error = function(error_condition) {
