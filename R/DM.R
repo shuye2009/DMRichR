@@ -894,6 +894,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     print(glue::glue("Reading target regions from: {targetRegion}"))
     
     # Read BED file and convert to GRanges
+    final_flag <- "failed"
     tryCatch({
       targetBed <- read.table(targetRegion, header = FALSE, sep = "\t", stringsAsFactors = FALSE)
       colnames(targetBed)[1:3] <- c("chr", "start", "end")
@@ -919,6 +920,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       sample_info <- bsseq::pData(bs.filtered)
       
       # Create methylKit objects for each sample
+      cat("Building methylKit list...\n")
       methylkit_list <- list()
       for(i in 1:ncol(meth_data)) {
         sample_name <- colnames(meth_data)[i]
@@ -947,6 +949,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       }
       
       # Create treatment vector based on your design
+      cat("Creating methylRawList object...\n")
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
       
       # Create methylRawList
@@ -957,14 +960,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
       # Calculate regional methylation for target regions
       cat("Calculating regional methylation for target regions...\n")
-      
-      # Convert target regions to methylKit format
-      target_regions_df <- data.frame(
-        chr = as.character(seqnames(targetRegions)),
-        start = start(targetRegions),
-        end = end(targetRegions),
-        strand = "*"
-      )
       
       # Get regional methylation
       regional_meth <- methylKit::regionCounts(meth_united, targetRegions, 
@@ -1059,11 +1054,12 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Saving targeted results RData..."))
       save(targetResults, file = "RData/targeted.RData")
       
+      final_flag <- "success"
     },
     error = function(error_condition) {
       print(glue::glue("Error processing target regions: {error_condition$message}"))
     })
-    print(glue::glue("Done targeted region analysis..."))
+    print(glue::glue("Done targeted region analysis... {final_flag}"))
   }
 
 } 

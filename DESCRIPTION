@@ -10,7 +10,8 @@ Description: A R package and executable for the preprocessing, statistical analy
 Depends: 
   R (>= 3.5.0),
   dmrseq,
-  bsseq
+  bsseq,
+  methylKit
 biocViews:
 Imports: 
     BiocGenerics,
