@@ -972,7 +972,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Calculate differential methylation for regions
       target_diff <- methylKit::calculateDiffMeth(regional_meth, 
                                                   overdispersion = "MN",
-                                                  test = "Chisq",
+                                                  test = "F",
                                                   mc.cores = cores)
       
       # Filter significant results
