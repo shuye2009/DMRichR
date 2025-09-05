@@ -938,14 +938,21 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         
         # Remove rows with NA values
         sample_df <- sample_df[complete.cases(sample_df),]
+
+        # Convert dataframe to methylRaw
         
-        # Create methylRaw object
-        methylkit_list[[i]] <- methylKit::new("methylRaw",
-                                              sample_df,
-                                              sample.id = sample_name,
-                                              assembly = genome,
-                                              context = "CpG",
-                                              resolution = "base")
+        temp_file <- tempfile(fileext = ".txt")
+        write.table(sample_df, file = temp_file, 
+                    sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+        
+        methylkit_list[[i]] <- methylKit::methRead(temp_file,
+                                                   sample.id = sample_name,
+                                                   assembly = genome,
+                                                   context = "CpG",
+                                                   mincov = 1)
+
+        # Clean up temp file
+        unlink(temp_file)
       }
       
       # Create treatment vector based on your design
@@ -953,7 +960,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
       
       # Create methylRawList
-      myobj <- methylKit::new("methylRawList", methylkit_list, treatment = treatment_vector)
+      myobj <- methylKit::methylRawList(methylkit_list, treatment = treatment_vector)
       
       # Unite samples (keep sites covered in at least 50% of samples per group)
       meth_united <- methylKit::unite(myobj, destrand = FALSE, min.per.group = ceiling(length(methylkit_list) * 0.5))
