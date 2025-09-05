@@ -892,6 +892,9 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }
     
     print(glue::glue("Reading target regions from: {targetRegion}"))
+
+    # Create Targeted directory
+    dir.create("Targeted", showWarnings = FALSE)
     
     # Read BED file and convert to GRanges
     final_flag <- "failed"
@@ -958,12 +961,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Create treatment vector based on your design
       cat("Creating methylRawList object...\n")
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
+      print(glue::glue("Treatment vector: {treatment_vector}"))
       
       # Create methylRawList
       myobj <- methylKit::methylRawList(methylkit_list, treatment = treatment_vector)
       
-      # Unite samples (keep sites covered in at least 50% of samples per group)
-      meth_united <- methylKit::unite(myobj, destrand = FALSE, min.per.group = ceiling(length(methylkit_list) * 0.5))
+      # Unite samples (keep sites covered in at least 2 samples per group)
+      meth_united <- methylKit::unite(myobj, destrand = FALSE, min.per.group = 2L)
       
       # Calculate regional methylation for target regions
       cat("Calculating regional methylation for target regions...\n")
@@ -1012,9 +1016,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         targetResults <- GenomicRanges::GRanges()
         print("No significantly differentially methylated target regions found")
       }
-      
-      # Create Targeted directory
-      dir.create("Targeted", showWarnings = FALSE)
       
       # Export results
       print(glue::glue("Exporting targeted region results..."))
