@@ -927,7 +927,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
       # Create methylKit objects for each sample
       cat("Building methylKit list...\n")
-      methylkit_list <- list()
+      methyfile_list <- list()
       for(i in 1:ncol(meth_data)) {
         sample_name <- colnames(meth_data)[i]
         
@@ -938,8 +938,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           end = end(pos_data),
           strand = "*",
           coverage = cov_data[,i],
-          freqC = round(meth_data[,i] * 100, 2),
-          freqT = round((1 - meth_data[,i]) * 100, 2)
+          numC = as.integer(meth_data[,i]*cov_data[,i]),
+          numT = cov_data[,i] - as.integer(meth_data[,i]*cov_data[,i])
         )
         
         # Remove rows with NA values
@@ -951,14 +951,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         write.table(sample_df, file = temp_file, 
                     sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
         
-        methylkit_list[[i]] <- methylKit::methRead(temp_file,
-                                                   sample.id = sample_name,
-                                                   assembly = genome,
-                                                   context = "CpG",
-                                                   mincov = 1)
-
-        # Clean up temp file
-        unlink(temp_file)
+        methyfile_list[[i]] <- temp_file
       }
       
       # Create treatment vector based on your design
@@ -967,10 +960,17 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Treatment vector: {treatment_vector}"))
       
       # Create methylRawList
-      myobj <- methylKit::methylRawList(methylkit_list, treatment = treatment_vector)
+      myMethylListobj <- methylKit::methRead(methyfile_list, 
+                                             sample.id = colnames(meth_data),
+                                             assembly = genome,
+                                             context = "CpG",
+                                             mincov = 1,
+                                             treatment = treatment_vector)
+      print(head(myMethylListobj))
       
+      lapply(methyfile_list, unlink)
       # Unite samples (keep sites covered in at least 2 samples per group)
-      meth_united <- methylKit::unite(myobj, destrand = FALSE, min.per.group = 2L)
+      meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
       
       # Calculate regional methylation for target regions
       cat("Calculating regional methylation for target regions...\n")
