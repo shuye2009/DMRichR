@@ -957,20 +957,60 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Create treatment vector based on your design
       cat("Creating methylRawList object...\n")
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
-      print(treatment_vector)
-      print(methyfile_list)
-      print(colnames(meth_data))
       
-      # Create methylRawList
-      myMethylListobj <- methylKit::methRead(methyfile_list, 
-                                             sample.id = colnames(meth_data),
-                                             assembly = genome,
-                                             context = "CpG",
-                                             mincov = 1,
-                                             treatment = treatment_vector)
-      print(head(myMethylListobj))
+      # Debug: Check vector lengths and ensure proper formatting
+      cat("Number of files:", length(methyfile_list), "\n")
+      cat("Number of sample IDs:", length(colnames(meth_data)), "\n")
+      cat("Treatment vector length:", length(treatment_vector), "\n")
       
-      lapply(methyfile_list, unlink)
+      # Ensure all vectors have same length
+      if(length(methyfile_list) != length(colnames(meth_data)) || 
+         length(methyfile_list) != length(treatment_vector)) {
+        stop("Vector length mismatch: files, sample.id, and treatment must have same length")
+      }
+      
+      # Ensure proper data types and avoid length > 1 conditions
+      file_list <- as.character(methyfile_list)
+      sample_ids <- as.character(colnames(meth_data))
+      treatment_vec <- as.integer(treatment_vector)
+      
+      print("Final parameters:")
+      print(paste("Files:", length(file_list)))
+      print(paste("Sample IDs:", length(sample_ids)))
+      print(paste("Treatment:", length(treatment_vec)))
+      
+      # Create methylRawList with proper error handling
+      tryCatch({
+        myMethylListobj <- methylKit::methRead(location = file_list, 
+                                               sample.id = sample_ids,
+                                               assembly = genome,
+                                               context = "CpG",
+                                               mincov = 1L,
+                                               treatment = treatment_vec,
+                                               header = TRUE,
+                                               sep = "\t")
+      }, error = function(e) {
+        cat("Error with methylKit::methRead:", e$message, "\n")
+        cat("Trying individual file reading approach...\n")
+        
+        # Alternative: Read files individually to avoid batch processing issues
+        meth_objects <- list()
+        for(i in seq_along(file_list)) {
+          cat("Reading file", i, "of", length(file_list), "\n")
+          meth_objects[[i]] <- methylKit::methRead(location = file_list[i], 
+                                                   sample.id = sample_ids[i],
+                                                   assembly = genome,
+                                                   context = "CpG",
+                                                   mincov = 1L,
+                                                   treatment = treatment_vec[i],
+                                                   header = TRUE,
+                                                   sep = "\t")
+        }
+        
+        # Create methylRawList manually
+        myMethylListobj <- methylKit::methylRawList(meth_objects, treatment = treatment_vec)
+      })
+      
       # Unite samples (keep sites covered in at least 2 samples per group)
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
       
