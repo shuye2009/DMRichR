@@ -926,7 +926,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       sample_info <- bsseq::pData(bs.filtered)
       
       # Create methylKit objects for each sample
-      cat("Building methylKit list...\n")
+      cat("Building methylfile list...\n")
       methyfile_list <- list()
       for(i in 1:ncol(meth_data)) {
         sample_name <- colnames(meth_data)[i]
@@ -957,7 +957,9 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Create treatment vector based on your design
       cat("Creating methylRawList object...\n")
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
-      print(glue::glue("Treatment vector: {treatment_vector}"))
+      print(treatment_vector)
+      print(methyfile_list)
+      print(colnames(meth_data))
       
       # Create methylRawList
       myMethylListobj <- methylKit::methRead(methyfile_list, 
