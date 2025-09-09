@@ -917,10 +917,14 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Convert BSseq to methylKit format for region-based testing
       cat("Converting BSseq to methylKit format...\n")
       
+      print(head(bs.filtered@assays@data$M))
       # Extract methylation data from BSseq object
-      meth_data <- bsseq::getMeth(bs.filtered, type = "raw")
-      cov_data <- bsseq::getCoverage(bs.filtered)
+      meth_data <- bsseq::getCoverage(bs.filtered, type = "M")
+      print(head(meth_data))
+      cov_data <- bsseq::getCoverage(bs.filtered, type = "Cov")
+      print(head(cov_data))
       pos_data <- GenomicRanges::granges(bs.filtered)
+      print(head(pos_data))
       
       # Get sample information
       sample_info <- bsseq::pData(bs.filtered)
@@ -936,14 +940,15 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           chr = as.character(seqnames(pos_data)),
           start = start(pos_data),
           end = end(pos_data),
-          strand = "*",
+          strand = strand(pos_data),
           coverage = cov_data[,i],
-          numC = as.integer(meth_data[,i]*cov_data[,i]),
-          numT = cov_data[,i] - as.integer(meth_data[,i]*cov_data[,i])
+          numC = as.integer(meth_data[,i]),
+          numT = as.integer(cov_data[,i] - meth_data[,i])
         )
         
         # Remove rows with NA values
         sample_df <- sample_df[complete.cases(sample_df),]
+        print(head(sample_df))
 
         # Convert dataframe to methylRaw
         
@@ -969,49 +974,16 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         stop("Vector length mismatch: files, sample.id, and treatment must have same length")
       }
       
-      # Ensure proper data types and avoid length > 1 conditions
-      file_list <- as.character(methyfile_list)
-      sample_ids <- as.character(colnames(meth_data))
-      treatment_vec <- as.integer(treatment_vector)
+      # Create methylRawList
+      myMethylListobj <- methylKit::methRead(location = methyfile_list, 
+                                             sample.id = as.list(colnames(meth_data)),
+                                             assembly = genome,
+                                             context = "CpG",
+                                             mincov = 1L,
+                                             treatment = treatment_vector,
+                                             header = TRUE,
+                                             sep = "\t")
       
-      print("Final parameters:")
-      print(paste("Files:", length(file_list)))
-      print(paste("Sample IDs:", length(sample_ids)))
-      print(paste("Treatment:", length(treatment_vec)))
-      
-      # Create methylRawList with proper error handling
-      tryCatch({
-        myMethylListobj <- methylKit::methRead(location = file_list, 
-                                               sample.id = sample_ids,
-                                               assembly = genome,
-                                               context = "CpG",
-                                               mincov = 1L,
-                                               treatment = treatment_vec,
-                                               header = TRUE,
-                                               sep = "\t")
-      }, error = function(e) {
-        cat("Error with methylKit::methRead:", e$message, "\n")
-        cat("Trying individual file reading approach...\n")
-        
-        # Alternative: Read files individually to avoid batch processing issues
-        meth_objects <- list()
-        for(i in seq_along(file_list)) {
-          cat("Reading file", i, "of", length(file_list), "\n")
-          meth_objects[[i]] <- methylKit::methRead(location = file_list[i], 
-                                                   sample.id = sample_ids[i],
-                                                   assembly = genome,
-                                                   context = "CpG",
-                                                   mincov = 1L,
-                                                   treatment = treatment_vec[i],
-                                                   header = TRUE,
-                                                   sep = "\t")
-          print(head(meth_objects[[i]]))
-        }
-        
-        # Create methylRawList manually
-        myMethylListobj <- methylKit::methylRawList(meth_objects, treatment = treatment_vec)
-        print(head(myMethylListobj))
-      })
       # Unite samples (keep sites covered in at least 2 samples per group)
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
       
