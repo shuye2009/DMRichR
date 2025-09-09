@@ -1007,6 +1007,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         overlaps <- findOverlaps(targetResults, targetRegions)
         targetResults$name <- NA_character_
         targetResults$name[queryHits(overlaps)] <- targetRegions$name[subjectHits(overlaps)]
+      }
       # Filter significant results
       cat("Filtering significant results...\n")
       target_diff_sig <- methylKit::getMethylDiff(target_diff, 
@@ -1090,7 +1091,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       
       # Save RData
       print(glue::glue("Saving significant targeted results RData..."))
-      save(sigResults, file = "RData/sigTargeted.RData")
+      save(sigResults, targetResults, file = "RData/sigTargeted_targetedRegions.RData")
       
       final_flag <- "success"
     },
