@@ -1005,12 +1005,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                    treatment = treatment_vec[i],
                                                    header = TRUE,
                                                    sep = "\t")
+          print(head(meth_objects[[i]]))
         }
         
         # Create methylRawList manually
         myMethylListobj <- methylKit::methylRawList(meth_objects, treatment = treatment_vec)
+        print(head(myMethylListobj))
       })
-      
       # Unite samples (keep sites covered in at least 2 samples per group)
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
       
