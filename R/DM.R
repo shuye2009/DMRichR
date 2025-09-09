@@ -942,13 +942,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           end = end(pos_data),
           strand = strand(pos_data),
           coverage = cov_data[,i],
-          numC = as.integer(meth_data[,i]),
-          numT = as.integer(cov_data[,i] - meth_data[,i])
+          numC = meth_data[,i],
+          numT = cov_data[,i] - meth_data[,i]
         )
         
         # Remove rows with NA values
-        sample_df <- sample_df[complete.cases(sample_df),]
-        print(head(sample_df))
+        #sample_df <- sample_df[complete.cases(sample_df),]
+        print(dim(sample_df))
 
         # Convert dataframe to methylRaw
         
@@ -983,8 +983,10 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                              treatment = treatment_vector,
                                              header = TRUE,
                                              sep = "\t")
+      print(head(myMethylListobj))
       
       # Unite samples (keep sites covered in at least 2 samples per group)
+      cat("Uniting methylRawList objects...\n")
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
       
       # Calculate regional methylation for target regions
