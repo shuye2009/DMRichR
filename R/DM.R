@@ -930,8 +930,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       sample_info <- bsseq::pData(bs.filtered)
       
       # Create methylKit objects for each sample
-      cat("Building methylfile list...\n")
-      methyfile_list <- list()
+      cat("Building methylRaw list...\n")
+      methyRaw_list <- list()
       for(i in 1:ncol(meth_data)) {
         sample_name <- colnames(meth_data)[i]
         
@@ -952,39 +952,24 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
 
         # Convert dataframe to methylRaw
         
-        temp_file <- tempfile(fileext = ".txt")
-        write.table(sample_df, file = temp_file, 
-                    sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+        methylraw_obj <- new("methylRaw",
+                     sample_df,
+                     sample.id = sample_name,
+                     assembly = genome,
+                     context = "CpG",
+                     resolution = "base")
         
-        methyfile_list[[i]] <- temp_file
+        methyRaw_list[[i]] <- methylraw_obj
       }
       
       # Create treatment vector based on your design
       cat("Creating methylRawList object...\n")
       treatment_vector <- as.numeric(as.factor(sample_info[[testCovariate]])) - 1
       
-      # Debug: Check vector lengths and ensure proper formatting
-      cat("Number of files:", length(methyfile_list), "\n")
-      cat("Number of sample IDs:", length(colnames(meth_data)), "\n")
-      cat("Treatment vector length:", length(treatment_vector), "\n")
-      
-      # Ensure all vectors have same length
-      if(length(methyfile_list) != length(colnames(meth_data)) || 
-         length(methyfile_list) != length(treatment_vector)) {
-        stop("Vector length mismatch: files, sample.id, and treatment must have same length")
-      }
-      
       # Create methylRawList
-      myMethylListobj <- methylKit::methRead(location = methyfile_list, 
-                                             sample.id = as.list(colnames(meth_data)),
-                                             assembly = genome,
-                                             context = "CpG",
-                                             mincov = 1L,
-                                             treatment = treatment_vector,
-                                             header = TRUE,
-                                             sep = "\t")
+      myMethylListobj <- new("methylRawList", methyRaw_list, treatment = treatment_vector)
       print(head(myMethylListobj))
-      
+
       # Unite samples (keep sites covered in at least 2 samples per group)
       cat("Uniting methylRawList objects...\n")
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
