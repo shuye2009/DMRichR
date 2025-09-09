@@ -902,15 +902,15 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     # Read BED file and convert to GRanges
     final_flag <- "failed"
     tryCatch({
-      targetBed <- read.table(targetRegion, header = FALSE, sep = "\t", stringsAsFactors = FALSE)
-      colnames(targetBed)[1:3] <- c("chr", "start", "end")
+      targetBed <- read.table(targetRegion, header = FALSE, sep = "\t", stringsAsFactors = FALSE,
+                              col.names = c("chr", "start", "end", "name", "score", "strand"))
       
-      # Add additional columns if they exist
-      if(ncol(targetBed) > 3){
-        colnames(targetBed)[4:ncol(targetBed)] <- paste0("V", 4:ncol(targetBed))
-      }
-      
-      targetRegions <- GenomicRanges::makeGRangesFromDataFrame(targetBed, keep.extra.columns = TRUE)
+      targetRegions <- GRanges(seqnames = targetBed$chr,
+                               ranges = IRanges(start = targetBed$start + 1,  # BED is 0-based, GRanges is 1-based
+                                                end = targetBed$end),
+                               strand = targetBed$strand,
+                               name = targetBed$name,
+                               score = targetBed$score)
       print(head(targetRegions))
       print(length(targetRegions))
       
@@ -975,7 +975,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Unite samples (keep sites covered in at least 2 samples per group)
       cat("Uniting methylRawList objects...\n")
       meth_united <- methylKit::unite(myMethylListobj, destrand = FALSE, min.per.group = 2L)
-      
+      print(head(meth_united))
       # Calculate regional methylation for target regions
       cat("Calculating regional methylation for target regions...\n")
       
@@ -983,7 +983,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       regional_meth <- methylKit::regionCounts(meth_united, targetRegions, 
                                                cov.bases = minCpGs, 
                                                strand.aware = FALSE)
-      
+      print(head(regional_meth))
       # Perform differential methylation testing on regions
       cat("Performing differential methylation testing on target regions...\n")
       
@@ -992,13 +992,15 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                   overdispersion = "MN",
                                                   test = "F",
                                                   mc.cores = cores)
-      
+      print(head(target_diff))
       # Filter significant results
+      cat("Filtering significant results...\n")
       target_diff_sig <- methylKit::getMethylDiff(target_diff, 
                                                   difference = cutoff * 100,  # Convert to percentage
                                                   qvalue = 0.05)
-      
+      print(head(target_diff_sig))
       # Convert results back to GRanges format
+      cat("Converting results back to GRanges format...\n")
       if(nrow(target_diff_sig) > 0) {
         targetResults <- GenomicRanges::makeGRangesFromDataFrame(
           target_diff_sig,
