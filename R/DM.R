@@ -993,6 +993,20 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                   test = "F",
                                                   mc.cores = cores)
       print(head(target_diff))
+      if(nrow(target_diff) > 0) {
+        targetResults <- GenomicRanges::makeGRangesFromDataFrame(
+          target_diff,
+          seqnames.field = "chr",
+          start.field = "start", 
+          end.field = "end",
+          strand.field = "strand",
+          keep.extra.columns = TRUE
+        )
+        
+        # Add back the name information from original targetRegions
+        overlaps <- findOverlaps(targetResults, targetRegions)
+        targetResults$name <- NA_character_
+        targetResults$name[queryHits(overlaps)] <- targetRegions$name[subjectHits(overlaps)]
       # Filter significant results
       cat("Filtering significant results...\n")
       target_diff_sig <- methylKit::getMethylDiff(target_diff, 
@@ -1002,27 +1016,34 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Convert results back to GRanges format
       cat("Converting results back to GRanges format...\n")
       if(nrow(target_diff_sig) > 0) {
-        targetResults <- GenomicRanges::makeGRangesFromDataFrame(
+        sigResults <- GenomicRanges::makeGRangesFromDataFrame(
           target_diff_sig,
           seqnames.field = "chr",
           start.field = "start", 
           end.field = "end",
+          strand.field = "strand",
           keep.extra.columns = TRUE
         )
         
+        # Add back the name information from original targetRegions
+        overlaps_sig <- findOverlaps(sigResults, targetRegions)
+        sigResults$name <- NA_character_
+        sigResults$name[queryHits(overlaps_sig)] <- targetRegions$name[subjectHits(overlaps_sig)]
+        
         # Add direction information
-        targetResults$direction <- ifelse(targetResults$meth.diff > 0, 
+        cat("Adding direction information...\n")
+        sigResults$direction <- ifelse(sigResults$meth.diff > 0, 
                                          "Hypermethylated", 
                                          "Hypomethylated")
-        targetResults$difference <- abs(targetResults$meth.diff)
-        targetResults$stat <- targetResults$meth.diff
-        targetResults$pval <- targetResults$pvalue
-        targetResults$qval <- targetResults$qvalue
+        sigResults$difference <- abs(sigResults$meth.diff)
+        sigResults$stat <- sigResults$meth.diff
+        sigResults$pval <- sigResults$pvalue
+        sigResults$qval <- sigResults$qvalue
         
-        print(glue::glue("Found {length(targetResults)} significantly differentially methylated target regions"))
+        print(glue::glue("Found {length(sigResults)} significantly differentially methylated target regions"))
         
       } else {
-        targetResults <- GenomicRanges::GRanges()
+        sigResults <- GenomicRanges::GRanges()
         print("No significantly differentially methylated target regions found")
       }
       
@@ -1030,19 +1051,19 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(glue::glue("Exporting targeted region results..."))
       gr2bed(targetResults, "Targeted/targeted_regions_all.bed")
       
-      if(length(targetResults) > 0){
-        print(glue::glue("Found {length(targetResults)} significant targeted regions"))
-        gr2bed(targetResults, "Targeted/targeted_regions_significant.bed")
+      if(length(sigResults) > 0){
+        print(glue::glue("Found {length(sigResults)} significant targeted regions"))
+        gr2bed(sigResults, "Targeted/targeted_regions_significant.bed")
         
         # Plot significant targeted regions
-        if(length(targetResults) > 0){
+        if(length(sigResults) > 0){
           pdf("Targeted/Targeted_regions.pdf", height = 4, width = 8)
           tryCatch({
             DMRichR::plotDMRs2(bs.filtered,
-                               regions = targetResults,
+                               regions = sigResults,
                                testCovariate = testCovariate,
-                               extend = (end(targetResults) - start(targetResults) + 1)*2,
-                               addRegions = targetResults,
+                               extend = (end(sigResults) - start(sigResults) + 1)*2,
+                               addRegions = sigResults,
                                annoTrack = annoTrack,
                                regionCol = "#FF00001A",
                                lwd = 2,
@@ -1060,7 +1081,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         if(exists("bs.filtered.bsseq")){
           print(glue::glue("Extracting individual smoothed methylation values for targeted regions..."))
           bs.filtered.bsseq %>%
-            DMRichR::smooth2txt(regions = targetResults,
+            DMRichR::smooth2txt(regions = sigResults,
                                 txt = "Targeted/targeted_individual_smoothed_methylation.txt")
         }
       }else{
@@ -1068,13 +1089,13 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       }
       
       # Save RData
-      print(glue::glue("Saving targeted results RData..."))
-      save(targetResults, file = "RData/targeted.RData")
+      print(glue::glue("Saving significant targeted results RData..."))
+      save(sigResults, file = "RData/sigTargeted.RData")
       
       final_flag <- "success"
     },
     error = function(error_condition) {
-      print(glue::glue("Error processing target regions: {error_condition$message}"))
+      print(glue::glue("Error processing significant target regions: {error_condition$message}"))
     })
     print(glue::glue("Done targeted region analysis... {final_flag}"))
   }
