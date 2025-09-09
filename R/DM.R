@@ -911,6 +911,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       }
       
       targetRegions <- GenomicRanges::makeGRangesFromDataFrame(targetBed, keep.extra.columns = TRUE)
+      print(head(targetRegions))
+      print(length(targetRegions))
       
       print(glue::glue("Loaded {length(targetRegions)} target regions"))
       
