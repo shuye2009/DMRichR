@@ -911,6 +911,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                strand = targetBed$strand,
                                name = targetBed$name,
                                score = targetBed$score)
+      print(head(targetBed))
       print(head(targetRegions))
       print(length(targetRegions))
       
@@ -995,7 +996,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       print(head(target_diff))
       if(nrow(target_diff) > 0) {
         target_diff_df <- as.data.frame(target_diff)
-        target_diff_df <- merge(target_diff_df, targetRegions, by = c("chr", "start", "end", "strand"), all.x = TRUE)
+        target_diff_df <- merge(target_diff_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
         # Export results
         print(glue::glue("Exporting targeted region results..."))
         write.table(target_diff_df, "Targeted/targeted_regions_all_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t")
@@ -1019,7 +1020,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           )
           
           target_diff_sig_df <- as.data.frame(target_diff_sig)
-          target_diff_sig_df <- merge(target_diff_sig_df, targetRegions, by = c("chr", "start", "end", "strand"), all.x = TRUE)
+          target_diff_sig_df <- merge(target_diff_sig_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
 
           
           print(glue::glue("Found {length(sigResults)} significant targeted regions"))
