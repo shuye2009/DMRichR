@@ -906,8 +906,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                               col.names = c("chr", "start", "end", "name", "score", "strand"))
       
       targetRegions <- GRanges(seqnames = targetBed$chr,
-                               ranges = IRanges(start = targetBed$start + 1,  # BED is 0-based, GRanges is 1-based
-                                                end = targetBed$end),
+                               ranges = IRanges(start = targetBed$start, end = targetBed$end),
                                strand = targetBed$strand,
                                name = targetBed$name,
                                score = targetBed$score)
@@ -1001,7 +1000,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         target_diff_df <- merge(target_diff_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
         # Export results
         print(glue::glue("Exporting targeted region results..."))
-        write.table(target_diff_df, "Targeted/targeted_regions_all_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t")
+        write.table(target_diff_df, "Targeted/targeted_regions_all_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
       
         # Filter significant results
         cat("Filtering significant results...\n")
@@ -1026,7 +1025,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           target_diff_sig_df <- merge(target_diff_sig_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
 
           print(glue::glue("Found {length(sigResults)} significant targeted regions"))
-          write.table(target_diff_sig_df, "Targeted/targeted_regions_significant_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t")
+          write.table(target_diff_sig_df, "Targeted/targeted_regions_significant_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
           # Add back the name information from original targetRegions
           overlaps_sig <- findOverlaps(sigResults, targetRegions)
