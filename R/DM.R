@@ -1064,15 +1064,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
             })
           dev.off()
         
-          # Extract individual smoothed methylation values for targeted regions
-          print(glue::glue("Extracting individual smoothed methylation values for targeted regions..."))
-          bs.filtered.bsseq %>%
-            DMRichR::smooth2txt(regions = sigResults,
-                                txt = "Targeted/targeted_significant_individual_smoothed_methylation.txt")
-          
-          # Save RData
-          print(glue::glue("Saving significant targeted results RData..."))
-          save(sigResults, file = "RData/sigTargeted.RData")
         }else{
           print(glue::glue("No significant differentially methylated targeted regions found"))
         }
