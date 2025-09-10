@@ -887,6 +887,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   if(!is.null(targetRegion)){
     cat("\n[DMRichR] Testing targeted regions with methylKit \t\t", format(Sys.time(), "%d-%m-%Y %X"), "\n")
+    target <- gsub("\\.bed", "", targetRegion)
     targetRegion <- file.path(resPath, targetRegion)
     
     # Validate and read BED file
@@ -1000,7 +1001,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         target_diff_df <- merge(target_diff_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
         # Export results
         print(glue::glue("Exporting targeted region results..."))
-        write.table(target_diff_df, "Targeted/targeted_regions_all_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+        write.table(target_diff_df, paste0("Targeted/all_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
       
         # Filter significant results
         cat("Filtering significant results...\n")
@@ -1025,7 +1026,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
           target_diff_sig_df <- merge(target_diff_sig_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
 
           print(glue::glue("Found {length(sigResults)} significant targeted regions"))
-          write.table(target_diff_sig_df, "Targeted/targeted_regions_significant_diff.tab", row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+          write.table(target_diff_sig_df, paste0("Targeted/significant_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
           # Add back the name information from original targetRegions
           overlaps_sig <- findOverlaps(sigResults, targetRegions)
@@ -1045,7 +1046,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
          
           
           # Plot significant targeted regions
-          pdf("Targeted/Targeted_regions.pdf", height = 4, width = 8)
+          pdf(paste0("Targeted/Targeted_regions_", target, ".pdf"), height = 4, width = 8)
           tryCatch({
             DMRichR::plotDMRs2(bs.filtered,
                                 regions = sigResults,
