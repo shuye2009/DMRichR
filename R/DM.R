@@ -995,7 +995,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                   mc.cores = cores)
       print(head(target_diff))
       if(nrow(target_diff) > 0) {
-        target_diff_df <- as.data.frame(target_diff.getData())
+        target_diff_df <- getData(target_diff)
         target_diff_df <- merge(target_diff_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
         # Export results
         print(glue::glue("Exporting targeted region results..."))
@@ -1019,7 +1019,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
             keep.extra.columns = FALSE
           )
           
-          target_diff_sig_df <- as.data.frame(target_diff_sig.getData())
+          target_diff_sig_df <- getData(target_diff_sig)
           target_diff_sig_df <- merge(target_diff_sig_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
 
           
