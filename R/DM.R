@@ -118,6 +118,10 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   
   rm(nSamples)
   
+  if(targetRegion == "NULL" || targetRegion == "NA"){
+    targetRegion <- NULL
+  }
+  
   # Print
   print(glue::glue("genome = {genome}"))
   print(glue::glue("coverage = {coverage}"))
