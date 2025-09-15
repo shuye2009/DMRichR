@@ -22,7 +22,7 @@ homerDMR(){
 	-cpg \
 	-size given \
 	-p ${cores} \
-	-nomotif"
+	-known"
 
 	echo $call
 	eval $call
@@ -39,7 +39,7 @@ homerDMR(){
 	-cpg \
 	-size given \
 	-p ${cores} \
-	-nomotif"
+	-known"
 
 	echo $call
 	eval $call
@@ -56,7 +56,7 @@ homerDMR(){
 	-cpg \
 	-size given \
 	-p ${cores} \
-	-nomotif"
+	-known"
 
 	echo $call
 	eval $call
