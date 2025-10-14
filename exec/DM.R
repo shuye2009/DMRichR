@@ -41,7 +41,7 @@ option_list <- list(
                         help = "Choose the number of permutations for the DMR analysis [default = %default]"),
   optparse::make_option(c("-b", "--maxBlockPerms"), type = "integer", default = 10,
                         help = "Choose the number of permutations for the block analysis [default = %default]"),
-  optparse::make_option(c("-o", "--cutoff"), type = "double", default = 0.05,
+  optparse::make_option(c("-o", "--cutoff"), type = "double", default = 0.1,
                         help = "Choose the cutoff value [from 0 to 1] for the single CpG coefficient utilized to discover testable background regions [default = %default]"),
   optparse::make_option(c("-t", "--testCovariate"), type = "character", default = NULL,
                         help = "Choose a test covariate [required]"),
