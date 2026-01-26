@@ -314,20 +314,22 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                group1=samples1,
                group2=samples2, 
                smoothing=TRUE,
-               ncores=cores) %>%
+               ncores=cores) 
+  DML_filtered <- DML %>%
     dplyr::filter(fdr < pval_cutoff) %>%
     dplyr::filter(abs(diff) > minDiff) 
   
   
   # Output DML to tsv file
   write.table(DML, paste0("DML_", aname, ".tsv"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
+  write.table(DML_filtered, paste0("DML_filtered_", aname, ".tsv"), row.names = FALSE, col.names = TRUE, sep="\t", quote=FALSE)
   
   #DMLs = DSS::callDML(DML, p.threshold = pval_cutoff, delta = 0.1)
   #DMLs <- na.omit(DMLs)
   
   message("[DSS_pairwise] call DMR ..")
   
-  dmrs <- DSS::callDMR(DML, 
+  dmrs <- DSS::callDMR(DML_filtered, 
                   p.threshold = pval_cutoff, 
                   delta = 0.1, 
                   minlen = 50, 
@@ -343,7 +345,7 @@ DSS_pairwise <- function(bss, condition1, condition2, pval_cutoff, minDiff,
                                      stat < 0 ~ "hypo",
                                      .default = "none"))
   
-  dmrs_background <- callDMR(DML, 
+  dmrs_background <- DSS::callDMR(DML_filtered, 
                   p.threshold = 0.5, 
                   delta = 0, 
                   minlen=50, 
