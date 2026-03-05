@@ -260,7 +260,15 @@ getCpGs <- function(genome = genome, resPath = resPath){
       plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
                         type = "islands")
   }else{
-    islands <- readr::read_tsv(file.path(resPath, "/cpgIslandExt.txt.gz"),
+    if(genome == "hs1"){
+      island_file <- "chm13v2.0_CGI.bed"
+    }else if(genome == "hg38"){
+      island_file <- "cpgIslandExt.txt.gz"
+    }else {
+      stop("CpG island file not found for genome", genome)
+    }
+    
+    islands <- readr::read_tsv(file.path(resPath, island_file),
                                col_names = c('chr','start','end'),
                                col_types = '-cii-------') %>%
       GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%

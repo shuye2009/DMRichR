@@ -75,7 +75,11 @@ annotationDatabases <- function(genome = genome,
   print(glue::glue("Loading {packages}"))
   stopifnot(suppressMessages(sapply(packages, require, character.only = TRUE)))
   
-  if(genome == "hg38"){
+  if(genome =="hs1"){
+    assign("goi", BSgenome.Hsapiens.UCSC.hs1, envir = parent.frame())
+    assign("TxDb", NULL, envir = parent.frame())
+    assign("annoDb", "org.Hs.eg.db", envir = parent.frame())
+  }else if(genome == "hg38"){
     assign("goi", BSgenome.Hsapiens.UCSC.hg38.masked, envir = parent.frame())
     assign("TxDb", TxDb.Hsapiens.UCSC.hg38.knownGene, envir = parent.frame())
     assign("annoDb", "org.Hs.eg.db", envir = parent.frame())
