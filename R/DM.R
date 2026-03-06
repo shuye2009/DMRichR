@@ -176,13 +176,10 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       annoTrack <- dmrseq::getAnnot(genome)
       saveRDS(annoTrack, file.path(getwd(), "RData/annoTrack.rds"))
     }else{
-      annoTrack <- readRDS(file.path(resPath, "annoTrack.rds"))
-    }
-    
-  }else if(is(TxDb, "EnsDb")){
-    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome, resPath),
+      annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome, resPath),
                                             Exons = DMRichR::getExons(TxDb),
                                             compress = FALSE)
+    }
   }else if(is.null(TxDb)){
     if(genome == "hs1"){
       gff <- rtracklayer::import(file.path(resPath,"Homo_sapiens-GCA_009914755.4-2022_07-genes.gff3"))
