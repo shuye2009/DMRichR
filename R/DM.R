@@ -90,11 +90,11 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   options(scipen = 999)
   options(readr.num_columns = 0)
   
-  # Check for requirements
-  stopifnot(genome %in% c("hg38", "hg19", "mm10", "mm9", "rheMac10",
-                          "rheMac8", "rn6", "danRer11", "galGal6",
-                          "bosTau9", "panTro6", "dm6", "susScr11",
-                          "canFam3", "TAIR10", "TAIR9"))
+  # Check for requirements (commented out to allow all genomes as long as genome files are available in resPath)
+  #stopifnot(genome %in% c("hg38", "hg19", "mm10", "mm9", "rheMac10",
+  #                       "rheMac8", "rn6", "danRer11", "galGal6",
+  #                       "bosTau9", "panTro6", "dm6", "susScr11",
+  #                       "canFam3", "TAIR10", "TAIR9"))
   stopifnot(!is.null(testCovariate))
   stopifnot(coverage >= 1)
   
