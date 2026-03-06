@@ -12,7 +12,7 @@ DM.R(
   minCpGs = 5,
   maxPerms = 10,
   maxBlockPerms = 10,
-  cutoff = 0.05,
+  cutoff = 0.1,
   testCovariate = testCovariate,
   adjustCovariate = NULL,
   matchCovariate = NULL,
@@ -21,7 +21,8 @@ DM.R(
   sexCheck = FALSE,
   EnsDb = FALSE,
   filePattern = "*.CpG_report.txt.gz",
-  resPath = NULL
+  resPath = NULL,
+  targetRegion = NULL
 )
 }
 \arguments{
@@ -67,6 +68,8 @@ This is recommended for non-model organisms.}
 \item{filePattern}{character indicating cytosine report file name pattern}
 
 \item{resPath}{character specifying path to local resources if internet is not available}
+
+\item{targetRegion}{character specifying path to BED file with genomic intervals for targeted differential methylation testing. If provided, dmrseq will be run on these specific regions and results saved to Targeted directory.}
 }
 \description{
 Performs the entire DMRichR analysis pipeline, 
