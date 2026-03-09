@@ -20,6 +20,8 @@ GREAT_analysis(
 
 \item{geneset}{a list from rGREAT::read_gmt.}
 
+\item{genesetName}{name of the geneset (e.g., "GO:BP", "KEGG").}
+
 \item{padj_cutoff}{Numeric cutoff value [from 0 to 1] for the adjusted p-value.}
 
 \item{status}{indicates the direction of methylation changes, either hyper or hypo.}
@@ -29,8 +31,6 @@ GREAT_analysis(
 \item{geneset_cutoff}{cutoff value for the maximal size of the geneset.}
 
 \item{genome}{Character specifying the genome.}
-
-\item{dir}{path for saving GREAT analysis results.}
 }
 \description{
 Perform GREAT analysis for DMR

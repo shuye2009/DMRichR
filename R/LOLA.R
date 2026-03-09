@@ -297,8 +297,8 @@ dmrList <- function(sigRegions = sigRegions){
   
   GenomicRanges::GRangesList("All DMRs" = sigRegions,
                              "Hypermethylated DMRs" = sigRegions %>%
-                               plyranges::filter(stat > 0),
+                               filter(stat > 0),
                              "Hypomethylated DMRs" = sigRegions %>%
-                               plyranges::filter(stat < 0)) %>% 
+                               filter(stat < 0)) %>% 
     return()
 }

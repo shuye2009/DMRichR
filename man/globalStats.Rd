@@ -23,6 +23,8 @@ globalStats(
 \item{adjustCovariate}{The covariate(s) to adjust for between groups}
 
 \item{matchCovariate}{Another covariate to adjust for between groups (for dmrseq compatibility)}
+
+\item{resPath}{Path to resource directory}
 }
 \value{
 A list of tibbles with smoothed global and CpG island methylation statistics

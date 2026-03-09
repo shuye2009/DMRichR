@@ -177,7 +177,7 @@ findDMR <- function(DML, pval_cutoff=0.05, ratio_cutoff=2, minSites=3){
 #' @param geneset_cutoff cutoff value for the maximal size of the geneset.
 #' @param status indicates the direction of methylation changes, either hyper or hypo.
 #' @param dname indicates nature of DMR, either sigDMR or background
-#' @param dir path for saving GREAT analysis results.
+#' @param genesetName name of the geneset (e.g., "GO:BP", "KEGG").
 #' @param genome Character specifying the genome.
 #' 
 #' @export GREAT_analysis
@@ -241,7 +241,6 @@ GREAT_analysis <- function(gr, geneset, genesetName="GO:BP", padj_cutoff=0.2,
 #' @title Output DMRs 
 #' @description Write DMR to bed files
 #' @param DMR a list of two dataframes.
-#' @param dir path for saving DMR bed files.
 #' 
 #' @export output_DMR
 #' 
@@ -275,7 +274,7 @@ output_DMR <- function(DMR){
 #' @description Call DML using two group design, then get DMRS and background regions.
 #' @param bss a bsseq object.
 #' @param pval_cutoff Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.
-#' @param minDifff cutoff value [from 0 to inf] for the minimum difference between mean methylation 
+#' @param minDiff cutoff value [from 0 to inf] for the minimum difference between mean methylation 
 #' levels between group1 and group2 during DMR detection.
 #' @param minSites Numeric for the minimum number of Cytosines for a DMR.
 #' @param condition1 Character indicating the group1. 

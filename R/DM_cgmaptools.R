@@ -112,16 +112,16 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   print(glue::glue("Selecting significant DMRs..."))
   
   regions <- regions %>% 
-    plyranges::mutate(direction = dplyr::case_when(stat > 0 ~ "Hypermethylated",
+    mutate(direction = dplyr::case_when(stat > 0 ~ "Hypermethylated",
                                                    stat < 0 ~ "Hypomethylated"),
                       difference = round((beta-pi)*100))
   
   if(sum(regions$qval < 0.05, na.rm=TRUE) < 100 & sum(regions$pval < 0.05, na.rm=TRUE) != 0){
     sigRegions <- regions %>%
-      plyranges::filter(pval < 0.05)
+      filter(pval < 0.05)
   }else if(sum(regions$qval < 0.05, na.rm=TRUE) >= 100){
     sigRegions <- regions %>%
-      plyranges::filter(qval < 0.05)
+      filter(qval < 0.05)
   }else if(sum(regions$pval < 0.05, na.rm=TRUE) == 0){
     stop(glue::glue("No significant DMRs detected in {length(regions)} background regions"))
   }
@@ -317,9 +317,9 @@ DM_cgmaptools.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10"
   dir.create(file.path(outfolder, "Ontologies"))
   
   hyper <- sigRegions %>%
-    plyranges::filter(stat > 0)
+    filter(stat > 0)
   hypo <- sigRegions %>%
-    plyranges::filter(stat < 0)
+    filter(stat < 0)
   all_sigRegions <- list("hyper"=hyper, "hypo"=hypo)
   
   for(direction in c("hyper", "hypo")){

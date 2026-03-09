@@ -115,15 +115,15 @@ DMRichCpG <- function(sigRegions = sigRegions,
     print(glue::glue("Now FISHERing for {term} annotation"))
     
     CGannotationsFiltered <- CGannotations %>%
-      plyranges::filter(stringr::str_detect(type, term))
+      filter(stringr::str_detect(type, term))
     
     sigRegionsOverlap <- sigRegions %>% 
-      plyranges::mutate(n_overlaps = plyranges::count_overlaps(.,CGannotationsFiltered)) %>%
-      plyranges::filter(n_overlaps > 0)
+      mutate(n_overlaps = plyranges::count_overlaps(.,CGannotationsFiltered)) %>%
+      filter(n_overlaps > 0)
     
     regionsOverlap <- regions %>% 
-      plyranges::mutate(n_overlaps = plyranges::count_overlaps(.,CGannotationsFiltered)) %>%
-      plyranges::filter(n_overlaps > 0)
+      mutate(n_overlaps = plyranges::count_overlaps(.,CGannotationsFiltered)) %>%
+      filter(n_overlaps > 0)
     
     CGmatrix <- matrix(c(length(sigRegionsOverlap), (length(sigRegions) - length(sigRegionsOverlap)),
                          length(regionsOverlap), (length(regions) - length(regionsOverlap))),

@@ -8,8 +8,6 @@ output_DMR(DMR)
 }
 \arguments{
 \item{DMR}{a list of two dataframes.}
-
-\item{dir}{path for saving DMR bed files.}
 }
 \description{
 Write DMR to bed files

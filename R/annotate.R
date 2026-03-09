@@ -48,22 +48,22 @@ annotateRegions <- function(regions = sigRegions,
   
   regionsCpG <- regions %>% 
     plyranges::join_overlap_left(CpGs %>%
-                                   plyranges::filter(type == "islands") %>% 
-                                   plyranges::select(CpG.Island = type)) %>%
+                                   filter(type == "islands") %>% 
+                                   select(CpG.Island = type)) %>%
     unique() %>% 
     plyranges::join_overlap_left(CpGs %>%
-                                   plyranges::filter(type == "shores") %>% 
-                                   plyranges::select(CpG.Shore = type)) %>%
+                                   filter(type == "shores") %>% 
+                                   select(CpG.Shore = type)) %>%
     unique() %>% 
     plyranges::join_overlap_left(CpGs %>%
-                                   plyranges::filter(type == "shelves") %>% 
-                                   plyranges::select(CpG.Shelf = type)) %>%
+                                   filter(type == "shelves") %>% 
+                                   select(CpG.Shelf = type)) %>%
     unique() %>% 
     plyranges::join_overlap_left(CpGs %>%
-                                   plyranges::filter(type == "inter") %>% 
-                                   plyranges::select(Open.Sea = type)) %>%
+                                   filter(type == "inter") %>% 
+                                   select(Open.Sea = type)) %>%
     unique() %>% 
-    plyranges::mutate(CpG.Island = dplyr::case_when(CpG.Island == "islands" ~ "Yes",
+    mutate(CpG.Island = dplyr::case_when(CpG.Island == "islands" ~ "Yes",
                                                     TRUE ~ "No"),
                       CpG.Shore = dplyr::case_when(CpG.Shore == "shores" ~ "Yes",
                                                    TRUE ~ "No"),
@@ -218,11 +218,11 @@ getExons <- function(TxDb = TxDb){
                      # filter = GeneBiotypeFilter("protein_coding")
                      ) %>%
     BiocGenerics::unlist(use.names = FALSE) %>%
-    plyranges::mutate(id = glue::glue("CDS:{seq_along(.)}"),
+    mutate(id = glue::glue("CDS:{seq_along(.)}"),
                       type = glue::glue("{unique(genome(TxDb))}_genes_cds")
                       ) %>%
-    plyranges::select(id, tx_id, gene_id, symbol, type) # %>%
-    # plyranges::filter(symbol != "")
+    select(id, tx_id, gene_id, symbol, type) # %>%
+    # filter(symbol != "")
   
   GenomeInfoDb::genome(exons) <- NA  
   ensembldb::seqlevelsStyle(exons) <- "UCSC"
@@ -253,27 +253,27 @@ getCpGs <- function(genome = genome, resPath = resPath){
   
   if(is.null(resPath)){
     islands <- readr::read_tsv(glue::glue("http://hgdownload.cse.ucsc.edu/goldenpath/{genome}/database/cpgIslandExt.txt.gz"),
-                               col_names = c('chr','start','end'),
-                               col_types = '-cii-------') %>%
+                             col_names = c('chr','start','end'),
+                             col_types = '-cii-------') %>%
       GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
       GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
-      plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
+      mutate(id = glue::glue("island:{seq_along(.)}"),
                         type = "islands")
   }else{
     if(genome == "hs1"){
       island_file <- "chm13v2.0_CGI.bed"
     }else if(genome == "hg38"){
-      island_file <- "cpgIslandExt.txt.gz"
+      island_file <- "cpgIslandExt.hg38.bed"
     }else {
       stop("CpG island file not found for genome", genome)
     }
     
     islands <- readr::read_tsv(file.path(resPath, island_file),
                                col_names = c('chr','start','end'),
-                               col_types = '-cii-------') %>%
+                               col_types = 'cii') %>%
       GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
       GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
-      plyranges::mutate(id = glue::glue("island:{seq_along(.)}"),
+      mutate(id = glue::glue("island:{seq_along(.)}"),
                         type = "islands")
   }
   
@@ -284,7 +284,7 @@ getCpGs <- function(genome = genome, resPath = resPath){
     plyranges::stretch(4000) %>% 
     GenomicRanges::trim() %>%
     GenomicRanges::setdiff(islands) %>%
-    plyranges::mutate(id = glue::glue("shore:{seq_along(.)}"),
+    mutate(id = glue::glue("shore:{seq_along(.)}"),
                       type = "shores")
   
   message('Building CpG shelves...')
@@ -294,7 +294,7 @@ getCpGs <- function(genome = genome, resPath = resPath){
     GenomicRanges::trim() %>%
     GenomicRanges::setdiff(islands) %>%
     GenomicRanges::setdiff(shores) %>%
-    plyranges::mutate(id = glue::glue("shelf:{seq_along(.)}"),
+    mutate(id = glue::glue("shelf:{seq_along(.)}"),
                       type = "shelves")
   
   message('Building inter-CpG-islands...')
@@ -302,12 +302,12 @@ getCpGs <- function(genome = genome, resPath = resPath){
   inter_cgi <- c(islands, shores, shelves) %>%
     GenomicRanges::sort() %>%
     GenomicRanges::gaps() %>%
-    plyranges::mutate(id = glue::glue("inter:{seq_along(.)}"),
+    mutate(id = glue::glue("inter:{seq_along(.)}"),
                       type = "inter")
   
   c(islands, shores, shelves, inter_cgi) %>%
     GenomicRanges::sort() %>%
-    plyranges::mutate(tx_id = NA,
+    mutate(tx_id = NA,
                       gene_id = NA,
                       symbol = NA) %>%
     plyranges::select(id, tx_id, gene_id, symbol, type) %>% 

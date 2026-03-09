@@ -54,7 +54,7 @@ information about which genomic region is being plotted.}
 plots. Same format as the \code{regions} argument.}
 
 \item{annoTrack}{a \code{GRangesList} object with two elements returned
-by \code{\link{getAnnot}}. The first
+by \code{\link[dmrseq]{getAnnot}}. The first
 contains CpG category information in the first element (optional)
 coding gene sequence information in the second element (optional).
 At least one of these elements needs to be non-null in order for 

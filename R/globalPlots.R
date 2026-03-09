@@ -50,7 +50,7 @@ CGi <- function(bs.filtered.bsseq = bs.filtered.bsseq,
   
   genome %>%
     DMRichR::getCpGs(resPath = resPath) %>% 
-    plyranges::filter(type == "islands") %>% 
+    filter(type == "islands") %>% 
     bsseq::getMeth(BSseq = bs.filtered.bsseq,
                    regions = .,
                    type = "raw",

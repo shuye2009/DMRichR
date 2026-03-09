@@ -70,8 +70,8 @@ GOfuncR <- function(sigRegions = sigRegions,
   }
   
   coord <- regions %>%
-    plyranges::mutate(candidate = plyranges::count_overlaps(., sigRegions)) %>% 
-    plyranges::mutate(candidate = dplyr::case_when(candidate != 0 ~ 1,
+    mutate(candidate = plyranges::count_overlaps(., sigRegions)) %>% 
+    mutate(candidate = dplyr::case_when(candidate != 0 ~ 1,
                                                    candidate == 0 ~ 0)) %>%
     GenomeInfoDb::as.data.frame() %>%
     dplyr::select(seqnames, start, end, candidate) %>%

@@ -18,11 +18,11 @@ prepareHOMER <- function(sigRegions = sigRegions,
     DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs.bed"))
   
   sigRegions %>%
-    plyranges::filter(stat > 0) %>% 
+    filter(stat > 0) %>% 
     DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs_hyper.bed"))
   
   sigRegions %>%
-    plyranges::filter(stat < 0) %>% 
+    filter(stat < 0) %>% 
     DMRichR::gr2bed(file.path(subfolder, "HOMER/DMRs_hypo.bed"))
   
   regions %>%

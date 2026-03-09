@@ -10,6 +10,7 @@
 #' @param testCovariate The factor to test for differences between groups
 #' @param adjustCovariate The covariate(s) to adjust for between groups
 #' @param matchCovariate Another covariate to adjust for between groups (for dmrseq compatibility)
+#' @param resPath Path to resource directory
 #' @return A list of tibbles with smoothed global and CpG island methylation statistics
 #'  and the values used for the tests
 #' @importFrom magrittr %>%
@@ -89,7 +90,7 @@ globalStats <- function(bs.filtered.bsseq = bs.filtered.bsseq,
     
     CGi <- genome %>%
       DMRichR::getCpGs(resPath = resPath) %>% 
-      plyranges::filter(type == "islands") %>% 
+      filter(type == "islands") %>% 
       bsseq::getMeth(BSseq = bs.filtered.bsseq,
                      regions = .,
                      type = "raw",

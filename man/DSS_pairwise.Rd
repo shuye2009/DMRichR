@@ -24,14 +24,14 @@ DSS_pairwise(
 
 \item{pval_cutoff}{Numeric cutoff value [from 0 to 1] for the pval of DML used for DMR detection.}
 
+\item{minDiff}{cutoff value [from 0 to inf] for the minimum difference between mean methylation 
+levels between group1 and group2 during DMR detection.}
+
 \item{minSites}{Numeric for the minimum number of Cytosines for a DMR.}
 
 \item{cores}{number of cpus.}
 
 \item{ratio_cutoff}{cutoff value [from 0 to inf] for the ratio areaStat/nSites used for DMR detection.}
-
-\item{minDifff}{cutoff value [from 0 to inf] for the minimum difference between mean methylation 
-levels between group1 and group2 during DMR detection.}
 }
 \value{
 a list of DMRs and background regions

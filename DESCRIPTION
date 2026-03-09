@@ -74,7 +74,8 @@ Imports:
     Biobase,
     S4Vectors,
     PCAtools,
-    scales
+    scales,
+    methylKit
 Suggests:
   knitr,
   markdown,
