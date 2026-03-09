@@ -66,15 +66,20 @@ annotationDatabases <- function(genome = genome,
                                                      "org.At.tair.db")
   )
   
-  new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
-  if(length(new.packages)>0){
-    glue::glue("Installing {new.packages}")
-    suppressMessages(BiocManager::install(new.packages, update = FALSE, ask = FALSE, quiet = TRUE))
-    cat("Done", "\n")
-  }
-  print(glue::glue("Loading {packages}"))
-  stopifnot(suppressMessages(sapply(packages, require, character.only = TRUE)))
+  if(is.na(packages)){
+    message("Custom genome provided: ", genome)
+  }else{
+    new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+    if(length(new.packages)>0){
+      glue::glue("Installing {new.packages}")
+      suppressMessages(BiocManager::install(new.packages, update = FALSE, ask = FALSE, quiet = TRUE))
+      cat("Done", "\n")
+    }
   
+    print(glue::glue("Loading {packages}"))
+    stopifnot(suppressMessages(sapply(packages, require, character.only = TRUE)))
+  }
+
   if(genome =="hs1"){
     assign("goi", BSgenome.Hsapiens.UCSC.hs1, envir = parent.frame())
     assign("TxDb", NULL, envir = parent.frame())

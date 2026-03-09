@@ -921,15 +921,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     # Read BED file and convert to GRanges
     final_flag <- "failed"
     tryCatch({
-      targetBed <- read.table(targetRegion, header = FALSE, sep = "\t", stringsAsFactors = FALSE,
-                              col.names = c("chr", "start", "end", "name", "score", "strand"))
       
-      targetRegions <- GRanges(seqnames = targetBed$chr,
-                               ranges = IRanges(start = targetBed$start, end = targetBed$end),
-                               strand = targetBed$strand,
-                               name = targetBed$name,
-                               score = targetBed$score)
-      print(head(targetBed))
+      targetRegions <- rtracklayer::import.bed(targetRegion)
       print(head(targetRegions))
       print(length(targetRegions))
       
