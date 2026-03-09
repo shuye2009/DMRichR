@@ -81,6 +81,7 @@ annotationDatabases <- function(genome = genome,
   }
 
   if(genome =="hs1"){
+    require("BSgenome.Hsapiens.UCSC.hs1", character.only = TRUE)
     assign("goi", BSgenome.Hsapiens.UCSC.hs1, envir = parent.frame())
     assign("TxDb", NULL, envir = parent.frame())
     assign("annoDb", "org.Hs.eg.db", envir = parent.frame())
