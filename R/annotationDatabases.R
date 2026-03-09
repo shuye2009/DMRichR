@@ -66,7 +66,7 @@ annotationDatabases <- function(genome = genome,
                                                      "org.At.tair.db")
   )
   
-  if(is.na(packages)){
+  if(all(is.na(packages))){
     message("Custom genome provided: ", genome)
   }else{
     new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
