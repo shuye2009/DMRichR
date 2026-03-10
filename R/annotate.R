@@ -271,7 +271,8 @@ getCpGs <- function(genome = genome, resPath = resPath){
     islands <- readr::read_tsv(file.path(resPath, island_file),
                                col_names = c('chr','start','end'),
                                col_types = 'cii') %>%
-      GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>%
+      GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE,
+                                            na.rm = TRUE) %>%
       GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
       mutate(id = glue::glue("island:{seq_along(.)}"),
                         type = "islands")
