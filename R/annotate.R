@@ -225,14 +225,13 @@ getExons <- function(TxDb = TxDb){
     ensembldb::seqlevelsStyle(exons) <- "UCSC"
     
   }else if(is(TxDb, "TxDb")){
-    exons <- TxDb %>%
-      GenomicFeatures::cds(columns = c("TXNAME", "GENEID")) %>%
+    exons <- GenomicFeatures::cdsBy(TxDb, by = "tx") %>%
       BiocGenerics::unlist(use.names = FALSE) %>%
       mutate(id = glue::glue("CDS:{seq_along(.)}"),
-                        type = glue::glue("{unique(genome(TxDb))}_genes_cds"),
-                        tx_id = TXNAME,
-                        gene_id = GENEID,
-                        symbol = GENEID) %>%
+             type = glue::glue("{unique(genome(TxDb))}_genes_cds"),
+             tx_id = NA_character_,
+             gene_id = NA_character_,
+             symbol = NA_character_) %>%
       select(id, tx_id, gene_id, symbol, type)
     
     GenomeInfoDb::genome(exons) <- NA
