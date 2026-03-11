@@ -197,6 +197,10 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }else{
       stop("GFF file not found for genome", genome)
     }
+  }else if(is(TxDb, "EnsDb")){
+    annoTrack <- GenomicRanges::GRangesList(CpGs = DMRichR::getCpGs(genome, resPath),
+                                            Exons = DMRichR::getExons(TxDb),
+                                            compress = FALSE)
   }
   
   # Background --------------------------------------------------------------

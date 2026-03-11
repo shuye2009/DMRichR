@@ -208,24 +208,38 @@ DMReport <- function(sigRegions = sigRegions,
 #' 
 getExons <- function(TxDb = TxDb){
   
-  stopifnot(is(TxDb, "EnsDb"))
-  
   message('Building exons...')
   
-  exons <- TxDb %>%
-    ensembldb::cdsBy(by = "tx",
-                     columns = c("tx_id", "gene_id", "symbol") #, # listColumns(TxDb)
-                     # filter = GeneBiotypeFilter("protein_coding")
-                     ) %>%
-    BiocGenerics::unlist(use.names = FALSE) %>%
-    mutate(id = glue::glue("CDS:{seq_along(.)}"),
-                      type = glue::glue("{unique(genome(TxDb))}_genes_cds")
-                      ) %>%
-    select(id, tx_id, gene_id, symbol, type) # %>%
-    # filter(symbol != "")
-  
-  GenomeInfoDb::genome(exons) <- NA  
-  ensembldb::seqlevelsStyle(exons) <- "UCSC"
+  if(is(TxDb, "EnsDb")){
+    exons <- TxDb %>%
+      ensembldb::cdsBy(by = "tx",
+                       columns = c("tx_id", "gene_id", "symbol")
+                       ) %>%
+      BiocGenerics::unlist(use.names = FALSE) %>%
+      mutate(id = glue::glue("CDS:{seq_along(.)}"),
+                        type = glue::glue("{unique(genome(TxDb))}_genes_cds")
+                        ) %>%
+      select(id, tx_id, gene_id, symbol, type)
+    
+    GenomeInfoDb::genome(exons) <- NA  
+    ensembldb::seqlevelsStyle(exons) <- "UCSC"
+    
+  }else if(is(TxDb, "TxDb")){
+    exons <- TxDb %>%
+      GenomicFeatures::cds(columns = c("TXNAME", "GENEID")) %>%
+      BiocGenerics::unlist(use.names = FALSE) %>%
+      mutate(id = glue::glue("CDS:{seq_along(.)}"),
+                        type = glue::glue("{unique(genome(TxDb))}_genes_cds"),
+                        tx_id = TXNAME,
+                        gene_id = GENEID,
+                        symbol = GENEID) %>%
+      select(id, tx_id, gene_id, symbol, type)
+    
+    GenomeInfoDb::genome(exons) <- NA
+    
+  }else{
+    stop("TxDb must be either a TxDb or EnsDb object")
+  }
   
   return(exons)
 }
