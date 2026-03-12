@@ -182,7 +182,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     }
   }else if(is.null(TxDb)){
     if(genome == "hs1"){
-      gff <- rtracklayer::import(file.path(resPath,"Homo_sapiens-GCA_009914755.4-2022_07-genes.gff3.gz"))
+      gff <- rtracklayer::import(file.path(resPath,"Homo_sapiens-GCA_009914755.4-2022_07-genes.gtf.gz"))
       TxDb <- txdbmaker::makeTxDbFromGRanges(gff, taxonomyId=9606)
       seqlevelsStyle(TxDb) <- "UCSC"
       GenomeInfoDb::genome(TxDb) <- "hs1"   # Add genome version
@@ -1024,11 +1024,16 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                     difference = cutoff * 100,  # Convert to percentage
                                                     qvalue = 0.05)
         print(head(target_diff_sig))
-        target_diff_sig_df <- getData(target_diff_sig)
+        target_diff_sig_df <- getData(target_diff_sig) %>%
+          dplyr::mutate(name = paste0(chr,":",start,"-",end))
 
-        # Convert results back to GRanges format
-        cat("Converting results back to GRanges format...\n")
+
         if(nrow(target_diff_sig_df) > 0) {
+          print(glue::glue("Found {length(sigResults)} significant targeted regions"))
+          write.table(target_diff_sig_df, paste0("Targeted/significant_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+
+          # Convert results back to GRanges format 
+          cat("Converting results back to GRanges format...\n")
           sigResults <- GenomicRanges::makeGRangesFromDataFrame(
             target_diff_sig_df,
             seqnames.field = "chr",
@@ -1037,11 +1042,6 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
             strand.field = "strand",
             keep.extra.columns = TRUE
           )
-        
-          target_diff_sig_df <- merge(target_diff_sig_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
-
-          print(glue::glue("Found {length(sigResults)} significant targeted regions"))
-          write.table(target_diff_sig_df, paste0("Targeted/significant_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
           # Add back the name information from original targetRegions
           overlaps_sig <- findOverlaps(sigResults, targetRegions)
@@ -1071,8 +1071,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                 annoTrack = annoTrack,
                                 regionCol = "#FF00001A",
                                 lwd = 2,
-                                qval = FALSE,
-                                stat = FALSE,
+                                qval = TRUE,
+                                stat = TRUE,
                                 horizLegend = FALSE)
             },
             error = function(error_condition) {

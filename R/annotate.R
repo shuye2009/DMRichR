@@ -225,13 +225,30 @@ getExons <- function(TxDb = TxDb){
     ensembldb::seqlevelsStyle(exons) <- "UCSC"
     
   }else if(is(TxDb, "TxDb")){
-    exons <- GenomicFeatures::cdsBy(TxDb, by = "tx") %>%
-      BiocGenerics::unlist(use.names = FALSE) %>%
+    # Get transcript to gene mapping from TxDb
+    tx_info <- GenomicFeatures::transcripts(TxDb, columns = c("tx_id", "gene_id"))
+    tx_gene_map <- GenomicRanges::mcols(tx_info) %>%
+      as.data.frame() %>%
+      dplyr::mutate(tx_id = as.character(tx_id),
+                    gene_id = as.character(gene_id))
+    
+    # Get CDS regions
+    cds_list <- GenomicFeatures::cdsBy(TxDb, by = "tx")
+    exons <- BiocGenerics::unlist(cds_list, use.names = TRUE)
+    
+    # Extract tx_id from names and map to gene_id
+    exons <- exons %>%
       mutate(id = glue::glue("CDS:{seq_along(.)}"),
              type = glue::glue("{unique(genome(TxDb))}_genes_cds"),
-             tx_id = NA_character_,
-             gene_id = NA_character_,
-             symbol = NA_character_) %>%
+             tx_id = names(.))
+    
+    # Add gene_id and symbol from mapping
+    exons_df <- as.data.frame(GenomicRanges::mcols(exons))
+    exons_df <- dplyr::left_join(exons_df, tx_gene_map, by = "tx_id")
+    exons_df$symbol <- exons_df$gene_id  # Use gene_id as symbol (gene names not available in TxDb)
+    GenomicRanges::mcols(exons) <- exons_df
+    
+    exons <- exons %>%
       select(id, tx_id, gene_id, symbol, type)
     
     GenomeInfoDb::genome(exons) <- NA
