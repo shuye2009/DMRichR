@@ -183,14 +183,14 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
   }else if(is.null(TxDb)){
     if(genome == "hs1"){
       gff <- rtracklayer::import(file.path(resPath,"Homo_sapiens-GCA_009914755.4-2022_07-genes.gtf.gz"))
+      GenomeInfoDb::seqlevelsStyle(gff) <- "UCSC"
+      GenomeInfoDb::genome(gff) <- "hs1"
       TxDb <- txdbmaker::makeTxDbFromGRanges(gff, taxonomyId=9606)
-      seqlevelsStyle(TxDb) <- "UCSC"
-      GenomeInfoDb::genome(TxDb) <- "hs1"   # Add genome version
 
       # Build annoTrack for hs1
       annoTrack <- GenomicRanges::GRangesList(
         CpGs = DMRichR::getCpGs(genome, resPath),
-        Exons = DMRichR::getExons(TxDb),
+        Exons = DMRichR::getExons(gff),
         compress = FALSE)
 
       save(annoTrack, file = "RData/annoTrack.RData")

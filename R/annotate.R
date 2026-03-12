@@ -195,6 +195,7 @@ DMReport <- function(sigRegions = sigRegions,
 #' @title Obtain exons for plotting
 #' @description Obtain exon annotations from a \code{ensDb} object and format for \code{plotDMRs()} 
 #' @param TxDb A \code{ensDb} object
+#' @param granges A \code{GRanges} object of exon regions
 #' @return A \code{GRanges} object of annotated exons for every gene with a symbol in the genome.
 #' @rawNamespace import(ensembldb, except = c(select, filter))
 #' @importFrom glue glue
@@ -206,7 +207,7 @@ DMReport <- function(sigRegions = sigRegions,
 #'  see: \url{https://github.com/rcavalcante/annotatr/blob/master/R/build_annotations.R}
 #' @export getExons
 #' 
-getExons <- function(TxDb = TxDb){
+getExons <- function(TxDb = TxDb, granges = NULL){
   
   message('Building exons...')
   
@@ -253,8 +254,29 @@ getExons <- function(TxDb = TxDb){
     
     GenomeInfoDb::genome(exons) <- NA
     
+  }else if(!is.null(granges)){
+    # If granges is provided, use it directly
+    exons <- granges %>%
+      filter(type == "exon") %>%
+      select(transcript_id, gene_id, gene_name)%>%
+      filter(!is.na(transcript_id))%>%
+      filter(!is.na(gene_id))%>%
+      filter(!is.na(gene_name))
+    
+    # Add id, type, tx_id, gene_id, and symbol to comply with annotatr format
+    exons <- exons %>%
+      mutate(id = glue::glue("CDS:{seq_along(.)}"),
+             type = glue::glue("{unique(genome(granges))}_genes_cds"),
+             tx_id = transcript_id,
+             symbol = gene_name)
+    
+    exons <- exons %>%
+      select(id, tx_id, gene_id, symbol, type)
+    
+    GenomeInfoDb::genome(exons) <- NA
+    
   }else{
-    stop("TxDb must be either a TxDb or EnsDb object")
+    stop("TxDb must be either a TxDb or EnsDb object, or a GRanges object must be provided")
   }
   
   return(exons)
