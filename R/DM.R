@@ -1009,11 +1009,10 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                   test = "F",
                                                   mc.cores = cores)
       print(head(target_diff))
-      target_diff_df <- getData(target_diff)
+      target_diff_df <- getData(target_diff) %>%
+          dplyr::mutate(name = paste0(chr, ":", start,"-",end))
 
       if(nrow(target_diff_df) > 0) {
-        
-        target_diff_df <- merge(target_diff_df, targetBed, by = c("chr", "start", "end", "strand"), all.x = TRUE)
         # Export results
         print(glue::glue("Exporting targeted region results..."))
         write.table(target_diff_df, paste0("Targeted/all_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
@@ -1025,7 +1024,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                                     qvalue = 0.05)
         print(head(target_diff_sig))
         target_diff_sig_df <- getData(target_diff_sig) %>%
-          dplyr::mutate(name = paste0(chr,":",start,"-",end))
+          dplyr::mutate(name = paste0(chr, ":", start, "-", end))
 
 
         if(nrow(target_diff_sig_df) > 0) {
