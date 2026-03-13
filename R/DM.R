@@ -190,7 +190,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
       # Build annoTrack for hs1
       annoTrack <- GenomicRanges::GRangesList(
         CpGs = DMRichR::getCpGs(genome, resPath),
-        Exons = DMRichR::getExons(gff),
+        Exons = DMRichR::getExons(TxDb, gff),
         compress = FALSE)
 
       save(annoTrack, file = "RData/annoTrack.RData")

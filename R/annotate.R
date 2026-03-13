@@ -225,7 +225,7 @@ getExons <- function(TxDb = TxDb, granges = NULL){
     GenomeInfoDb::genome(exons) <- NA  
     ensembldb::seqlevelsStyle(exons) <- "UCSC"
     
-  }else if(is(TxDb, "TxDb")){
+  }else if(is(TxDb, "TxDb") && is.null(granges)){
     # Get transcript to gene mapping from TxDb
     tx_info <- GenomicFeatures::transcripts(TxDb, columns = c("tx_id", "gene_id"))
     tx_gene_map <- GenomicRanges::mcols(tx_info) %>%
