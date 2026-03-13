@@ -1028,7 +1028,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
 
 
         if(nrow(target_diff_sig_df) > 0) {
-          print(glue::glue("Found {length(sigResults)} significant targeted regions"))
+          print(glue::glue("Found {nrow(target_diff_sig_df)} significant targeted regions"))
           write.table(target_diff_sig_df, paste0("Targeted/significant_diff_", target, ".tab"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
           # Convert results back to GRanges format 
