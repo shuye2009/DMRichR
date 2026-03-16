@@ -327,7 +327,7 @@ getCpGs <- function(genome = genome, resPath = resPath){
                                             na.rm = TRUE) %>%
       GenomeInfoDb::keepStandardChromosomes(pruning.mode = "coarse") %>%
       mutate(id = glue::glue("island:{seq_along(.)}"),
-                        type = "islands")
+             type = "islands")
   }
   
   
@@ -338,7 +338,7 @@ getCpGs <- function(genome = genome, resPath = resPath){
     GenomicRanges::trim() %>%
     GenomicRanges::setdiff(islands) %>%
     mutate(id = glue::glue("shore:{seq_along(.)}"),
-                      type = "shores")
+           type = "shores")
   
   message('Building CpG shelves...')
   
@@ -348,7 +348,7 @@ getCpGs <- function(genome = genome, resPath = resPath){
     GenomicRanges::setdiff(islands) %>%
     GenomicRanges::setdiff(shores) %>%
     mutate(id = glue::glue("shelf:{seq_along(.)}"),
-                      type = "shelves")
+           type = "shelves")
   
   message('Building inter-CpG-islands...')
   
@@ -356,13 +356,13 @@ getCpGs <- function(genome = genome, resPath = resPath){
     GenomicRanges::sort() %>%
     GenomicRanges::gaps() %>%
     mutate(id = glue::glue("inter:{seq_along(.)}"),
-                      type = "inter")
+           type = "inter")
   
   c(islands, shores, shelves, inter_cgi) %>%
     GenomicRanges::sort() %>%
     mutate(tx_id = NA,
-                      gene_id = NA,
-                      symbol = NA) %>%
-    plyranges::select(id, tx_id, gene_id, symbol, type) %>% 
+           gene_id = NA,
+           symbol = NA) %>%
+    select(id, tx_id, gene_id, symbol, type) %>% 
     return()
 }
