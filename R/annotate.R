@@ -76,7 +76,7 @@ annotateRegions <- function(regions = sigRegions,
     GenomeInfoDb::seqlevelsStyle(regionsCpG) <- "Ensembl" # Work around for organism not supported
   }
   
-  regionsCpG %>% 
+  annotated <- regionsCpG %>% 
     ChIPseeker::annotatePeak(TxDb = TxDb,
                              annoDb = annoDb,
                              overlap = "all",
@@ -106,8 +106,17 @@ annotateRegions <- function(regions = sigRegions,
         . == "qval" ~ "q.value",
         . == "SYMBOL" ~ "geneSymbol",
         . == "GENENAME" ~ "gene",
-        TRUE ~ .)) %>% 
-    return()
+        TRUE ~ .))
+  
+  # Add missing columns if not present (happens with TxDb without OrgDb)
+  if(!"geneSymbol" %in% names(annotated)){
+    annotated$geneSymbol <- NA_character_
+  }
+  if(!"gene" %in% names(annotated)){
+    annotated$gene <- NA_character_
+  }
+  
+  return(annotated)
 }
 
 #' DMReport
@@ -153,8 +162,7 @@ DMReport <- function(sigRegions = sigRegions,
                   Open.Sea,
                   annotation,
                   distanceToTSS,
-                  geneSymbol,
-                  gene) %>%
+                  tidyselect::any_of(c("geneSymbol", "gene"))) %>%
     dplyr::mutate(difference = difference/100) %>% 
     gt::gt() %>%
     gt::tab_header(
