@@ -269,14 +269,14 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         }
         
         print(glue::glue("Annotating and plotting blocks..."))
-        pdf("Blocks/Blocks.pdf", height = 7.50, width = 11.50)
+        pdf("Blocks/Blocks.pdf", height = 8.50, width = 11.50)
         dmrseq::plotDMRs(bs.filtered,
                          regions = sigBlocks,
                          testCovariate = testCovariate,
                          annoTrack = annoTrack,
                          regionCol = "#FF00001A",
-                         qval = FALSE,
-                         stat = FALSE)
+                         qval = TRUE,
+                         stat = TRUE)
         dev.off()
       }
       
@@ -385,7 +385,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
     
     print(glue::glue("Annotating DMRs and plotting..."))
     
-    pdf("DMRs/DMRs.pdf", height = 4, width = 8)
+    pdf("DMRs/DMRs.pdf", height = 5, width = 8)
     tryCatch({
       DMRichR::plotDMRs2(bs.filtered,
                         regions = sigRegions,
@@ -395,8 +395,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                         annoTrack = annoTrack,
                         regionCol = "#FF00001A",
                         lwd = 2,
-                        qval = FALSE,
-                        stat = FALSE,
+                        qval = TRUE,
+                        stat = TRUE,
                         horizLegend = FALSE)
     },
     error = function(error_condition) {
@@ -1060,7 +1060,7 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
          
           
           # Plot significant targeted regions
-          pdf(paste0("Targeted/Targeted_regions_", target, ".pdf"), height = 4, width = 8)
+          pdf(paste0("Targeted/Targeted_regions_", target, ".pdf"), height = 5, width = 8)
           tryCatch({
             DMRichR::plotDMRs2(bs.filtered,
                                 regions = sigResults,
