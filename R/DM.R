@@ -275,8 +275,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                          testCovariate = testCovariate,
                          annoTrack = annoTrack,
                          regionCol = "#FF00001A",
-                         qval = TRUE,
-                         stat = TRUE)
+                         qval = FALSE,
+                         stat = FALSE)
         dev.off()
       }
       
@@ -395,8 +395,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                         annoTrack = annoTrack,
                         regionCol = "#FF00001A",
                         lwd = 2,
-                        qval = TRUE,
-                        stat = TRUE,
+                        qval = FALSE,
+                        stat = FALSE,
                         horizLegend = FALSE)
     },
     error = function(error_condition) {
@@ -1070,8 +1070,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
                                 annoTrack = annoTrack,
                                 regionCol = "#FF00001A",
                                 lwd = 2,
-                                qval = TRUE,
-                                stat = TRUE,
+                                qval = FALSE,
+                                stat = FALSE,
                                 horizLegend = FALSE)
             },
             error = function(error_condition) {
