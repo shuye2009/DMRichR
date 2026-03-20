@@ -1020,8 +1020,8 @@ DM.R <- function(genome = c("hg38", "hg19", "mm10", "mm9", "rheMac10",
         # Filter significant results
         cat("Filtering significant results...\n")
         target_diff_sig <- methylKit::getMethylDiff(target_diff, 
-                                                    difference = cutoff * 100,  # Convert to percentage
-                                                    qvalue = 0.05)
+                                                    difference = 10,  # Convert to percentage
+                                                    qvalue = 0.2)
         print(head(target_diff_sig))
         target_diff_sig_df <- getData(target_diff_sig) %>%
           dplyr::mutate(name = paste0(chr, ":", start, "-", end))
